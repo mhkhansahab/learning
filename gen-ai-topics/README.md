@@ -2,7 +2,7 @@
 
 Read each topic directly on GitHub using its Markdown link. HTML editions share the same content and diagram assets.
 
-[Combined HTML handbook](genai-handbook.html) · [Topic PDFs](pdfs/README.md)
+[Combined HTML handbook](genai-handbook.html)
 
 | Lesson | Read on GitHub | HTML edition |
 | --- | --- | --- |
@@ -22,4 +22,4 @@ Read each topic directly on GitHub using its Markdown link. HTML editions share 
 
 Lessons 0001-0012 contain archived material. See the handbook for coverage gaps and review status.
 
-Edit the Markdown source and run `npm run build` from the repository root. See [the authoring guide](../CONTRIBUTING.md). Topic PDFs and automatic publishing are not configured yet.
+Edit the Markdown source and run `npm run build` from the repository root. See [the authoring guide](../CONTRIBUTING.md). Automatic publishing is not configured yet.

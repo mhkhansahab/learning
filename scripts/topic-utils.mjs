@@ -25,7 +25,7 @@ export function topicIndex(category, topics) {
   const handbook = category === 'gen-ai-topics' ? 'genai-handbook.html' : 'system-design-handbook.html';
   const table = topics.map(topic => `| ${topic.number} | [${topic.title.replaceAll('|', '\\|')}](lessons/${topic.stem}.md) | [HTML](lessons/${topic.stem}.html) |`).join('\n');
   const archive = category === 'gen-ai-topics' ? '\nLessons 0001-0012 contain archived material. See the handbook for coverage gaps and review status.\n' : '';
-  return `# ${title}\n\nRead each topic directly on GitHub using its Markdown link. HTML editions share the same content and diagram assets.\n\n[Combined HTML handbook](${handbook}) · [Topic PDFs](pdfs/README.md)\n\n| Lesson | Read on GitHub | HTML edition |\n| --- | --- | --- |\n${table}\n${archive}\nEdit the Markdown source and run \`npm run build\` from the repository root. See [the authoring guide](../CONTRIBUTING.md). Topic PDFs and automatic publishing are not configured yet.\n`;
+  return `# ${title}\n\nRead each topic directly on GitHub using its Markdown link. HTML editions share the same content and diagram assets.\n\n[Combined HTML handbook](${handbook})\n\n| Lesson | Read on GitHub | HTML edition |\n| --- | --- | --- |\n${table}\n${archive}\nEdit the Markdown source and run \`npm run build\` from the repository root. See [the authoring guide](../CONTRIBUTING.md). Automatic publishing is not configured yet.\n`;
 }
 
 export function addSectionNavigation(doc, titleLevel = 1) {

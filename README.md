@@ -14,12 +14,10 @@ gen-ai-topics/
   README.md
   lessons/
   assets/
-  pdfs/
 system-design-docs/
   README.md
   lessons/
   assets/
-  pdfs/
 ```
 
 Every topic has a Markdown source and a generated HTML edition in `lessons/`. The category indexes link to Markdown so you can read directly on GitHub without cloning. Both editions use the same diagram assets.
@@ -38,6 +36,6 @@ npm test
 
 Edit the `.md` files, not the generated HTML. See [CONTRIBUTING.md](CONTRIBUTING.md) for adding topics and preserving diagrams and references.
 
-Topic PDFs will go in each category's `pdfs/` folder with matching numbered filenames. This initial publication does not include topic PDFs, a PDF export pipeline, or automatic GitHub publishing.
+Automatic GitHub publishing is not configured yet.
 
 Lessons contain illustrative examples, exercises, and links to references. Archived Generative AI material is labeled in its handbook; it has not all been checked against current documentation.

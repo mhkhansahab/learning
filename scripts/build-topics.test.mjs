@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { renderTopic, diagramSvg } from './topic-utils.mjs';
+import { renderTopic, diagramSvg, topicIndex } from './topic-utils.mjs';
 
 test('preserves code inside lists, comparisons, quotes and nested fences', () => {
   const source = '# Example\n\n1. A step\n\n   ````js\n   if (a < b && value === "x") {\n     console.log(````);\n   }\n   ````\n';
@@ -29,4 +29,13 @@ test('renders GitHub tables and escapes diagram labels', () => {
   assert.ok(svg.includes('A &lt; B'));
   assert.ok(svg.includes('x &amp; y'));
   assert.ok(!svg.includes('A < B'));
+});
+
+test('category indexes link to Markdown and HTML without retired output links', () => {
+  for (const category of ['gen-ai-topics', 'system-design-docs']) {
+    const markdown = topicIndex(category, [{number:'0001', stem:'0001-example', title:'Example'}]);
+    assert.ok(markdown.includes('lessons/0001-example.md'));
+    assert.ok(markdown.includes('lessons/0001-example.html'));
+    assert.ok(!/pdf/i.test(markdown));
+  }
 });

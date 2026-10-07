@@ -2,7 +2,7 @@
 
 Read each topic directly on GitHub using its Markdown link. HTML editions share the same content and diagram assets.
 
-[Combined HTML handbook](system-design-handbook.html) · [Topic PDFs](pdfs/README.md)
+[Combined HTML handbook](system-design-handbook.html)
 
 | Lesson | Read on GitHub | HTML edition |
 | --- | --- | --- |
@@ -21,4 +21,4 @@ Read each topic directly on GitHub using its Markdown link. HTML editions share 
 | 0013 | [Circuit Breakers](lessons/0013-circuit-breakers.md) | [HTML](lessons/0013-circuit-breakers.html) |
 | 0014 | [Cost-Aware Architecture](lessons/0014-cost-aware-architecture.md) | [HTML](lessons/0014-cost-aware-architecture.html) |
 
-Edit the Markdown source and run `npm run build` from the repository root. See [the authoring guide](../CONTRIBUTING.md). Topic PDFs and automatic publishing are not configured yet.
+Edit the Markdown source and run `npm run build` from the repository root. See [the authoring guide](../CONTRIBUTING.md). Automatic publishing is not configured yet.

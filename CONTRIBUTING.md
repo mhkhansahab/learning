@@ -29,10 +29,8 @@ Explain the answer here.
 
 The shared diagrams are SVG image assets, with the workflow also described in alternative text. No remote scripts are required to read the generated pages.
 
-## Compatibility and templates
+## Templates
 
-`scripts/templates/` holds handbook layout and appendix material. Topic content comes from Markdown. The system-design Python build command delegates to the shared Markdown builder.
+`scripts/templates/` holds handbook layout and appendix material. Topic content comes from Markdown. Use the shared build command from the repository root for both categories.
 
-`scripts/migrate-topics.mjs` was used for the initial HTML conversion. It does not replace Markdown sources in already-migrated categories. Use the normal build command after editing; do not use the migration script for ongoing publishing.
-
-Topic PDFs and scheduled GitHub pushes are separate workflows and are not enabled by this change.
+Scheduled GitHub pushes are not configured yet.
