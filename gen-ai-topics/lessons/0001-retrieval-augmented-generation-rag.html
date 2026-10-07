@@ -1,0 +1,172 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Retrieval-Augmented Generation (RAG)</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-1"><h1><span class="chapter-number">Lesson 01</span> Retrieval-Augmented Generation (RAG)</h1><div class="meta"><time datetime="2026-06-25">2026-06-25</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-1-section-1">1. What RAG Means</a></li><li><a href="#lesson-1-section-2">2. Why RAG Matters</a></li><li><a href="#lesson-1-section-3">3. How RAG Works</a></li><li><a href="#lesson-1-section-4">Step 1: Prepare documents</a></li><li><a href="#lesson-1-section-5">Step 2: Create embeddings</a></li><li><a href="#lesson-1-section-6">Step 3: Search</a></li><li><a href="#lesson-1-section-7">Step 4: Rerank results</a></li><li><a href="#lesson-1-section-8">Step 5: Build the prompt</a></li><li><a href="#lesson-1-section-9">Step 6: Generate the answer</a></li><li><a href="#lesson-1-section-10">4. Applying RAG in a Project</a></li><li><a href="#lesson-1-section-11">5. Real-World Example: Customer Support</a></li><li><a href="#lesson-1-section-12">6. Real-World Example: Internal Engineering Assistant</a></li><li><a href="#lesson-1-section-13">7. Common Mistakes and Trade-offs</a></li><li><a href="#lesson-1-section-14">8. Practical Best Practices</a></li><li><a href="#lesson-1-section-15">Practice</a></li></ul></details><figure class="diagram" role="group" aria-label="Retrieval-Augmented Generation (RAG) workflow"><ol class="flow"><li><strong>Question</strong><span>What does the user need?</span></li><li><strong>Retrieve</strong><span>Find relevant evidence</span></li><li><strong>Generate</strong><span>Answer using evidence</span></li><li><strong>Check</strong><span>Verify claims and citations</span></li></ol><figcaption>Figure 1. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-1-section-1">1. What RAG Means</h2>
+<p><strong>Retrieval-Augmented Generation</strong>, usually called <strong>RAG</strong>, is a method where an AI searches your data before answering a question.</p>
+<p>A normal language model answers mainly from knowledge learned during training. A RAG system adds an external knowledge source, such as:</p>
+<ul>
+<li>Company documents</li>
+<li>Product manuals</li>
+<li>Support articles</li>
+<li>Database records</li>
+<li>Policies and procedures</li>
+<li>Research papers</li>
+</ul>
+<p>Think of RAG as an <strong>open-book exam</strong>:</p>
+<ol>
+<li>The user asks a question.</li>
+<li>The system searches relevant documents.</li>
+<li>It gives the best document sections to the model.</li>
+<li>The model writes an answer using that evidence.</li>
+</ol>
+<p>RAG does not permanently teach the model new facts. It gives the model useful information for the current request.</p>
+<hr>
+<h2 id="lesson-1-section-2">2. Why RAG Matters</h2>
+<p>Language models have several limitations:</p>
+<ul>
+<li>Their training knowledge may be outdated.</li>
+<li>They do not know private company information.</li>
+<li>They may confidently invent facts.</li>
+<li>Retraining them whenever information changes is expensive.</li>
+</ul>
+<p>RAG helps because documents can be updated without retraining the model.</p>
+<p>For example, when a refund policy changes, you update the policy document. Future answers can immediately use the new policy.</p>
+<p>However, RAG does not automatically guarantee correct answers. If retrieval returns the wrong document, the model may still produce a wrong answer.</p>
+<hr>
+<h2 id="lesson-1-section-3">3. How RAG Works</h2>
+<h3 id="lesson-1-section-4">Step 1: Prepare documents</h3>
+<p>Collect trusted information and remove outdated or duplicate content.</p>
+<p>Large documents are divided into smaller sections called <strong>chunks</strong>. A chunk might contain two or three paragraphs about one topic.</p>
+<h3 id="lesson-1-section-5">Step 2: Create embeddings</h3>
+<p>An <strong>embedding</strong> is a numerical representation of meaning.</p>
+<p>For example, these sentences have different words but similar meanings:</p>
+<ul>
+<li>“How can I cancel my subscription?”</li>
+<li>“I want to stop my paid plan.”</li>
+</ul>
+<p>Their embeddings should be close together.</p>
+<p>The system stores document chunks and their embeddings in a searchable index, often called a <strong>vector database</strong>.</p>
+<h3 id="lesson-1-section-6">Step 3: Search</h3>
+<p>When a user asks a question, the system creates an embedding for that question.</p>
+<p>It searches for document chunks with similar meanings.</p>
+<p>The system may retrieve five chunks, for example.</p>
+<h3 id="lesson-1-section-7">Step 4: Rerank results</h3>
+<p>Initial search results are not always ordered correctly.</p>
+<p>A <strong>reranker</strong> examines the question and retrieved chunks more carefully, then moves the most useful chunks to the top.</p>
+<h3 id="lesson-1-section-8">Step 5: Build the prompt</h3>
+<p>The application sends the model:</p>
+<ul>
+<li>System instructions</li>
+<li>User’s question</li>
+<li>Retrieved document chunks</li>
+<li>Rules for using those chunks</li>
+</ul>
+<p>A useful rule might be:</p>
+<blockquote>
+<p>Answer only from the supplied sources. If the sources do not contain the answer, say that you cannot find it.</p>
+</blockquote>
+<h3 id="lesson-1-section-9">Step 6: Generate the answer</h3>
+<p>The model reads the retrieved information and creates an answer.</p>
+<p>A production system should usually include citations so the user can inspect the source.</p>
+<hr>
+<h2 id="lesson-1-section-10">4. Applying RAG in a Project</h2>
+<p>Start with a narrow use case. Do not index every company document immediately.</p>
+<p>A practical implementation process is:</p>
+<ol>
+<li>Select one trusted document collection.</li>
+<li>Clean and divide the documents into chunks.</li>
+<li>Attach metadata such as title, date, category, and access level.</li>
+<li>Generate embeddings and index the chunks.</li>
+<li>Retrieve several chunks for each question.</li>
+<li>Rerank them when necessary.</li>
+<li>Ask the model to answer from retrieved evidence.</li>
+<li>Return citations with the answer.</li>
+<li>Test retrieval and answer quality separately.</li>
+<li>Monitor unanswered and incorrect questions.</li>
+</ol>
+<p>Security must be applied during retrieval. A user should never retrieve documents they are not allowed to access.</p>
+<hr>
+<h2 id="lesson-1-section-11">5. Real-World Example: Customer Support</h2>
+<p>Imagine a software company with these documents:</p>
+<ul>
+<li>Pricing guide</li>
+<li>Refund policy</li>
+<li>Account cancellation guide</li>
+<li>Enterprise contract rules</li>
+</ul>
+<p>A customer asks:</p>
+<blockquote>
+<p>Can I receive a refund if I cancel my annual plan after 20 days?</p>
+</blockquote>
+<p>The RAG system:</p>
+<ol>
+<li>Searches the support documents.</li>
+<li>Retrieves the annual-plan refund section.</li>
+<li>Finds that annual plans have a 30-day refund period.</li>
+<li>Gives that section to the model.</li>
+<li>Produces an answer explaining that the customer is eligible.</li>
+<li>Includes a link to the refund policy.</li>
+</ol>
+<p>Without RAG, the model might invent a 14-day limit or use an old policy.</p>
+<p>The outcome is a more reliable answer that support staff and customers can verify.</p>
+<hr>
+<h2 id="lesson-1-section-12">6. Real-World Example: Internal Engineering Assistant</h2>
+<p>An engineering company has:</p>
+<ul>
+<li>Architecture documents</li>
+<li>Deployment guides</li>
+<li>Incident reports</li>
+<li>API documentation</li>
+</ul>
+<p>A developer asks:</p>
+<blockquote>
+<p>How do I deploy the payment service to production?</p>
+</blockquote>
+<p>The system retrieves:</p>
+<ul>
+<li>The current deployment guide</li>
+<li>Required approval rules</li>
+<li>Rollback instructions</li>
+</ul>
+<p>The assistant then returns the exact deployment process and links to those documents.</p>
+<p>Metadata filters are important here. The system should prefer:</p>
+<ul>
+<li>Production documents</li>
+<li>The latest approved version</li>
+<li>Documents for the payment service</li>
+<li>Content the developer can access</li>
+</ul>
+<p>Without these filters, it might retrieve an old staging deployment guide and provide dangerous instructions.</p>
+<hr>
+<h2 id="lesson-1-section-13">7. Common Mistakes and Trade-offs</h2>
+<p><strong>Poor document quality:</strong> RAG cannot fix incorrect source documents.</p>
+<p><strong>Bad chunking:</strong> Very small chunks lose context. Very large chunks add irrelevant information and increase cost.</p>
+<p><strong>Retrieving by similarity only:</strong> A semantically similar document may still be outdated or unauthorized.</p>
+<p><strong>Too many retrieved chunks:</strong> More context is not always better. Irrelevant text can confuse the model.</p>
+<p><strong>No citations:</strong> Users cannot verify where the answer came from.</p>
+<p><strong>Ignoring missing evidence:</strong> The model should admit when the retrieved documents do not contain an answer.</p>
+<p><strong>Higher latency:</strong> Retrieval and reranking add extra processing time.</p>
+<p><strong>Higher complexity:</strong> You must maintain document ingestion, indexes, permissions, retrieval, evaluation, and monitoring.</p>
+<hr>
+<h2 id="lesson-1-section-14">8. Practical Best Practices</h2>
+<ul>
+<li>Index only trusted and approved sources.</li>
+<li>Store document dates, versions, owners, and permissions as metadata.</li>
+<li>Use access controls before sending retrieved content to the model.</li>
+<li>Prefer a small number of highly relevant chunks.</li>
+<li>Require citations for factual claims.</li>
+<li>Test whether the correct document was retrieved.</li>
+<li>Test whether the final answer correctly used that document.</li>
+<li>Log retrieved document IDs for debugging.</li>
+<li>Re-index changed or deleted documents quickly.</li>
+<li>Let the system say “I don’t know” when evidence is missing.</li>
+</ul>
+<p>The key production lesson is:</p>
+<p><strong>RAG quality depends more on retrieving the right evidence than on writing a clever prompt.</strong></p>
+<h2 id="lesson-1-section-15">Practice</h2>
+<p>Your company has 10,000 documents, including old policies, drafts, and confidential files.</p>
+<p>Before building a RAG assistant, what rules would you create to decide:</p>
+<ol>
+<li>Which documents can be indexed?</li>
+<li>Which users can retrieve each document?</li>
+<li>How should the system handle conflicting document versions?</li>
+</ol>
+<p>Primary source: <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</a> (<a href="https://arxiv.org/abs/2005.11401?utm_source=openai">arxiv.org</a>)</p>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

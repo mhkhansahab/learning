@@ -1,0 +1,190 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Containerization: Package Apps for Consistent Deployment</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0009 · Deployment</p>
+      <h1>Containerization</h1>
+      <p class="muted">
+        Containerization packages an application with the runtime, libraries, and
+        configuration it needs, then runs it as an isolated process.
+      </p>
+
+      <h2>The problem it solves</h2>
+      <p>
+        Applications often fail because environments are different. A service may
+        work on a developer laptop but fail in staging because Node, Python, system
+        packages, environment variables, or OS libraries are different.
+      </p>
+      <p>
+        Containers reduce this drift. The team builds one image and runs that same
+        image in local development, CI, staging, and production. This makes deploys
+        more repeatable and scaling more predictable.
+      </p>
+      <p class="flow">Source code → Container image → Registry → Container runtime → Running container</p>
+
+      <h2>How it works</h2>
+      <ol>
+        <li>Write a container build file that describes the app runtime and files.</li>
+        <li>Build an immutable image from the source code and dependencies.</li>
+        <li>Push the image to a registry.</li>
+        <li>Deploy the image to a server, container platform, or orchestrator.</li>
+        <li>The runtime starts one or more isolated containers from the image.</li>
+        <li>Traffic reaches the container through a published port or service route.</li>
+      </ol>
+      <p>
+        A container is not a full virtual machine. It usually shares the host kernel
+        but has isolated process, filesystem, network, and resource boundaries. This
+        makes containers lighter than VMs, while still giving useful separation.
+      </p>
+
+      <h2>Main components</h2>
+      <ul>
+        <li><strong>Image:</strong> a versioned package containing the app and its dependencies.</li>
+        <li><strong>Container:</strong> a running process created from an image.</li>
+        <li><strong>Containerfile / Dockerfile:</strong> the recipe used to build the image.</li>
+        <li><strong>Registry:</strong> a place to store and pull images, such as Docker Hub or a private registry.</li>
+        <li><strong>Runtime:</strong> the engine that starts, stops, and isolates containers.</li>
+        <li><strong>Orchestrator:</strong> a system, such as Kubernetes or ECS, that schedules and replaces containers at scale.</li>
+      </ul>
+
+      <h2>Example 1: consistent API deployments</h2>
+      <p>
+        A Node.js API needs Node 22, a specific image library, and a few system
+        packages. Without containers, every server must be configured correctly by
+        scripts or manual setup. One missing library can break production.
+      </p>
+      <p>
+        With containers, the team builds one API image. CI tests that image, staging
+        runs that image, and production deploys that same image tag. If a rollback is
+        needed, the platform starts the previous image tag instead of rebuilding the
+        server by hand.
+      </p>
+
+      <h2>Example 2: production scaling and failed container</h2>
+      <p>
+        A payment worker runs as 20 containers across five machines. Each container
+        processes messages from a queue. During peak load, the queue grows from 5,000
+        to 80,000 messages, so the platform scales the worker to 80 containers.
+      </p>
+      <p>
+        One machine runs out of memory and kills several containers. The orchestrator
+        detects failed containers, starts replacements on healthier machines, and the
+        queue continues draining. The container image made scaling simple, but the
+        system still needed memory limits, health checks, logs, metrics, and safe
+        retry behavior.
+      </p>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>You want the same app package across local, CI, staging, and production.</li>
+        <li>You run many services with different runtimes or dependencies.</li>
+        <li>You need fast horizontal scaling and repeatable rollbacks.</li>
+        <li>You deploy background workers, APIs, scheduled jobs, or event consumers.</li>
+        <li>You want infrastructure to schedule services based on CPU and memory limits.</li>
+      </ul>
+
+      <h2>When not to use it</h2>
+      <ul>
+        <li>A very small app is already simple to deploy and does not need environment isolation.</li>
+        <li>The team cannot operate the container platform safely.</li>
+        <li>The workload needs direct host access that containers would complicate.</li>
+        <li>You are using containers to hide poor configuration, weak tests, or missing observability.</li>
+        <li>The application stores important state only inside the container filesystem.</li>
+      </ul>
+
+      <h2>Implementation considerations</h2>
+      <ul>
+        <li>Keep images small and deterministic; install only what the app needs.</li>
+        <li>Use explicit image tags or digests instead of deploying a moving <code>latest</code> tag.</li>
+        <li>Pass configuration through environment variables or secrets, not baked into images.</li>
+        <li>Run one main process per container unless there is a clear reason not to.</li>
+        <li>Write logs to stdout or stderr so the platform can collect them.</li>
+        <li>Set CPU and memory requests or limits so one container cannot starve the host.</li>
+        <li>Make containers stateless; store durable data in databases, queues, object storage, or volumes.</li>
+      </ul>
+
+      <h2>Security considerations</h2>
+      <ul>
+        <li>Use trusted base images and scan images for known vulnerabilities.</li>
+        <li>Do not run containers as root unless the workload truly requires it.</li>
+        <li>Keep secrets out of images, build logs, and image layers.</li>
+        <li>Drop unnecessary Linux capabilities and keep the filesystem read-only where possible.</li>
+        <li>Patch base images regularly; rebuilding the app is not enough if the base is old.</li>
+        <li>Restrict who can push production images to the registry.</li>
+      </ul>
+
+      <h2>Reliability concerns</h2>
+      <ul>
+        <li>Define readiness checks so traffic only reaches containers that are actually ready.</li>
+        <li>Define liveness checks carefully; bad checks can restart healthy containers.</li>
+        <li>Gracefully handle shutdown so in-flight requests or queue messages are not lost.</li>
+        <li>Use immutable image tags so rollbacks are predictable.</li>
+        <li>Monitor restart count, memory usage, CPU throttling, image pull failures, and startup time.</li>
+        <li>Keep startup fast enough that scaling and recovery are useful during incidents.</li>
+      </ul>
+
+      <h2>Performance and cost</h2>
+      <p>
+        Containers are usually lighter than virtual machines because they share the
+        host kernel. That can improve resource utilization and reduce cost. The cost
+        is operational complexity: image builds, registries, security scanning,
+        orchestration, networking, and monitoring. Poorly sized containers can also
+        waste money or cause noisy-neighbor problems on shared hosts.
+      </p>
+
+      <h2>Key trade-offs</h2>
+      <ul>
+        <li><strong>Portability vs platform knowledge:</strong> containers package the app well, but production still depends on networking, storage, and orchestration.</li>
+        <li><strong>Fast scaling vs stateless design:</strong> containers can scale quickly only when state is externalized.</li>
+        <li><strong>Isolation vs shared kernel risk:</strong> containers isolate processes but are not the same security boundary as separate VMs.</li>
+        <li><strong>Small images vs build convenience:</strong> smaller images are faster and safer, but may require cleaner build steps.</li>
+      </ul>
+
+      <h2>Common mistakes and edge cases</h2>
+      <ul>
+        <li>Putting secrets into the image or Dockerfile.</li>
+        <li>Using <code>latest</code> in production and losing rollback clarity.</li>
+        <li>Writing uploaded files or important state inside the container filesystem.</li>
+        <li>Running as root by default and giving containers unnecessary privileges.</li>
+        <li>Not setting memory limits, then being surprised by host-level failures.</li>
+        <li>Ignoring graceful shutdown, causing duplicate queue work or dropped requests.</li>
+        <li>Assuming containers alone provide high availability without load balancing and orchestration.</li>
+      </ul>
+
+      <h2>Connection to previous lessons</h2>
+      <p>
+        <a href="0002-horizontal-scaling.html">Horizontal scaling</a> often means
+        running more containers. <a href="0004-load-balancing.html">Load balancing</a>
+        routes traffic to healthy containers. <a href="0005-message-queues.html">Message queues</a>
+        let worker containers scale separately from APIs. <a href="0006-zero-downtime-database-migrations.html">Zero-downtime migrations</a>
+        matter because old and new container versions can overlap during deploys.
+        <a href="0008-eventual-consistency.html">Eventual consistency</a> shows why
+        containerized services must tolerate delayed side effects.
+      </p>
+
+      <h2>Design exercise</h2>
+      <p class="prompt">
+        You are containerizing an API and a background worker. What should go into
+        the image, what should stay outside as configuration or secrets, what health
+        checks would you add, and how would you roll back if the new image starts
+        failing after 10% of traffic is deployed?
+      </p>
+
+      <h2>Primary source</h2>
+      <p>
+        Read:
+        <a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">
+          Docker Docs: What is a container?
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    </main>
+  </body>
+</html>

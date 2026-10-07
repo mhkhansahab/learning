@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Cache-Aside: Faster Reads Without Losing the Database</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0001 · Caching</p>
+      <h1>Cache-Aside</h1>
+      <p class="muted">Reduce repeated database work while keeping the database as the source of truth.</p>
+
+      <h2>The concept</h2>
+      <p>
+        The application checks a cache before reading the database. On a cache miss,
+        it reads the database and stores the result in the cache for later requests.
+      </p>
+      <p class="flow">request → cache → miss → database → update cache → response</p>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>Many requests repeatedly read the same data.</li>
+        <li>Database reads are slow or expensive.</li>
+        <li>Slightly stale data is acceptable for a limited time.</li>
+      </ul>
+
+      <h2>Real-world example</h2>
+      <p>
+        An online store caches product details for five minutes. Popular products are
+        served from Redis, reducing database load. The database remains authoritative.
+      </p>
+
+      <h2>Trade-offs</h2>
+      <ul>
+        <li><strong>Benefit:</strong> lower latency and database load.</li>
+        <li><strong>Cost:</strong> more infrastructure and invalidation logic.</li>
+        <li><strong>Risk:</strong> users may briefly receive stale data.</li>
+        <li><strong>Failure mode:</strong> a cache outage can suddenly overload the database.</li>
+      </ul>
+
+      <h2>Common mistakes</h2>
+      <ul>
+        <li>Caching sensitive data without proper isolation or encryption.</li>
+        <li>Using one expiration time for data with different freshness needs.</li>
+        <li>Not preventing a cache stampede when a popular key expires.</li>
+        <li>Treating the cache as durable storage.</li>
+      </ul>
+
+      <h2>Think today</h2>
+      <p class="prompt">
+        Your product page gets 10,000 reads per minute but changes twice per day.
+        What would you cache, for how long, and how would you invalidate it after an update?
+      </p>
+
+      <h2>Primary source</h2>
+      <p>
+        Read:
+        <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside">
+          Microsoft Azure Architecture Center: Cache-Aside Pattern
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the pattern is unclear.</p>
+    </main>
+  </body>
+</html>

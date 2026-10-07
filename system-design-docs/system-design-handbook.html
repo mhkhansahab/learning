@@ -1,0 +1,2396 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System design handbook</title><style>:root {
+  color-scheme: light;
+  --ink: #17202a;
+  --muted: #5c6670;
+  --line: #d9dee3;
+  --paper: #ffffff;
+  --canvas: #f3f5f6;
+  --accent: #0969da;
+  --note: #eef6ff;
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: var(--canvas);
+  color: var(--ink);
+  line-height: 1.6;
+}
+
+main {
+  width: min(760px, calc(100% - 32px));
+  margin: 32px auto;
+  padding: clamp(24px, 5vw, 52px);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+}
+
+h1,
+h2 {
+  line-height: 1.25;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: clamp(2rem, 8vw, 3rem);
+}
+
+h2 {
+  margin-top: 2rem;
+  font-size: 1.2rem;
+}
+
+p,
+li {
+  max-width: 68ch;
+}
+
+.eyebrow,
+.muted {
+  color: var(--muted);
+}
+
+.eyebrow {
+  margin-bottom: 8px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.flow,
+.prompt {
+  padding: 16px;
+  background: var(--note);
+  border-left: 4px solid var(--accent);
+}
+
+.flow {
+  overflow-x: auto;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: nowrap;
+}
+
+a {
+  color: var(--accent);
+}
+
+@media print {
+  body {
+    background: white;
+  }
+
+  main {
+    width: 100%;
+    margin: 0;
+    border: 0;
+  }
+}
+
+body { background: white; }
+.book-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); max-width: 1240px; margin: auto; }
+.contents { position: sticky; top: 0; height: 100vh; overflow: auto; padding: 32px 24px; border-right: 1px solid var(--line); background: #f6f8fa; }
+.contents h2 { margin-top: 0; }
+.contents ol { padding-left: 22px; font-size: 14px; }
+.contents li { margin: 10px 0; }
+.contents a { text-decoration: none; }
+.contents a:hover { text-decoration: underline; }
+main { width: 100%; min-width: 0; margin: 0; padding: 48px; border: 0; border-radius: 0; }
+h1 { font-size: 36px; letter-spacing: 0; }
+h2.chapter-title { font-size: 28px; margin-top: 12px; }
+h3 { font-size: 19px; margin-top: 32px; line-height: 1.35; }
+article { padding: 40px 0; border-top: 1px solid var(--line); }
+article, h3 { scroll-margin-top: 24px; }
+.chapter-nav { display: flex; flex-wrap: wrap; gap: 10px 20px; font-size: 14px; margin: 24px 0; }
+.chapter-map { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 24px 0; padding: 16px 0; border-block: 1px solid var(--line); font-size: 14px; }
+.chapter-map a { max-width: 100%; overflow-wrap: anywhere; }
+.diagram { margin: 28px 0; padding: 24px 0; border-block: 1px solid var(--line); }
+.diagram-title { margin: 0 0 16px; font-size: 16px; font-weight: 700; }
+.diagram-row { display: flex; align-items: stretch; gap: 0; margin: 16px 0; }
+.diagram-node { flex: 1; min-width: 0; padding: 16px 12px; background: #eef6ff; border-top: 3px solid #0969da; }
+.diagram-node:nth-of-type(3n) { background: #eaf7f0; border-color: #24784b; }
+.diagram-node strong { display: block; font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+.diagram-node span { display: block; color: #364452; font-size: 13px; margin-top: 8px; overflow-wrap: anywhere; }
+.diagram-arrow { width: 28px; flex: 0 0 28px; align-self: center; text-align: center; font-size: 22px; color: #4b5965; }
+figcaption { font-size: 14px; color: var(--muted); max-width: 72ch; }
+.topic-index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; margin: 24px 0 40px; }
+.topic-index dt { font-weight: 700; }
+.topic-index dd { margin: 4px 0 0; font-size: 14px; }
+.topic-index dd a { display: block; margin: 4px 0; }
+.prompt { background: #edf8f1; border-color: #24784b; }
+.flow { white-space: normal; overflow-wrap: anywhere; }
+.source-note { font-size: 14px; color: var(--muted); }
+@media (max-width: 850px) {
+  .book-layout { display: block; }
+  .contents { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 24px; }
+  .contents ol { columns: 2; }
+  main { padding: 32px 24px; }
+}
+@media (max-width: 520px) {
+  .contents ol { columns: 1; }
+  h1 { font-size: 30px; }
+  h2.chapter-title { font-size: 26px; overflow-wrap: anywhere; }
+  .topic-index { grid-template-columns: 1fr; }
+  .diagram-row { flex-direction: column; }
+  .diagram-arrow { transform: rotate(90deg); height: 28px; flex-basis: 28px; }
+}
+@media print {
+  @page { size: A4; margin: 18mm; }
+  .book-layout { display: block; }
+  .contents { position: static; height: auto; overflow: visible; background: white; border: 0; padding: 0; break-after: page; }
+  .contents ol { columns: 2; }
+  main { padding: 0; }
+  article { break-before: page; border: 0; padding-top: 0; }
+  h2, h3, .diagram-title { break-after: avoid; }
+  figure, .prompt, .diagram-node { break-inside: avoid; }
+  .chapter-nav, .chapter-map { display: none; }
+  a { color: #17202a; }
+  p, li { orphans: 3; widows: 3; }
+  .diagram-node { background: white; border: 1px solid #65717b; }
+  .topic-index { break-after: page; }
+}
+</style></head>
+<body><div class="book-layout">
+<nav class="contents" id="contents" aria-label="Table of contents"><h2>Contents</h2><p class="muted">14 lessons</p><ol><li><a href="#lesson-0001">Cache-Aside</a></li><li><a href="#lesson-0002">Horizontal Scaling</a></li><li><a href="#lesson-0003">Vertical Scaling</a></li><li><a href="#lesson-0004">Load Balancing</a></li><li><a href="#lesson-0005">Message Queues</a></li><li><a href="#lesson-0006">Zero-Downtime Database Migrations</a></li><li><a href="#lesson-0007">Database Indexes</a></li><li><a href="#lesson-0008">Eventual Consistency</a></li><li><a href="#lesson-0009">Containerization</a></li><li><a href="#lesson-0010">API Pagination</a></li><li><a href="#lesson-0011">Observability</a></li><li><a href="#lesson-0012">Rate Limiting</a></li><li><a href="#lesson-0013">Circuit Breakers</a></li><li><a href="#lesson-0014">Cost-Aware Architecture</a></li></ol><a href="#topic-index">Topic index</a></nav>
+<main><header><p class="eyebrow">Practical system design</p><h1>System design handbook</h1>
+<p>Architecture concepts, worked examples, production trade-offs, and design exercises.</p></header>
+<section id="topic-index"><h2>Topic index</h2><dl class="topic-index"><div><dt>APIs</dt><dd><a href="#lesson-0010">10. API Pagination</a><a href="#lesson-0012">12. Rate Limiting</a></dd></div><div><dt>Async work</dt><dd><a href="#lesson-0005">05. Message Queues</a></dd></div><div><dt>Availability</dt><dd><a href="#lesson-0002">02. Horizontal Scaling</a><a href="#lesson-0004">04. Load Balancing</a></dd></div><div><dt>Caching</dt><dd><a href="#lesson-0001">01. Cache-Aside</a></dd></div><div><dt>Capacity</dt><dd><a href="#lesson-0003">03. Vertical Scaling</a><a href="#lesson-0012">12. Rate Limiting</a></dd></div><div><dt>Cost</dt><dd><a href="#lesson-0014">14. Cost-Aware Architecture</a></dd></div><div><dt>Data freshness</dt><dd><a href="#lesson-0001">01. Cache-Aside</a><a href="#lesson-0008">08. Eventual Consistency</a></dd></div><div><dt>Databases</dt><dd><a href="#lesson-0006">06. Zero-Downtime Database Migrations</a><a href="#lesson-0007">07. Database Indexes</a><a href="#lesson-0008">08. Eventual Consistency</a></dd></div><div><dt>Deployment</dt><dd><a href="#lesson-0006">06. Zero-Downtime Database Migrations</a><a href="#lesson-0009">09. Containerization</a></dd></div><div><dt>Isolation</dt><dd><a href="#lesson-0009">09. Containerization</a></dd></div><div><dt>Operations</dt><dd><a href="#lesson-0011">11. Observability</a><a href="#lesson-0014">14. Cost-Aware Architecture</a></dd></div><div><dt>Query performance</dt><dd><a href="#lesson-0007">07. Database Indexes</a><a href="#lesson-0010">10. API Pagination</a></dd></div><div><dt>Reliability</dt><dd><a href="#lesson-0005">05. Message Queues</a><a href="#lesson-0011">11. Observability</a><a href="#lesson-0013">13. Circuit Breakers</a></dd></div><div><dt>Scaling</dt><dd><a href="#lesson-0002">02. Horizontal Scaling</a><a href="#lesson-0003">03. Vertical Scaling</a></dd></div><div><dt>Security</dt><dd><a href="#lesson-0012">12. Rate Limiting</a></dd></div><div><dt>State machines</dt><dd><a href="#lesson-0013">13. Circuit Breakers</a></dd></div><div><dt>Traffic routing</dt><dd><a href="#lesson-0004">04. Load Balancing</a></dd></div></dl></section>
+<article id="lesson-0001" aria-label="Cache-Aside">
+      <p class="eyebrow">Lesson 0001 · Caching</p>
+      <h2 class="chapter-title">Cache-Aside</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0001-section-1">The concept</a><a href="#lesson-0001-section-2">When to use it</a><a href="#lesson-0001-section-3">Real-world example</a><a href="#lesson-0001-section-4">Trade-offs</a><a href="#lesson-0001-section-5">Common mistakes</a><a href="#lesson-0001-section-6">Think today</a><a href="#lesson-0001-section-7">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0001"><p class="diagram-title" id="diagram-0001">Illustration 1: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Application</strong><span>Read product 42</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Cache lookup</strong><span>Hit: return cached data</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Cache miss</strong><span>No stored value</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Database</strong><span>Read authoritative value</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Cache + response</strong><span>Store with TTL; return value</span></div></div><figcaption>Two read paths. A hit avoids a database read; a miss reads the database and fills the cache. Updates need an invalidation or freshness policy.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">Reduce repeated database work while keeping the database as the source of truth.</p>
+
+      <h3 id="lesson-0001-section-1">The concept</h3>
+      <p>
+        The application checks a cache before reading the database. On a cache miss,
+        it reads the database and stores the result in the cache for later requests.
+      </p>
+      <p class="flow">request → cache → miss → database → update cache → response</p>
+
+      <h3 id="lesson-0001-section-2">When to use it</h3>
+      <ul>
+        <li>Many requests repeatedly read the same data.</li>
+        <li>Database reads are slow or expensive.</li>
+        <li>Slightly stale data is acceptable for a limited time.</li>
+      </ul>
+
+      <h3 id="lesson-0001-section-3">Real-world example</h3>
+      <p>
+        An online store caches product details for five minutes. Popular products are
+        served from Redis, reducing database load. The database remains authoritative.
+      </p>
+
+      <h3 id="lesson-0001-section-4">Trade-offs</h3>
+      <ul>
+        <li><strong>Benefit:</strong> lower latency and database load.</li>
+        <li><strong>Cost:</strong> more infrastructure and invalidation logic.</li>
+        <li><strong>Risk:</strong> users may briefly receive stale data.</li>
+        <li><strong>Failure mode:</strong> a cache outage can suddenly overload the database.</li>
+      </ul>
+
+      <h3 id="lesson-0001-section-5">Common mistakes</h3>
+      <ul>
+        <li>Caching sensitive data without proper isolation or encryption.</li>
+        <li>Using one expiration time for data with different freshness needs.</li>
+        <li>Not preventing a cache stampede when a popular key expires.</li>
+        <li>Treating the cache as durable storage.</li>
+      </ul>
+
+      <h3 id="lesson-0001-section-6">Think today</h3>
+      <p class="prompt">
+        Your product page gets 10,000 reads per minute but changes twice per day.
+        What would you cache, for how long, and how would you invalidate it after an update?
+      </p>
+
+      <h3 id="lesson-0001-section-7">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside">
+          Microsoft Azure Architecture Center: Cache-Aside Pattern
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the pattern is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0002">Next lesson</a></nav></article><article id="lesson-0002" aria-label="Horizontal Scaling">
+      <p class="eyebrow">Lesson 0002 · Scalability</p>
+      <h2 class="chapter-title">Horizontal Scaling</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0002-section-1">The concept</a><a href="#lesson-0002-section-2">When to use it</a><a href="#lesson-0002-section-3">Real-world example</a><a href="#lesson-0002-section-4">Important requirement</a><a href="#lesson-0002-section-5">Trade-offs</a><a href="#lesson-0002-section-6">Common mistakes</a><a href="#lesson-0002-section-7">Think today</a><a href="#lesson-0002-section-8">Connect yesterday</a><a href="#lesson-0002-section-9">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0002"><p class="diagram-title" id="diagram-0002">Illustration 2: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Clients</strong><span>Concurrent requests</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Load balancer</strong><span>Select a healthy instance</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>App pool</strong><span>App A | App B | App C</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Every app instance</strong><span>Uses shared state</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Database / session store</strong><span>Data remains available across instances</span></div></div><figcaption>Add application instances to share traffic. Local-only sessions break when a user&#x27;s next request reaches a different instance; shared storage can still become the bottleneck.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">Handle more traffic by adding application instances instead of making one machine larger.</p>
+
+      <h3 id="lesson-0002-section-1">The concept</h3>
+      <p>
+        Horizontal scaling, or scaling out, runs multiple instances of the same
+        service. A load balancer distributes requests across healthy instances.
+      </p>
+      <p class="flow">clients → load balancer → app 1 / app 2 / app 3</p>
+
+      <h3 id="lesson-0002-section-2">When to use it</h3>
+      <ul>
+        <li>Traffic can exceed the capacity of one machine.</li>
+        <li>The service needs higher availability.</li>
+        <li>Demand changes enough to benefit from automatic scaling.</li>
+      </ul>
+
+      <h3 id="lesson-0002-section-3">Real-world example</h3>
+      <p>
+        A ticketing API normally runs three instances. Before a major sale, it
+        automatically grows to twenty instances, then scales back after demand falls.
+      </p>
+
+      <h3 id="lesson-0002-section-4">Important requirement</h3>
+      <p>
+        Application instances should be stateless. Store sessions, uploaded files,
+        and shared state in external systems such as Redis, object storage, or a database.
+        Any healthy instance must be able to handle the next request.
+      </p>
+
+      <h3 id="lesson-0002-section-5">Trade-offs</h3>
+      <ul>
+        <li><strong>Benefit:</strong> more capacity and better fault tolerance.</li>
+        <li><strong>Cost:</strong> load balancing, monitoring, and deployment become more complex.</li>
+        <li><strong>Limit:</strong> the database may become the next bottleneck.</li>
+        <li><strong>Risk:</strong> scaling too slowly can still cause overload during sudden spikes.</li>
+      </ul>
+
+      <h3 id="lesson-0002-section-6">Common mistakes</h3>
+      <ul>
+        <li>Keeping user sessions only in instance memory.</li>
+        <li>Scaling on CPU alone without watching latency or queue depth.</li>
+        <li>Stopping instances before active requests finish.</li>
+        <li>Adding servers without load testing downstream dependencies.</li>
+      </ul>
+
+      <h3 id="lesson-0002-section-7">Think today</h3>
+      <p class="prompt">
+        Your API grows from two instances to ten, but latency stays high. Which shared
+        dependency would you inspect first, and what metric would confirm the bottleneck?
+      </p>
+
+      <h3 id="lesson-0002-section-8">Connect yesterday</h3>
+      <p>
+        <a href="#lesson-0001">Cache-aside</a> can reduce database pressure
+        after application servers scale out, but it does not remove database limits.
+      </p>
+
+      <h3 id="lesson-0002-section-9">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html">
+          AWS: What is Amazon EC2 Auto Scaling?
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the pattern is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0001">Previous lesson</a><a href="#lesson-0003">Next lesson</a></nav></article><article id="lesson-0003" aria-label="Vertical Scaling">
+      <p class="eyebrow">Lesson 0003 · Scalability</p>
+      <h2 class="chapter-title">Vertical Scaling</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0003-section-1">The problem it solves</a><a href="#lesson-0003-section-2">How it works</a><a href="#lesson-0003-section-3">Main components</a><a href="#lesson-0003-section-4">Example 1: growing database</a><a href="#lesson-0003-section-5">Example 2: production resize under load</a><a href="#lesson-0003-section-6">When to use it</a><a href="#lesson-0003-section-7">When not to rely on it</a><a href="#lesson-0003-section-8">Implementation and reliability</a><a href="#lesson-0003-section-9">Security considerations</a><a href="#lesson-0003-section-10">Performance and cost</a><a href="#lesson-0003-section-11">Key trade-offs</a><a href="#lesson-0003-section-12">Common mistakes and edge cases</a><a href="#lesson-0003-section-13">Connection to previous lessons</a><a href="#lesson-0003-section-14">Design exercise</a><a href="#lesson-0003-section-15">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0003"><p class="diagram-title" id="diagram-0003">Illustration 3: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Before</strong><span>One machine: 4 CPU / 16 GB RAM</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Resize</strong><span>Plan restart or failover</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>After</strong><span>One machine: 16 CPU / 64 GB RAM</span></div></div><figcaption>The same machine role gets more resources. This helps a measured CPU or memory limit, but a larger single machine still needs a separate availability plan.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        Increase the CPU, memory, storage performance, or network capacity of one
+        machine instead of adding more machines.
+      </p>
+
+      <h3 id="lesson-0003-section-1">The problem it solves</h3>
+      <p>
+        A service can become slow because its current machine has insufficient
+        resources. CPU may remain near 100%, memory pressure may cause swapping,
+        or storage may be unable to handle enough operations per second. Vertical
+        scaling, also called <strong>scaling up</strong>, moves the workload to a
+        larger machine.
+      </p>
+      <p class="flow">4 CPU / 16 GB RAM → 16 CPU / 64 GB RAM</p>
+
+      <h3 id="lesson-0003-section-2">How it works</h3>
+      <ol>
+        <li>Measure which resource is limiting the workload.</li>
+        <li>Select a machine with more of that specific resource.</li>
+        <li>Back up data and prepare a rollback plan.</li>
+        <li>Stop, resize, and restart the machine when required.</li>
+        <li>Run health checks and compare performance with the baseline.</li>
+      </ol>
+      <p>
+        The application architecture usually stays unchanged. This makes vertical
+        scaling operationally simpler than distributing work across multiple nodes.
+        However, the larger machine remains one failure domain.
+      </p>
+
+      <h3 id="lesson-0003-section-3">Main components</h3>
+      <ul>
+        <li><strong>Compute:</strong> more CPU cores or faster processors.</li>
+        <li><strong>Memory:</strong> more RAM for working data, connections, and caches.</li>
+        <li><strong>Storage:</strong> more capacity, IOPS, or throughput.</li>
+        <li><strong>Network:</strong> higher bandwidth and packet-processing limits.</li>
+        <li><strong>Monitoring:</strong> evidence that identifies the real bottleneck.</li>
+      </ul>
+
+      <h3 id="lesson-0003-section-4">Example 1: growing database</h3>
+      <p>
+        A PostgreSQL database serves a business application. Its active dataset grows
+        from 10 GB to 80 GB, and frequently used indexes no longer fit in memory.
+        Disk reads increase and query latency rises from 30 ms to 300 ms.
+      </p>
+      <p>
+        Moving from 16 GB to 128 GB of RAM allows the database to retain more indexes
+        and frequently accessed pages in memory. This can be the simplest correct
+        solution while the workload still fits comfortably on one database server.
+      </p>
+
+      <h3 id="lesson-0003-section-5">Example 2: production resize under load</h3>
+      <p>
+        A payment API runs on one 4-vCPU VM and receives 200 requests per second.
+        During payroll processing it reaches 95% CPU, p95 latency grows from 150 ms
+        to 2 seconds, and requests begin timing out.
+      </p>
+      <p>
+        The team temporarily moves it to a 16-vCPU VM. Before resizing, they drain
+        traffic, take a snapshot, confirm driver and storage compatibility, reserve
+        a maintenance window, and prepare the old machine type as rollback. The resize
+        restores capacity quickly, but the team then removes the single point of failure
+        by moving toward multiple stateless instances.
+      </p>
+
+      <h3 id="lesson-0003-section-6">When to use it</h3>
+      <ul>
+        <li>You need a fast capacity increase with minimal architectural change.</li>
+        <li>The application cannot easily distribute work across multiple nodes.</li>
+        <li>A database requires strong coordination and still fits on one machine.</li>
+        <li>The larger machine is affordable and comfortably handles future growth.</li>
+      </ul>
+
+      <h3 id="lesson-0003-section-7">When not to rely on it</h3>
+      <ul>
+        <li>The service requires high availability across failure domains.</li>
+        <li>Traffic changes rapidly and frequently.</li>
+        <li>The workload is approaching the provider&#x27;s largest machine size.</li>
+        <li>The bottleneck is inefficient code, slow queries, locks, or an external API.</li>
+      </ul>
+
+      <h3 id="lesson-0003-section-8">Implementation and reliability</h3>
+      <ul>
+        <li>Use CPU, memory, disk latency, IOPS, network, and application latency metrics.</li>
+        <li>Load test the new size; additional CPU does not fix every bottleneck.</li>
+        <li>Plan downtime because some platforms require stopping the machine.</li>
+        <li>Verify instance type, architecture, drivers, disks, and network compatibility.</li>
+        <li>Take tested backups and define exact rollback conditions.</li>
+        <li>Run post-change health checks before restoring full traffic.</li>
+      </ul>
+
+      <h3 id="lesson-0003-section-9">Security considerations</h3>
+      <ul>
+        <li>Preserve encryption, firewall, identity, and audit settings during replacement.</li>
+        <li>Do not expose a temporary public address while testing the larger machine.</li>
+        <li>Protect snapshots because they may contain production data and credentials.</li>
+        <li>Use infrastructure as code to reduce configuration drift during resizing.</li>
+      </ul>
+
+      <h3 id="lesson-0003-section-10">Performance and cost</h3>
+      <p>
+        Vertical scaling can improve performance immediately, but cost often increases
+        in large steps. A machine with four times the memory may cost roughly four times
+        as much even when memory was not the real bottleneck. Larger machines can also
+        increase the financial and operational impact of a single failure.
+      </p>
+
+      <h3 id="lesson-0003-section-11">Key trade-offs</h3>
+      <ul>
+        <li><strong>Simplicity vs resilience:</strong> one larger node is simpler but less fault tolerant.</li>
+        <li><strong>Speed vs limits:</strong> resizing is fast, but every platform has a maximum size.</li>
+        <li><strong>Low engineering effort vs higher unit cost:</strong> architecture stays simple, but large machines can be expensive.</li>
+        <li><strong>Consistency vs availability:</strong> one database avoids distributed coordination, but maintenance can cause downtime.</li>
+      </ul>
+
+      <h3 id="lesson-0003-section-12">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Resizing before identifying whether CPU, memory, disk, or code is the constraint.</li>
+        <li>Assuming more CPU will fix lock contention or sequential processing.</li>
+        <li>Ignoring downtime, IP address changes, or machine compatibility.</li>
+        <li>Scaling up repeatedly without defining the point to redesign or scale out.</li>
+        <li>Increasing database connections with machine size until downstream systems fail.</li>
+        <li>Forgetting that a larger machine can take longer to restart, restore, or replace.</li>
+      </ul>
+
+      <h3 id="lesson-0003-section-13">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0002">Horizontal scaling</a> adds machines and
+        improves fault tolerance, but requires stateless services and coordination.
+        Vertical scaling changes fewer things and is often the right first move.
+        <a href="#lesson-0001">Cache-aside</a> may delay either type of scaling
+        by reducing repeated database work.
+      </p>
+
+      <h3 id="lesson-0003-section-14">Design exercise</h3>
+      <p class="prompt">
+        A PostgreSQL server has 90% memory usage, 20% CPU usage, low disk latency, and
+        a 99.9% availability requirement. Queries slow down only after the active dataset
+        exceeds memory. Would you scale vertically, horizontally, add caching, or combine
+        approaches? Describe the metrics, migration steps, rollback trigger, and remaining
+        single-point-of-failure risk.
+      </p>
+
+      <h3 id="lesson-0003-section-15">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/change-instance-type-of-ebs-backed-instance.html">
+          AWS: Change the instance type for an EC2 instance
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0002">Previous lesson</a><a href="#lesson-0004">Next lesson</a></nav></article><article id="lesson-0004" aria-label="Load Balancing">
+      <p class="eyebrow">Lesson 0004 · Reliability</p>
+      <h2 class="chapter-title">Load Balancing</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0004-section-1">The problem it solves</a><a href="#lesson-0004-section-2">How it works</a><a href="#lesson-0004-section-3">Main components</a><a href="#lesson-0004-section-4">Example 1: web API with four servers</a><a href="#lesson-0004-section-5">Example 2: production failure during peak traffic</a><a href="#lesson-0004-section-6">When to use it</a><a href="#lesson-0004-section-7">When not to use it</a><a href="#lesson-0004-section-8">Implementation considerations</a><a href="#lesson-0004-section-9">Security considerations</a><a href="#lesson-0004-section-10">Reliability concerns</a><a href="#lesson-0004-section-11">Performance and cost</a><a href="#lesson-0004-section-12">Key trade-offs</a><a href="#lesson-0004-section-13">Common mistakes and edge cases</a><a href="#lesson-0004-section-14">Connection to previous lessons</a><a href="#lesson-0004-section-15">Design exercise</a><a href="#lesson-0004-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0004"><p class="diagram-title" id="diagram-0004">Illustration 4: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Client</strong><span>Send request</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Load balancer</strong><span>Route using health checks</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Healthy pool</strong><span>App A and App B receive traffic</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>App C fails health check</strong><span>Remove from routing</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Remaining capacity</strong><span>A and B carry extra traffic</span></div></div><figcaption>Health checks change which servers are eligible for traffic. Removing a failed server protects requests only if the remaining servers have enough capacity.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        A load balancer receives client requests and sends each request to one of
+        several healthy backend servers.
+      </p>
+
+      <h3 id="lesson-0004-section-1">The problem it solves</h3>
+      <p>
+        When an application runs on one server, that server can become overloaded
+        or fail completely. After you add more servers with
+        <a href="#lesson-0002">horizontal scaling</a>, clients need
+        one stable place to send traffic. A load balancer gives clients one endpoint
+        while spreading work across many servers.
+      </p>
+      <p class="flow">Clients → DNS → Load balancer → Healthy app servers → Database / cache</p>
+
+      <h3 id="lesson-0004-section-2">How it works</h3>
+      <ol>
+        <li>A client calls one public hostname, such as api.example.com.</li>
+        <li>DNS points that hostname to the load balancer.</li>
+        <li>The load balancer accepts the connection or HTTP request.</li>
+        <li>It checks its list of healthy backend servers.</li>
+        <li>It chooses a backend using a routing rule or balancing algorithm.</li>
+        <li>The backend handles the request and returns the response.</li>
+      </ol>
+      <p>
+        The client usually does not know which server handled the request. This is
+        useful because servers can be added, removed, deployed, or replaced without
+        changing the client.
+      </p>
+
+      <h3 id="lesson-0004-section-3">Main components</h3>
+      <ul>
+        <li><strong>Listener:</strong> the port and protocol the load balancer accepts, such as HTTPS on port 443.</li>
+        <li><strong>Backend pool:</strong> the servers, containers, or IP targets that can receive traffic.</li>
+        <li><strong>Health check:</strong> a repeated test that decides whether a backend should receive traffic.</li>
+        <li><strong>Routing rule:</strong> logic that sends traffic by host, path, header, port, or service.</li>
+        <li><strong>Algorithm:</strong> the method used to choose a backend, such as round robin or least connections.</li>
+        <li><strong>TLS termination:</strong> the load balancer decrypts HTTPS before sending traffic to backends.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-4">Example 1: web API with four servers</h3>
+      <p>
+        A simple order API runs on four identical app servers. The load balancer
+        receives 800 requests per second and sends roughly 200 requests per second
+        to each server. If the team deploys a new version, it can remove one server
+        from rotation, update it, run health checks, and then put it back.
+      </p>
+      <p>
+        This only works cleanly if the app servers are mostly stateless. User sessions,
+        carts, and temporary data should live in a shared store such as Redis or a
+        database, not only in one server&#x27;s memory.
+      </p>
+
+      <h3 id="lesson-0004-section-5">Example 2: production failure during peak traffic</h3>
+      <p>
+        An e-commerce checkout service runs across six containers in three availability
+        zones. During a sale, traffic reaches 3,000 requests per second. One container
+        starts returning HTTP 500 errors because it lost its database connection.
+      </p>
+      <p>
+        The load balancer health check calls <code>/health</code> every 10 seconds.
+        After two failed checks, the bad container is marked unhealthy and receives
+        no new requests. Existing requests may still fail, but the blast radius is
+        limited. The remaining five containers continue serving traffic while the
+        orchestrator replaces the broken container.
+      </p>
+
+      <h3 id="lesson-0004-section-6">When to use it</h3>
+      <ul>
+        <li>You have multiple app servers, containers, or service instances.</li>
+        <li>You need one stable public endpoint for a service.</li>
+        <li>You want to remove unhealthy instances automatically.</li>
+        <li>You want rolling deployments without sending users to broken versions.</li>
+        <li>You need traffic routing by path, hostname, region, or service.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-7">When not to use it</h3>
+      <ul>
+        <li>A small internal tool runs fine on one machine and downtime is acceptable.</li>
+        <li>The backend is not safe to run on multiple instances.</li>
+        <li>The real bottleneck is the database, a lock, or a slow third-party API.</li>
+        <li>You need global disaster recovery; one regional load balancer is not enough.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Make app servers stateless or move session state to a shared store.</li>
+        <li>Use health checks that prove real readiness, not only process existence.</li>
+        <li>Set timeouts lower than client timeouts so failures return quickly.</li>
+        <li>Enable connection draining before removing a backend during deploys.</li>
+        <li>Pass request IDs and original client IP headers to preserve observability.</li>
+        <li>Test behavior when one backend, one zone, or one dependency fails.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-9">Security considerations</h3>
+      <ul>
+        <li>Terminate TLS at the load balancer or re-encrypt traffic to private backends.</li>
+        <li>Keep backend servers private; only the load balancer should reach them directly.</li>
+        <li>Attach WAF, rate limiting, and DDoS protection at the public edge when needed.</li>
+        <li>Restrict admin and health-check endpoints so they do not expose sensitive data.</li>
+        <li>Validate forwarded headers; do not blindly trust client-supplied IP headers.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Run the load balancer across multiple availability zones when possible.</li>
+        <li>Keep enough spare backend capacity to survive one instance or zone failure.</li>
+        <li>Use slow-start or warm-up so new instances do not receive full load immediately.</li>
+        <li>Monitor unhealthy target count, target latency, 4xx/5xx rates, and rejected connections.</li>
+        <li>Decide what happens if all backends are unhealthy: fail closed, serve maintenance, or route to fallback.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-11">Performance and cost</h3>
+      <p>
+        Load balancing improves throughput by using many servers, but it adds one
+        network hop. Usually that cost is small compared with the reliability gain.
+        Managed load balancers also add direct cost based on time, traffic, rules,
+        or capacity units. The bigger cost risk is over-scaling backends because
+        health checks or routing rules hide an inefficient application.
+      </p>
+
+      <h3 id="lesson-0004-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Simplicity vs resilience:</strong> one server is simpler, but multiple servers behind a load balancer survive failures better.</li>
+        <li><strong>Stateless design vs convenience:</strong> shared session storage is more work, but it avoids users being tied to one server.</li>
+        <li><strong>Strict health checks vs false failures:</strong> deep checks catch real issues, but can remove healthy servers if dependencies briefly fail.</li>
+        <li><strong>TLS termination vs end-to-end encryption:</strong> terminating TLS simplifies certificates and inspection, but backends may still need encryption.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Using a health check that returns OK even when the app cannot reach the database.</li>
+        <li>Using sticky sessions to hide unsafe stateful server design.</li>
+        <li>Forgetting connection draining, causing user requests to fail during deploys.</li>
+        <li>Setting timeouts too high, which keeps broken requests open and wastes capacity.</li>
+        <li>Ignoring uneven traffic when some requests are much slower than others.</li>
+        <li>Allowing direct public access to backend servers, bypassing the load balancer.</li>
+        <li>Not planning for all targets becoming unhealthy at the same time.</li>
+      </ul>
+
+      <h3 id="lesson-0004-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0002">Horizontal scaling</a> creates the
+        need for load balancing. <a href="#lesson-0003">Vertical scaling</a>
+        can buy time before adding more servers, but it does not remove the single
+        server failure risk. <a href="#lesson-0001">Cache-aside</a> can
+        reduce backend pressure so the load balancer and app servers handle fewer
+        expensive database reads.
+      </p>
+
+      <h3 id="lesson-0004-section-15">Design exercise</h3>
+      <p class="prompt">
+        You run an API on three servers behind a load balancer. One server becomes
+        slow but still returns HTTP 200 from <code>/health</code>. p95 latency doubles
+        during peak traffic. What should your health check measure, what timeout
+        values would you review, and how would you deploy a fix without dropping
+        active user requests?
+      </p>
+
+      <h3 id="lesson-0004-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html">
+          AWS: What is Elastic Load Balancing?
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0003">Previous lesson</a><a href="#lesson-0005">Next lesson</a></nav></article><article id="lesson-0005" aria-label="Message Queues">
+      <p class="eyebrow">Lesson 0005 · Asynchronous Systems</p>
+      <h2 class="chapter-title">Message Queues</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0005-section-1">The problem it solves</a><a href="#lesson-0005-section-2">How it works</a><a href="#lesson-0005-section-3">Main components</a><a href="#lesson-0005-section-4">Example 1: image processing</a><a href="#lesson-0005-section-5">Example 2: production spike and external failure</a><a href="#lesson-0005-section-6">When to use it</a><a href="#lesson-0005-section-7">When not to use it</a><a href="#lesson-0005-section-8">Implementation considerations</a><a href="#lesson-0005-section-9">Security considerations</a><a href="#lesson-0005-section-10">Reliability concerns</a><a href="#lesson-0005-section-11">Performance and cost</a><a href="#lesson-0005-section-12">Key trade-offs</a><a href="#lesson-0005-section-13">Common mistakes and edge cases</a><a href="#lesson-0005-section-14">Connection to previous lessons</a><a href="#lesson-0005-section-15">Design exercise</a><a href="#lesson-0005-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0005"><p class="diagram-title" id="diagram-0005">Illustration 5: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Producer</strong><span>Submit job</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Durable queue</strong><span>Buffer pending work</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Worker</strong><span>Process, then acknowledge</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Worker fails</strong><span>No success acknowledgment</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Retry</strong><span>Redeliver after timeout / delay</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Dead-letter queue</strong><span>After configured failure limit</span></div></div><figcaption>Success removes work from the queue. A failure can lead to redelivery, so processing must tolerate duplicates. The retry path needs limits and an owner for dead-letter messages.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        A message queue stores work temporarily so producers and workers do not need
+        to be online, fast, or scaled at exactly the same time.
+      </p>
+
+      <h3 id="lesson-0005-section-1">The problem it solves</h3>
+      <p>
+        Some work should not happen inside the user&#x27;s request. Sending emails,
+        resizing images, charging retries, report generation, fraud checks, and
+        webhooks can be slow or unreliable. If the API waits for all of that work,
+        users see slow responses and failures spread across the system.
+      </p>
+      <p>
+        A queue creates a buffer. The API records the work as a message, returns
+        quickly, and background workers process the message later.
+      </p>
+      <p class="flow">API / producer → Queue → Worker pool → Database / external service</p>
+
+      <h3 id="lesson-0005-section-2">How it works</h3>
+      <ol>
+        <li>A producer creates a message that describes work to do.</li>
+        <li>The queue stores the message durably.</li>
+        <li>A worker receives the message when it has capacity.</li>
+        <li>The worker processes the job.</li>
+        <li>If processing succeeds, the worker acknowledges or deletes the message.</li>
+        <li>If processing fails, the message becomes available again or moves to a dead-letter queue.</li>
+      </ol>
+      <p>
+        The key idea is decoupling. Producers care about submitting work. Workers
+        care about completing work. The queue sits between them and absorbs spikes,
+        retries, and temporary failures.
+      </p>
+
+      <h3 id="lesson-0005-section-3">Main components</h3>
+      <ul>
+        <li><strong>Producer:</strong> the service that sends work to the queue.</li>
+        <li><strong>Message:</strong> a small payload with the task type, IDs, metadata, and retry context.</li>
+        <li><strong>Queue:</strong> the durable buffer that stores messages until workers are ready.</li>
+        <li><strong>Consumer / worker:</strong> the process that receives and handles messages.</li>
+        <li><strong>Visibility timeout:</strong> the time a message is hidden while one worker processes it.</li>
+        <li><strong>Dead-letter queue:</strong> a separate queue for messages that fail too many times.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-4">Example 1: image processing</h3>
+      <p>
+        A marketplace lets sellers upload product images. The upload API stores the
+        original file, sends an <code>ImageUploaded</code> message, and returns success
+        to the seller. Workers later create thumbnails, compress the image, scan it,
+        and update the product record.
+      </p>
+      <p>
+        Without a queue, upload requests would wait for CPU-heavy image processing.
+        With a queue, sellers get a fast response and workers can scale separately
+        when many sellers upload at the same time.
+      </p>
+
+      <h3 id="lesson-0005-section-5">Example 2: production spike and external failure</h3>
+      <p>
+        A SaaS billing system receives 50,000 invoice events in 10 minutes at the end
+        of the month. Each invoice must call a payment provider and send an email.
+        The payment provider starts timing out for 20% of requests.
+      </p>
+      <p>
+        The API writes invoice messages to a queue and returns quickly. Workers process
+        300 messages per second under normal conditions. When the provider is slow, the
+        queue depth grows, but the API stays healthy. Failed messages retry with delay.
+        After five failures, a message moves to a dead-letter queue so engineers can
+        inspect it without blocking all other invoices.
+      </p>
+
+      <h3 id="lesson-0005-section-6">When to use it</h3>
+      <ul>
+        <li>Work can happen after the user gets a response.</li>
+        <li>Traffic arrives in bursts but processing capacity is limited.</li>
+        <li>An external dependency is slow, rate-limited, or temporarily unreliable.</li>
+        <li>You need retries without making the original request wait.</li>
+        <li>Different services need a stable handoff point.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-7">When not to use it</h3>
+      <ul>
+        <li>The user needs the final result immediately before continuing.</li>
+        <li>The task must be strongly consistent with the request transaction.</li>
+        <li>The team has no monitoring or ownership for failed background jobs.</li>
+        <li>Ordering is strict and the queue design does not guarantee the order you need.</li>
+        <li>The work is tiny and synchronous processing is simpler and reliable enough.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Keep messages small; store large files in object storage and send a pointer.</li>
+        <li>Make workers idempotent because a message may be delivered more than once.</li>
+        <li>Choose retry limits, backoff, and dead-letter queue behavior deliberately.</li>
+        <li>Set visibility timeout longer than normal processing time, but not extremely long.</li>
+        <li>Track queue depth, oldest message age, processing rate, failure rate, and DLQ count.</li>
+        <li>Use a stable message schema and version it when producers and consumers change.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-9">Security considerations</h3>
+      <ul>
+        <li>Encrypt queue data at rest and in transit.</li>
+        <li>Give producers only permission to send messages and workers only permission to consume.</li>
+        <li>Do not put passwords, API keys, or raw sensitive data in message bodies.</li>
+        <li>Validate message payloads; never trust queue input just because it is internal.</li>
+        <li>Protect dead-letter queues because failed messages may contain production context.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Plan for duplicate messages with idempotency keys or processed-event records.</li>
+        <li>Plan for poison messages that fail every retry and fill the queue.</li>
+        <li>Use alarms on oldest message age, not only queue size.</li>
+        <li>Apply backpressure when producers create work faster than workers can finish it.</li>
+        <li>Have a safe replay process for messages in the dead-letter queue.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-11">Performance and cost</h3>
+      <p>
+        Queues improve user-facing latency because the API stops waiting for slow
+        work. They also smooth traffic spikes, so worker capacity can be sized for
+        sustained throughput instead of the highest instant spike. The cost is extra
+        infrastructure, more monitoring, and possible delayed completion. If workers
+        fall behind for too long, the system is not failing loudly, but users may
+        still experience stale data or missing side effects.
+      </p>
+
+      <h3 id="lesson-0005-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Fast response vs delayed result:</strong> the request returns quickly, but the work finishes later.</li>
+        <li><strong>Loose coupling vs debugging complexity:</strong> services fail less together, but traces cross async boundaries.</li>
+        <li><strong>Retries vs duplicates:</strong> retrying improves reliability, but workers must handle repeated messages safely.</li>
+        <li><strong>Buffering vs hidden backlog:</strong> queues absorb spikes, but a growing queue can hide a capacity problem.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Putting business-critical work in a queue without alerts for failed jobs.</li>
+        <li>Assuming queues guarantee exactly-once processing in all conditions.</li>
+        <li>Using message order as a hidden dependency when multiple workers run in parallel.</li>
+        <li>Retrying immediately and overwhelming an already failing dependency.</li>
+        <li>Making messages too large or tightly coupled to one database schema.</li>
+        <li>Forgetting that background work still needs authorization and audit logs.</li>
+      </ul>
+
+      <h3 id="lesson-0005-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0004">Load balancing</a> spreads live request
+        traffic across healthy servers. Queues spread background work across workers
+        and protect the request path from slow tasks. <a href="#lesson-0002">Horizontal scaling</a>
+        also applies to workers: add more consumers when the queue is growing.
+        <a href="#lesson-0001">Cache-aside</a> reduces repeated reads, while
+        queues reduce synchronous work.
+      </p>
+
+      <h3 id="lesson-0005-section-15">Design exercise</h3>
+      <p class="prompt">
+        A signup API sends welcome emails, creates a CRM record, and calls a fraud
+        service. Today the API takes 4 seconds and fails whenever the CRM is down.
+        Which parts would you move to a queue, what would the message contain, how
+        would you make retries safe, and what alerts would prove the queue is healthy?
+      </p>
+
+      <h3 id="lesson-0005-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html">
+          AWS: What is Amazon Simple Queue Service?
+        </a>.
+        For failed-message handling, also review
+        <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html">
+          AWS: Using dead-letter queues in Amazon SQS
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0004">Previous lesson</a><a href="#lesson-0006">Next lesson</a></nav></article><article id="lesson-0006" aria-label="Zero-Downtime Database Migrations">
+      <p class="eyebrow">Lesson 0006 · Databases</p>
+      <h2 class="chapter-title">Zero-Downtime Database Migrations</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0006-section-1">The problem it solves</a><a href="#lesson-0006-section-2">How it works</a><a href="#lesson-0006-section-3">Main components</a><a href="#lesson-0006-section-4">Example 1: adding a user display name</a><a href="#lesson-0006-section-5">Example 2: production migration on a large table</a><a href="#lesson-0006-section-6">When to use it</a><a href="#lesson-0006-section-7">When not to use it</a><a href="#lesson-0006-section-8">Implementation considerations</a><a href="#lesson-0006-section-9">Security considerations</a><a href="#lesson-0006-section-10">Reliability concerns</a><a href="#lesson-0006-section-11">Performance and cost</a><a href="#lesson-0006-section-12">Key trade-offs</a><a href="#lesson-0006-section-13">Common mistakes and edge cases</a><a href="#lesson-0006-section-14">Connection to previous lessons</a><a href="#lesson-0006-section-15">Design exercise</a><a href="#lesson-0006-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0006"><p class="diagram-title" id="diagram-0006">Illustration 6: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Expand</strong><span>Add compatible schema</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Transition</strong><span>Deploy compatible code; backfill in batches</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Switch</strong><span>Verify and use new schema</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Compatibility check</strong><span>Old code and jobs no longer depend on old schema</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Contract</strong><span>Remove old schema safely</span></div></div><figcaption>Schema removal comes last. The compatibility window lets old and new application versions coexist while the backfill runs. Verify the cutover before deleting old data.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        A zero-downtime migration changes a production database in small compatible
+        steps so old code, new code, and live traffic can safely overlap.
+      </p>
+
+      <h3 id="lesson-0006-section-1">The problem it solves</h3>
+      <p>
+        Database schema changes can break running applications. If you rename a
+        column while old app servers still read the old name, requests fail. If you
+        add a slow index on a large table, writes may block. If you backfill millions
+        of rows in one transaction, the database can become overloaded.
+      </p>
+      <p>
+        Zero-downtime migration design prevents one release from assuming the entire
+        system changes at the same instant. In real production, old app instances,
+        new app instances, background jobs, and database migrations may all overlap.
+      </p>
+      <p class="flow">Expand schema → Deploy compatible code → Backfill safely → Switch reads/writes → Contract old schema</p>
+
+      <h3 id="lesson-0006-section-2">How it works</h3>
+      <ol>
+        <li><strong>Expand:</strong> add the new table, column, index, or nullable field without removing the old path.</li>
+        <li><strong>Dual support:</strong> deploy code that can work with both old and new schema shapes.</li>
+        <li><strong>Backfill:</strong> copy or calculate existing data in small batches.</li>
+        <li><strong>Switch:</strong> move reads and writes to the new schema after data is ready.</li>
+        <li><strong>Contract:</strong> remove the old column, table, or code only after it is no longer used.</li>
+      </ol>
+      <p>
+        This is often called the expand-and-contract pattern. It turns one risky
+        migration into several safe releases. The cost is more steps, but each step
+        is reversible or easier to pause.
+      </p>
+
+      <h3 id="lesson-0006-section-3">Main components</h3>
+      <ul>
+        <li><strong>Schema migration:</strong> the database change, such as adding a column or index.</li>
+        <li><strong>Application compatibility:</strong> code that supports both old and new schema versions.</li>
+        <li><strong>Backfill job:</strong> a controlled process that updates old rows in batches.</li>
+        <li><strong>Feature flag:</strong> a switch that lets you move traffic gradually to the new path.</li>
+        <li><strong>Rollback plan:</strong> the exact action to stop, pause, or reverse a bad migration.</li>
+        <li><strong>Observability:</strong> metrics, logs, and checks that prove the migration is safe.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-4">Example 1: adding a user display name</h3>
+      <p>
+        A social app wants to add <code>display_name</code> to the <code>users</code>
+        table. A safe first step is to add the nullable column. Then the application
+        writes both <code>name</code> and <code>display_name</code> for new updates.
+        A batch job fills <code>display_name</code> for existing users. After the team
+        verifies that every active row has the new value, reads switch to the new
+        column. The old column is removed in a later release.
+      </p>
+      <p>
+        The important part is compatibility. During deployment, some servers may still
+        use the old column and some may use the new code. Both must work.
+      </p>
+
+      <h3 id="lesson-0006-section-5">Example 2: production migration on a large table</h3>
+      <p>
+        An orders table has 400 million rows and receives 6,000 writes per second
+        during peak traffic. The team needs to add an index for faster customer order
+        history queries. A normal blocking index build could slow writes or lock the
+        table long enough to cause an incident.
+      </p>
+      <p>
+        The production-safe approach is to use the database&#x27;s online or concurrent
+        index creation mode, run it during a low-risk period, and monitor replication
+        lag, write latency, CPU, disk I/O, and lock waits. If pressure rises above the
+        rollback threshold, the team cancels or pauses the operation. The query path
+        is enabled only after the index is valid and performance is measured.
+      </p>
+
+      <h3 id="lesson-0006-section-6">When to use it</h3>
+      <ul>
+        <li>Your application has real users and cannot pause for schema changes.</li>
+        <li>Multiple app versions may run at the same time during deploys.</li>
+        <li>The table is large enough that backfills, indexes, or constraints may take time.</li>
+        <li>You are renaming, dropping, moving, or changing the meaning of data.</li>
+        <li>You need a safe rollback if the new code or data path fails.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-7">When not to use it</h3>
+      <ul>
+        <li>A tiny internal app can accept a clear maintenance window.</li>
+        <li>The database is disposable or can be recreated from source data.</li>
+        <li>The change is purely additive and has no performance or compatibility risk.</li>
+        <li>The extra release steps create more risk than a planned short downtime.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Prefer additive changes first: add before rename, remove, or make required.</li>
+        <li>Make new columns nullable first, then enforce <code>NOT NULL</code> after backfill and validation.</li>
+        <li>Backfill in small batches with sleeps or rate limits between batches.</li>
+        <li>Use online index creation when your database supports it.</li>
+        <li>Keep old and new code paths compatible across at least one deploy window.</li>
+        <li>Check background workers and queued jobs; they may run old code after the web deploy.</li>
+        <li>Write migration scripts so they can be safely retried after partial failure.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-9">Security considerations</h3>
+      <ul>
+        <li>Do not expose sensitive copied data through a new column before permissions are updated.</li>
+        <li>Preserve encryption, masking, retention, and audit rules when moving data.</li>
+        <li>Limit who can run production migrations, especially destructive changes.</li>
+        <li>Avoid logging raw row values while debugging migration failures.</li>
+        <li>Test rollback without restoring production data into unsafe environments.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Define stop conditions before starting: max lock time, lag, error rate, or latency.</li>
+        <li>Monitor old and new code paths until the old path is fully removed.</li>
+        <li>Protect the database from aggressive backfills that compete with user traffic.</li>
+        <li>Plan for partial progress; a migration may succeed for 60% of rows and then fail.</li>
+        <li>Keep backups, but do not treat restore-from-backup as your normal rollback plan.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-11">Performance and cost</h3>
+      <p>
+        Safe migrations often take longer because they use batching, online operations,
+        and multiple releases. That is usually better than causing downtime. The cost
+        is extra engineering effort, temporary duplicate writes, storage for old and
+        new columns, and monitoring time. The performance risk is database pressure:
+        locks, replication lag, large transactions, slow indexes, and cache churn.
+      </p>
+
+      <h3 id="lesson-0006-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Speed vs safety:</strong> one big migration is faster to write, but harder to recover from.</li>
+        <li><strong>Simplicity vs compatibility:</strong> supporting old and new schema shapes adds temporary code.</li>
+        <li><strong>Immediate cleanup vs rollback:</strong> deleting old columns quickly reduces clutter but removes fallback options.</li>
+        <li><strong>Strong constraints vs rollout flexibility:</strong> constraints protect data but should be added after data is ready.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Renaming or dropping a column in the same release where code stops using it.</li>
+        <li>Adding a required column without a safe default or backfill plan.</li>
+        <li>Running a large backfill in one transaction.</li>
+        <li>Forgetting that background workers, cron jobs, and old containers may still use the old schema.</li>
+        <li>Using rollback code that assumes the migration fully completed.</li>
+        <li>Adding an index safely but enabling a query before the index is ready.</li>
+        <li>Testing only on a tiny local database where lock and backfill behavior is unrealistic.</li>
+      </ul>
+
+      <h3 id="lesson-0006-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0005">Message queues</a> are often used for
+        safe backfills because workers can process rows gradually. <a href="#lesson-0004">Load balancing</a>
+        means old and new app servers may run at the same time, so migrations must
+        support mixed versions. <a href="#lesson-0001">Cache-aside</a>
+        can hide database load, but cached data may also need invalidation when the
+        schema or data shape changes.
+      </p>
+
+      <h3 id="lesson-0006-section-15">Design exercise</h3>
+      <p class="prompt">
+        You need to rename <code>users.full_name</code> to <code>users.display_name</code>
+        on a table with 80 million rows and continuous traffic. Design the releases:
+        what do you add first, when do you dual-write, how do you backfill, when do
+        you switch reads, and what metrics decide whether to pause or roll back?
+      </p>
+
+      <h3 id="lesson-0006-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.gitlab.com/development/database/avoiding_downtime_in_migrations/">
+          GitLab Docs: Avoiding downtime in migrations
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0005">Previous lesson</a><a href="#lesson-0007">Next lesson</a></nav></article><article id="lesson-0007" aria-label="Database Indexes">
+      <p class="eyebrow">Lesson 0007 · Databases</p>
+      <h2 class="chapter-title">Database Indexes</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0007-section-1">The problem it solves</a><a href="#lesson-0007-section-2">How it works</a><a href="#lesson-0007-section-3">Main components</a><a href="#lesson-0007-section-4">Example 1: finding a user&#x27;s orders</a><a href="#lesson-0007-section-5">Example 2: production incident from missing index</a><a href="#lesson-0007-section-6">When to use it</a><a href="#lesson-0007-section-7">When not to use it</a><a href="#lesson-0007-section-8">Implementation considerations</a><a href="#lesson-0007-section-9">Security considerations</a><a href="#lesson-0007-section-10">Reliability concerns</a><a href="#lesson-0007-section-11">Performance and cost</a><a href="#lesson-0007-section-12">Key trade-offs</a><a href="#lesson-0007-section-13">Common mistakes and edge cases</a><a href="#lesson-0007-section-14">Connection to previous lessons</a><a href="#lesson-0007-section-15">Design exercise</a><a href="#lesson-0007-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0007"><p class="diagram-title" id="diagram-0007">Illustration 7: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Query</strong><span>WHERE user_id = 42</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Planner</strong><span>Choose a useful access path</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Index</strong><span>Find matching entries</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Matching entries</strong><span>Locate required data</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Rows / index-only data</strong><span>Read projected columns</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Result</strong><span>Return matching orders</span></div></div><figcaption>An index can reduce how much data a query reads. The planner may still prefer a scan; some queries can use index-only scans. Writes also need to maintain the index.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        A database index is a separate data structure that helps the database find
+        matching rows faster without scanning the whole table.
+      </p>
+
+      <h3 id="lesson-0007-section-1">The problem it solves</h3>
+      <p>
+        As tables grow, simple queries can become slow. A query that was fast on
+        10,000 rows may become painful on 100 million rows. Without a useful index,
+        the database may need to check many rows to find a small result set.
+      </p>
+      <p>
+        Indexes solve lookup problems. They help queries filter, join, sort, and
+        enforce uniqueness efficiently. But they are not free: every index takes
+        storage and must be updated when rows are inserted, updated, or deleted.
+      </p>
+      <p class="flow">Query → Planner chooses index → Index lookup → Matching row IDs → Table rows → Result</p>
+
+      <h3 id="lesson-0007-section-2">How it works</h3>
+      <ol>
+        <li>You create an index on one or more columns used by important queries.</li>
+        <li>The database keeps a sorted or searchable structure beside the table.</li>
+        <li>When a query runs, the query planner estimates whether the index is useful.</li>
+        <li>If useful, the database reads a smaller part of the index instead of scanning the full table.</li>
+        <li>The database fetches matching rows and returns the result.</li>
+      </ol>
+      <p>
+        The planner can still ignore an index. For example, if a query returns most
+        of the table, scanning the table may be cheaper than jumping through the index
+        and then reading many table pages anyway.
+      </p>
+
+      <h3 id="lesson-0007-section-3">Main components</h3>
+      <ul>
+        <li><strong>Indexed columns:</strong> the fields used for filtering, joining, sorting, or uniqueness.</li>
+        <li><strong>Index type:</strong> the structure, such as B-tree, hash, GIN, GiST, or BRIN.</li>
+        <li><strong>Query planner:</strong> the database component that decides whether to use the index.</li>
+        <li><strong>Selectivity:</strong> how much the index narrows the result set.</li>
+        <li><strong>Statistics:</strong> database metadata that helps the planner estimate cost.</li>
+        <li><strong>Maintenance cost:</strong> extra work on writes because the index must stay updated.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-4">Example 1: finding a user&#x27;s orders</h3>
+      <p>
+        An <code>orders</code> table has 20 million rows. The app often runs:
+        <code>WHERE user_id = ? ORDER BY created_at DESC LIMIT 20</code>. Without a
+        helpful index, the database may scan many orders, filter by user, sort them,
+        and return the latest 20.
+      </p>
+      <p>
+        A compound index on <code>(user_id, created_at DESC)</code> matches the query
+        shape. The database can jump to that user&#x27;s orders in the correct order and
+        stop after 20 rows. This is usually much faster than scanning and sorting.
+      </p>
+
+      <h3 id="lesson-0007-section-5">Example 2: production incident from missing index</h3>
+      <p>
+        A support dashboard filters tickets by <code>account_id</code> and
+        <code>status = &#x27;open&#x27;</code>. At launch, each account has a few hundred tickets.
+        Six months later, enterprise accounts have millions. During business hours,
+        dashboard traffic reaches 1,200 requests per minute and the query starts
+        doing repeated full table scans.
+      </p>
+      <p>
+        CPU rises to 95%, read I/O spikes, and unrelated APIs slow down because they
+        share the same database. The fix is not just &quot;add an index quickly.&quot; The team
+        creates an index safely, ideally using an online or concurrent method, verifies
+        the query plan, and adds monitoring for slow queries. A partial index on open
+        tickets may be better than indexing every historical closed ticket.
+      </p>
+
+      <h3 id="lesson-0007-section-6">When to use it</h3>
+      <ul>
+        <li>A frequent query filters by a column and returns a small part of the table.</li>
+        <li>A query needs sorted results quickly, especially with <code>LIMIT</code>.</li>
+        <li>A join repeatedly uses the same foreign key or lookup column.</li>
+        <li>You need to enforce uniqueness, such as one email per user.</li>
+        <li>A production slow-query log shows the same expensive query pattern repeatedly.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-7">When not to use it</h3>
+      <ul>
+        <li>The table is tiny and scans are already cheap.</li>
+        <li>The query returns a large percentage of the table.</li>
+        <li>The column has very low selectivity, such as a boolean used alone.</li>
+        <li>The table is write-heavy and the index is rarely used.</li>
+        <li>You are guessing without checking query plans or real workload data.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Design indexes around real query shapes, not individual columns in isolation.</li>
+        <li>Use <code>EXPLAIN</code> or your database&#x27;s query plan tool before and after changes.</li>
+        <li>Keep column order intentional in compound indexes; equality filters often come before range and sort columns.</li>
+        <li>Consider partial indexes for common filtered subsets, such as active or unprocessed rows.</li>
+        <li>Remove unused duplicate indexes after proving they are not needed.</li>
+        <li>Create large production indexes with a zero-downtime migration approach.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-9">Security considerations</h3>
+      <ul>
+        <li>Indexes may duplicate sensitive values, so database encryption and access controls still matter.</li>
+        <li>Unique indexes can reveal data existence through error messages if the app exposes them poorly.</li>
+        <li>Expression indexes on normalized data, such as lowercased emails, should follow the same privacy rules as source columns.</li>
+        <li>Slow unindexed queries can become a denial-of-service risk if attackers can trigger expensive filters.</li>
+        <li>Do not give application users direct access to index metadata if it reveals sensitive schema details.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Creating an index on a large table can consume CPU, I/O, locks, and replication bandwidth.</li>
+        <li>Bad indexes can make writes slower and increase database recovery time.</li>
+        <li>Stale statistics can cause the planner to choose the wrong plan.</li>
+        <li>Adding many indexes can hide query problems until write throughput collapses.</li>
+        <li>Index bloat may grow over time and require maintenance depending on the database.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-11">Performance and cost</h3>
+      <p>
+        A good index can turn a slow query into a fast lookup. It can reduce CPU,
+        disk reads, memory pressure, and response time. The cost is storage, slower
+        writes, more backup size, more replication work, and more operational care.
+        Indexes are performance tools, but they are also capacity and cost decisions.
+      </p>
+
+      <h3 id="lesson-0007-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Read speed vs write speed:</strong> indexes make reads faster but inserts and updates heavier.</li>
+        <li><strong>Specificity vs flexibility:</strong> a targeted compound index is fast for one query shape but may not help others.</li>
+        <li><strong>Storage cost vs latency:</strong> more indexes use more disk but can reduce expensive scans.</li>
+        <li><strong>Fast fix vs safe rollout:</strong> adding an index may fix latency, but production creation still needs migration discipline.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Creating one index per column without matching the actual query.</li>
+        <li>Expecting an index to help when the query returns most rows.</li>
+        <li>Putting compound index columns in the wrong order.</li>
+        <li>Indexing a column but wrapping it in a function that prevents normal index use.</li>
+        <li>Forgetting that indexes must be maintained during every write.</li>
+        <li>Adding an index locally on tiny data and assuming production behavior will match.</li>
+        <li>Not checking whether an old index became unused after the product changed.</li>
+      </ul>
+
+      <h3 id="lesson-0007-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0006">Zero-downtime migrations</a>
+        matter because large indexes must be added safely. <a href="#lesson-0001">Cache-aside</a>
+        can reduce repeated database reads, but a cache should not hide permanently
+        bad query design. <a href="#lesson-0003">Vertical scaling</a>
+        may buy time for a slow database, but the correct index can remove the real
+        bottleneck. <a href="#lesson-0005">Message queues</a> can help
+        process index-related backfills or cleanup work gradually.
+      </p>
+
+      <h3 id="lesson-0007-section-15">Design exercise</h3>
+      <p class="prompt">
+        A table <code>events</code> has 200 million rows. The main query is
+        <code>WHERE account_id = ? AND event_type = ? AND created_at &gt; ? ORDER BY created_at DESC LIMIT 100</code>.
+        What index would you try first, how would you verify the query plan, and
+        what production metrics would you watch while creating the index?
+      </p>
+
+      <h3 id="lesson-0007-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://www.postgresql.org/docs/current/indexes.html">
+          PostgreSQL Docs: Indexes
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0006">Previous lesson</a><a href="#lesson-0008">Next lesson</a></nav></article><article id="lesson-0008" aria-label="Eventual Consistency">
+      <p class="eyebrow">Lesson 0008 · Consistency</p>
+      <h2 class="chapter-title">Eventual Consistency</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0008-section-1">The problem it solves</a><a href="#lesson-0008-section-2">How it works</a><a href="#lesson-0008-section-3">Main components</a><a href="#lesson-0008-section-4">Example 1: profile update and search</a><a href="#lesson-0008-section-5">Example 2: production multi-region reads</a><a href="#lesson-0008-section-6">When to use it</a><a href="#lesson-0008-section-7">When not to use it</a><a href="#lesson-0008-section-8">Implementation considerations</a><a href="#lesson-0008-section-9">Security considerations</a><a href="#lesson-0008-section-10">Reliability concerns</a><a href="#lesson-0008-section-11">Performance and cost</a><a href="#lesson-0008-section-12">Key trade-offs</a><a href="#lesson-0008-section-13">Common mistakes and edge cases</a><a href="#lesson-0008-section-14">Connection to previous lessons</a><a href="#lesson-0008-section-15">Design exercise</a><a href="#lesson-0008-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0008"><p class="diagram-title" id="diagram-0008">Illustration 8: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Write</strong><span>Profile name becomes version 2</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Primary</strong><span>Version 2 committed</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Replica / search view</strong><span>May still show version 1</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Replication catches up</strong><span>Update is applied</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Replica / search view</strong><span>Now shows version 2</span></div></div><figcaption>Different readers can temporarily see different versions. Convergence depends on updates reaching and being applied by the replica or derived view. A lagging permission view can create a security risk.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        Eventual consistency means different copies of data may disagree briefly,
+        but they should converge to the same value after writes stop and replication finishes.
+      </p>
+
+      <h3 id="lesson-0008-section-1">The problem it solves</h3>
+      <p>
+        Distributed systems often keep data in more than one place: replicas,
+        caches, search indexes, queues, analytics stores, or different regions.
+        Updating every copy immediately can be slow, expensive, or unavailable when
+        part of the system is down.
+      </p>
+      <p>
+        Eventual consistency accepts temporary staleness so the system can stay fast
+        and available. The trade-off is that users or services may briefly read old
+        data after a successful write.
+      </p>
+      <p class="flow">Write accepted → Primary data updated → Replication / async update → Other readers catch up</p>
+
+      <h3 id="lesson-0008-section-2">How it works</h3>
+      <ol>
+        <li>A service accepts a write and stores it in the primary system.</li>
+        <li>The system sends updates to replicas, caches, indexes, or other regions.</li>
+        <li>Some reads may hit a copy that has not received the update yet.</li>
+        <li>Background replication continues until copies catch up.</li>
+        <li>After enough time, later reads return the new value from all healthy copies.</li>
+      </ol>
+      <p>
+        Eventual consistency is not the same as random inconsistency. A production
+        system still needs clear rules: how long staleness is acceptable, how conflicts
+        are resolved, how retries work, and which operations require stronger guarantees.
+      </p>
+
+      <h3 id="lesson-0008-section-3">Main components</h3>
+      <ul>
+        <li><strong>Primary write path:</strong> the place where the write is accepted first.</li>
+        <li><strong>Replicas or derived stores:</strong> copies such as read replicas, caches, search indexes, or regional tables.</li>
+        <li><strong>Replication mechanism:</strong> the process that moves changes from one place to another.</li>
+        <li><strong>Lag:</strong> the delay between the accepted write and all readers seeing it.</li>
+        <li><strong>Conflict resolution:</strong> the rule used when two updates disagree.</li>
+        <li><strong>Read policy:</strong> the decision of when stale reads are acceptable and when strong reads are required.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-4">Example 1: profile update and search</h3>
+      <p>
+        A user updates their profile name from &quot;Hamza K.&quot; to &quot;Hamza Khan.&quot; The main
+        user table updates immediately. A background job later updates the search
+        index used by people search.
+      </p>
+      <p>
+        For a short time, the profile page may show the new name while search results
+        still show the old name. That is usually acceptable if search catches up
+        quickly. It would not be acceptable if the old value contained sensitive data
+        that must disappear immediately.
+      </p>
+
+      <h3 id="lesson-0008-section-5">Example 2: production multi-region reads</h3>
+      <p>
+        A global e-commerce app runs in the US, Europe, and Asia. Users can update
+        shipping addresses. Writes are accepted in the nearest region and replicated
+        to other regions, usually within one second. During a regional network issue,
+        replication lag grows to 45 seconds.
+      </p>
+      <p>
+        Product browsing and recommendation reads can tolerate stale data, so they
+        keep using local replicas. Checkout cannot risk shipping to an old address,
+        so it reads from a stronger source or asks the user to confirm the address.
+        The design uses eventual consistency for speed, but switches to stronger
+        consistency for business-critical decisions.
+      </p>
+
+      <h3 id="lesson-0008-section-6">When to use it</h3>
+      <ul>
+        <li>Reads need to be fast and highly available across replicas or regions.</li>
+        <li>Temporary stale data is acceptable for the user experience.</li>
+        <li>The data is derived, such as search results, feeds, counters, recommendations, or analytics.</li>
+        <li>The system needs to keep working during partial network or replica failures.</li>
+        <li>You can explain and measure the allowed staleness window.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-7">When not to use it</h3>
+      <ul>
+        <li>Money movement, inventory reservation, permissions, or safety decisions require the latest value.</li>
+        <li>A stale read can leak private data or violate compliance rules.</li>
+        <li>The user expects read-your-writes behavior immediately after editing something.</li>
+        <li>Conflicts cannot be resolved safely or automatically.</li>
+        <li>The team has no visibility into replication lag or failed updates.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Classify operations: which can be stale, which need read-your-writes, and which need strong consistency.</li>
+        <li>Expose clear UI states, such as &quot;processing&quot; or &quot;syncing&quot;, when users may see delayed results.</li>
+        <li>Use version numbers, timestamps, or event IDs to detect old updates arriving late.</li>
+        <li>Make update handlers idempotent so duplicate replication events do not corrupt data.</li>
+        <li>Measure replication lag and alert when it exceeds the business tolerance.</li>
+        <li>Use stronger reads for critical paths instead of forcing every read to be strong.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-9">Security considerations</h3>
+      <ul>
+        <li>Do not serve stale authorization or permission data for sensitive operations.</li>
+        <li>When deleting private data, make sure caches, indexes, logs, and replicas are also cleaned up.</li>
+        <li>Avoid exposing old personal data in search indexes after a user updates or removes it.</li>
+        <li>Protect replication channels because they carry production changes across systems.</li>
+        <li>Audit conflict resolution rules when they affect money, access, or compliance data.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Replication can pause, fall behind, or replay events out of order.</li>
+        <li>Retries can create duplicate events unless consumers are idempotent.</li>
+        <li>Conflicting writes from different regions may need deterministic resolution.</li>
+        <li>Derived stores can drift silently unless you run reconciliation checks.</li>
+        <li>Failover can expose older data if the replacement replica is behind.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-11">Performance and cost</h3>
+      <p>
+        Eventual consistency can reduce latency because reads can use nearby replicas,
+        caches, or indexes. It can also reduce cost because not every read needs the
+        strongest and most expensive path. The cost is design complexity: monitoring
+        lag, handling conflicts, explaining stale UI states, and deciding which paths
+        need stronger guarantees.
+      </p>
+
+      <h3 id="lesson-0008-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Speed vs freshness:</strong> local or cached reads are faster but may return old data.</li>
+        <li><strong>Availability vs strict correctness:</strong> the system can keep serving during partial failures, but some reads may lag.</li>
+        <li><strong>Lower cost vs more logic:</strong> weaker reads can cost less, but the application must handle stale values.</li>
+        <li><strong>Async updates vs simpler reasoning:</strong> background propagation scales well, but debugging becomes harder.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Saying &quot;eventual consistency&quot; without defining how much delay is acceptable.</li>
+        <li>Using stale permission data for authorization decisions.</li>
+        <li>Assuming users will not notice after they update data and immediately read it back.</li>
+        <li>Letting cache, search, and database copies drift with no reconciliation job.</li>
+        <li>Resolving conflicts by timestamp without thinking about clock skew or business meaning.</li>
+        <li>Retrying failed replication forever without a dead-letter path or alert.</li>
+        <li>Using eventual consistency for inventory or balance checks that need strict correctness.</li>
+      </ul>
+
+      <h3 id="lesson-0008-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0001">Cache-aside</a> is often eventually consistent
+        because cached values can be stale. <a href="#lesson-0005">Message queues</a>
+        create async workflows where side effects finish later. <a href="#lesson-0006">Zero-downtime migrations</a>
+        may temporarily support old and new data shapes at the same time.
+        <a href="#lesson-0007">Database indexes</a> and search indexes
+        can also lag or require safe rebuilds in production.
+      </p>
+
+      <h3 id="lesson-0008-section-15">Design exercise</h3>
+      <p class="prompt">
+        You are designing a shopping cart used across mobile and web. Item additions
+        must feel instant, but checkout must never charge for the wrong quantity.
+        Which reads can be eventually consistent, which reads must be strong, how
+        would you handle conflicts, and what lag metric would you alert on?
+      </p>
+
+      <h3 id="lesson-0008-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/HowItWorks.ReadConsistency.html">
+          AWS DynamoDB Docs: Read consistency
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0007">Previous lesson</a><a href="#lesson-0009">Next lesson</a></nav></article><article id="lesson-0009" aria-label="Containerization">
+      <p class="eyebrow">Lesson 0009 · Deployment</p>
+      <h2 class="chapter-title">Containerization</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0009-section-1">The problem it solves</a><a href="#lesson-0009-section-2">How it works</a><a href="#lesson-0009-section-3">Main components</a><a href="#lesson-0009-section-4">Example 1: consistent API deployments</a><a href="#lesson-0009-section-5">Example 2: production scaling and failed container</a><a href="#lesson-0009-section-6">When to use it</a><a href="#lesson-0009-section-7">When not to use it</a><a href="#lesson-0009-section-8">Implementation considerations</a><a href="#lesson-0009-section-9">Security considerations</a><a href="#lesson-0009-section-10">Reliability concerns</a><a href="#lesson-0009-section-11">Performance and cost</a><a href="#lesson-0009-section-12">Key trade-offs</a><a href="#lesson-0009-section-13">Common mistakes and edge cases</a><a href="#lesson-0009-section-14">Connection to previous lessons</a><a href="#lesson-0009-section-15">Design exercise</a><a href="#lesson-0009-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0009"><p class="diagram-title" id="diagram-0009">Illustration 9: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Build</strong><span>Code + runtime dependencies</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Image registry</strong><span>Store versioned image</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Container runtime</strong><span>Start containers from image</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Running containers</strong><span>Separate processes and resource limits</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Host kernel</strong><span>Shared by containers on this host</span></div></div><figcaption>A versioned image travels between environments. Containers provide process isolation while sharing the host kernel; persistent data and secrets need separate handling.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        Containerization packages an application with the runtime, libraries, and
+        configuration it needs, then runs it as an isolated process.
+      </p>
+
+      <h3 id="lesson-0009-section-1">The problem it solves</h3>
+      <p>
+        Applications often fail because environments are different. A service may
+        work on a developer laptop but fail in staging because Node, Python, system
+        packages, environment variables, or OS libraries are different.
+      </p>
+      <p>
+        Containers reduce this drift. The team builds one image and runs that same
+        image in local development, CI, staging, and production. This makes deploys
+        more repeatable and scaling more predictable.
+      </p>
+      <p class="flow">Source code → Container image → Registry → Container runtime → Running container</p>
+
+      <h3 id="lesson-0009-section-2">How it works</h3>
+      <ol>
+        <li>Write a container build file that describes the app runtime and files.</li>
+        <li>Build an immutable image from the source code and dependencies.</li>
+        <li>Push the image to a registry.</li>
+        <li>Deploy the image to a server, container platform, or orchestrator.</li>
+        <li>The runtime starts one or more isolated containers from the image.</li>
+        <li>Traffic reaches the container through a published port or service route.</li>
+      </ol>
+      <p>
+        A container is not a full virtual machine. It usually shares the host kernel
+        but has isolated process, filesystem, network, and resource boundaries. This
+        makes containers lighter than VMs, while still giving useful separation.
+      </p>
+
+      <h3 id="lesson-0009-section-3">Main components</h3>
+      <ul>
+        <li><strong>Image:</strong> a versioned package containing the app and its dependencies.</li>
+        <li><strong>Container:</strong> a running process created from an image.</li>
+        <li><strong>Containerfile / Dockerfile:</strong> the recipe used to build the image.</li>
+        <li><strong>Registry:</strong> a place to store and pull images, such as Docker Hub or a private registry.</li>
+        <li><strong>Runtime:</strong> the engine that starts, stops, and isolates containers.</li>
+        <li><strong>Orchestrator:</strong> a system, such as Kubernetes or ECS, that schedules and replaces containers at scale.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-4">Example 1: consistent API deployments</h3>
+      <p>
+        A Node.js API needs Node 22, a specific image library, and a few system
+        packages. Without containers, every server must be configured correctly by
+        scripts or manual setup. One missing library can break production.
+      </p>
+      <p>
+        With containers, the team builds one API image. CI tests that image, staging
+        runs that image, and production deploys that same image tag. If a rollback is
+        needed, the platform starts the previous image tag instead of rebuilding the
+        server by hand.
+      </p>
+
+      <h3 id="lesson-0009-section-5">Example 2: production scaling and failed container</h3>
+      <p>
+        A payment worker runs as 20 containers across five machines. Each container
+        processes messages from a queue. During peak load, the queue grows from 5,000
+        to 80,000 messages, so the platform scales the worker to 80 containers.
+      </p>
+      <p>
+        One machine runs out of memory and kills several containers. The orchestrator
+        detects failed containers, starts replacements on healthier machines, and the
+        queue continues draining. The container image made scaling simple, but the
+        system still needed memory limits, health checks, logs, metrics, and safe
+        retry behavior.
+      </p>
+
+      <h3 id="lesson-0009-section-6">When to use it</h3>
+      <ul>
+        <li>You want the same app package across local, CI, staging, and production.</li>
+        <li>You run many services with different runtimes or dependencies.</li>
+        <li>You need fast horizontal scaling and repeatable rollbacks.</li>
+        <li>You deploy background workers, APIs, scheduled jobs, or event consumers.</li>
+        <li>You want infrastructure to schedule services based on CPU and memory limits.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-7">When not to use it</h3>
+      <ul>
+        <li>A very small app is already simple to deploy and does not need environment isolation.</li>
+        <li>The team cannot operate the container platform safely.</li>
+        <li>The workload needs direct host access that containers would complicate.</li>
+        <li>You are using containers to hide poor configuration, weak tests, or missing observability.</li>
+        <li>The application stores important state only inside the container filesystem.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Keep images small and deterministic; install only what the app needs.</li>
+        <li>Use explicit image tags or digests instead of deploying a moving <code>latest</code> tag.</li>
+        <li>Pass configuration through environment variables or secrets, not baked into images.</li>
+        <li>Run one main process per container unless there is a clear reason not to.</li>
+        <li>Write logs to stdout or stderr so the platform can collect them.</li>
+        <li>Set CPU and memory requests or limits so one container cannot starve the host.</li>
+        <li>Make containers stateless; store durable data in databases, queues, object storage, or volumes.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-9">Security considerations</h3>
+      <ul>
+        <li>Use trusted base images and scan images for known vulnerabilities.</li>
+        <li>Do not run containers as root unless the workload truly requires it.</li>
+        <li>Keep secrets out of images, build logs, and image layers.</li>
+        <li>Drop unnecessary Linux capabilities and keep the filesystem read-only where possible.</li>
+        <li>Patch base images regularly; rebuilding the app is not enough if the base is old.</li>
+        <li>Restrict who can push production images to the registry.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Define readiness checks so traffic only reaches containers that are actually ready.</li>
+        <li>Define liveness checks carefully; bad checks can restart healthy containers.</li>
+        <li>Gracefully handle shutdown so in-flight requests or queue messages are not lost.</li>
+        <li>Use immutable image tags so rollbacks are predictable.</li>
+        <li>Monitor restart count, memory usage, CPU throttling, image pull failures, and startup time.</li>
+        <li>Keep startup fast enough that scaling and recovery are useful during incidents.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-11">Performance and cost</h3>
+      <p>
+        Containers are usually lighter than virtual machines because they share the
+        host kernel. That can improve resource utilization and reduce cost. The cost
+        is operational complexity: image builds, registries, security scanning,
+        orchestration, networking, and monitoring. Poorly sized containers can also
+        waste money or cause noisy-neighbor problems on shared hosts.
+      </p>
+
+      <h3 id="lesson-0009-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Portability vs platform knowledge:</strong> containers package the app well, but production still depends on networking, storage, and orchestration.</li>
+        <li><strong>Fast scaling vs stateless design:</strong> containers can scale quickly only when state is externalized.</li>
+        <li><strong>Isolation vs shared kernel risk:</strong> containers isolate processes but are not the same security boundary as separate VMs.</li>
+        <li><strong>Small images vs build convenience:</strong> smaller images are faster and safer, but may require cleaner build steps.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Putting secrets into the image or Dockerfile.</li>
+        <li>Using <code>latest</code> in production and losing rollback clarity.</li>
+        <li>Writing uploaded files or important state inside the container filesystem.</li>
+        <li>Running as root by default and giving containers unnecessary privileges.</li>
+        <li>Not setting memory limits, then being surprised by host-level failures.</li>
+        <li>Ignoring graceful shutdown, causing duplicate queue work or dropped requests.</li>
+        <li>Assuming containers alone provide high availability without load balancing and orchestration.</li>
+      </ul>
+
+      <h3 id="lesson-0009-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0002">Horizontal scaling</a> often means
+        running more containers. <a href="#lesson-0004">Load balancing</a>
+        routes traffic to healthy containers. <a href="#lesson-0005">Message queues</a>
+        let worker containers scale separately from APIs. <a href="#lesson-0006">Zero-downtime migrations</a>
+        matter because old and new container versions can overlap during deploys.
+        <a href="#lesson-0008">Eventual consistency</a> shows why
+        containerized services must tolerate delayed side effects.
+      </p>
+
+      <h3 id="lesson-0009-section-15">Design exercise</h3>
+      <p class="prompt">
+        You are containerizing an API and a background worker. What should go into
+        the image, what should stay outside as configuration or secrets, what health
+        checks would you add, and how would you roll back if the new image starts
+        failing after 10% of traffic is deployed?
+      </p>
+
+      <h3 id="lesson-0009-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.docker.com/get-started/docker-concepts/the-basics/what-is-a-container/">
+          Docker Docs: What is a container?
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0008">Previous lesson</a><a href="#lesson-0010">Next lesson</a></nav></article><article id="lesson-0010" aria-label="API Pagination">
+      <p class="eyebrow">Lesson 0010 · API Optimization</p>
+      <h2 class="chapter-title">API Pagination</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0010-section-1">The problem it solves</a><a href="#lesson-0010-section-2">How it works</a><a href="#lesson-0010-section-3">Main components</a><a href="#lesson-0010-section-4">Offset vs cursor pagination</a><a href="#lesson-0010-section-5">Example 1: order history API</a><a href="#lesson-0010-section-6">Example 2: production export incident</a><a href="#lesson-0010-section-7">When to use it</a><a href="#lesson-0010-section-8">When not to use it</a><a href="#lesson-0010-section-9">Implementation considerations</a><a href="#lesson-0010-section-10">Security considerations</a><a href="#lesson-0010-section-11">Reliability concerns</a><a href="#lesson-0010-section-12">Performance and cost</a><a href="#lesson-0010-section-13">Key trade-offs</a><a href="#lesson-0010-section-14">Common mistakes and edge cases</a><a href="#lesson-0010-section-15">Connection to previous lessons</a><a href="#lesson-0010-section-16">Design exercise</a><a href="#lesson-0010-section-17">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0010"><p class="diagram-title" id="diagram-0010">Illustration 10: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Client</strong><span>page_size = 50 + optional cursor</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>API</strong><span>Validate scope and cap size</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Database</strong><span>Stable order; bounded query</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Response</strong><span>Up to 50 items + next cursor</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Next request</strong><span>Continue after last sort key</span></div></div><figcaption>Each request reads a bounded page. A stable sort key needs a tie-breaker, such as an ID. A cursor does not bypass authorization or automatically guarantee a snapshot across pages.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        Pagination splits a large list response into smaller pages so APIs stay fast,
+        predictable, and safer under real production load.
+      </p>
+
+      <h3 id="lesson-0010-section-1">The problem it solves</h3>
+      <p>
+        List endpoints are dangerous when they are unbounded. An endpoint like
+        <code>GET /orders</code> may be fine with 500 rows, but painful with 50 million
+        rows. A single request can consume too much database time, memory, network
+        bandwidth, and client processing.
+      </p>
+      <p>
+        Pagination forces the API to return a controlled number of items. The client
+        asks for the next page only when it needs more data.
+      </p>
+      <p class="flow">Client requests page → API validates page size → Database fetches bounded rows → API returns items + next page token</p>
+
+      <h3 id="lesson-0010-section-2">How it works</h3>
+      <ol>
+        <li>The client calls a list endpoint with a requested page size.</li>
+        <li>The API applies a maximum page size to protect the system.</li>
+        <li>The database fetches one bounded slice of results.</li>
+        <li>The API returns the items and a cursor or page token for the next page.</li>
+        <li>The client sends that token to continue from the previous position.</li>
+        <li>The API stops returning a next token when there are no more results.</li>
+      </ol>
+      <p>
+        Good pagination is not only a UI feature. It is a system protection mechanism.
+        It keeps each request small enough to measure, retry, cache, rate limit, and
+        debug.
+      </p>
+
+      <h3 id="lesson-0010-section-3">Main components</h3>
+      <ul>
+        <li><strong>Page size:</strong> the number of items requested, with a server-side maximum.</li>
+        <li><strong>Cursor or page token:</strong> an opaque value that tells the API where to continue.</li>
+        <li><strong>Stable ordering:</strong> a predictable sort order so items are not skipped or duplicated.</li>
+        <li><strong>Index:</strong> a database index that supports the filter and order used by the list endpoint.</li>
+        <li><strong>Response metadata:</strong> data such as <code>next_page_token</code>, count hints, or links.</li>
+        <li><strong>Rate limits:</strong> protection against clients crawling too aggressively.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-4">Offset vs cursor pagination</h3>
+      <p>
+        Offset pagination uses <code>limit</code> and <code>offset</code>, such as
+        <code>?limit=50&amp;offset=1000</code>. It is simple, but it gets slower on
+        deep pages because the database may still need to walk past many skipped rows.
+        It can also duplicate or skip items when rows are inserted or deleted while
+        the user is paging.
+      </p>
+      <p>
+        Cursor pagination uses a stable position, such as the last seen
+        <code>created_at</code> and <code>id</code>, wrapped in an opaque token. It is
+        usually better for large, changing datasets because it continues from a known
+        item instead of counting skipped rows.
+      </p>
+
+      <h3 id="lesson-0010-section-5">Example 1: order history API</h3>
+      <p>
+        A customer opens their order history. The app calls
+        <code>GET /orders?page_size=25</code>. The API returns the latest 25 orders
+        and a <code>next_page_token</code>. The mobile app only fetches more if the
+        customer scrolls.
+      </p>
+      <p>
+        The database uses an index like <code>(customer_id, created_at DESC, id DESC)</code>.
+        This matches the filter and ordering. The API avoids loading years of history
+        when the user only wants the first screen.
+      </p>
+
+      <h3 id="lesson-0010-section-6">Example 2: production export incident</h3>
+      <p>
+        A reporting endpoint returns all events for an account. One enterprise account
+        has 90 million events. At 9:00 AM, three customers start exports at the same
+        time. Each request tries to return every matching row. Database CPU reaches
+        98%, memory pressure rises, API containers time out, and unrelated dashboards
+        become slow.
+      </p>
+      <p>
+        The fix is to make the endpoint paginated and move full exports to an async
+        job. Interactive APIs return small pages. Large exports create a background
+        task, stream data in chunks, store the file in object storage, and notify the
+        user when it is ready. Pagination protects the request path; queues handle
+        the long-running export.
+      </p>
+
+      <h3 id="lesson-0010-section-7">When to use it</h3>
+      <ul>
+        <li>An endpoint returns a list that can grow over time.</li>
+        <li>Clients display scrollable or table-based data.</li>
+        <li>The query reads from a large table, search index, or external API.</li>
+        <li>You need predictable latency and memory usage per request.</li>
+        <li>You want APIs that remain safe as customers grow from small to large accounts.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-8">When not to use it</h3>
+      <ul>
+        <li>The response is always tiny and bounded by business rules.</li>
+        <li>The client truly needs a complete export; use an async export flow instead.</li>
+        <li>The endpoint returns a single aggregate value, not a list of items.</li>
+        <li>The data is static and small enough to cache as one object safely.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-9">Implementation considerations</h3>
+      <ul>
+        <li>Always enforce a server-side maximum page size.</li>
+        <li>Use cursor pagination for large or frequently changing datasets.</li>
+        <li>Use a stable sort, often by <code>created_at</code> plus a unique <code>id</code> tie-breaker.</li>
+        <li>Make page tokens opaque so clients do not depend on internal database details.</li>
+        <li>Validate filters and sort fields; unsupported combinations can create slow queries.</li>
+        <li>Avoid expensive total counts on large datasets unless the product truly needs them.</li>
+        <li>Align database indexes with the endpoint&#x27;s filters and order.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-10">Security considerations</h3>
+      <ul>
+        <li>Apply authorization before pagination so users cannot page through data they should not see.</li>
+        <li>Sign or encrypt page tokens if they include sensitive internal state.</li>
+        <li>Do not expose raw database IDs or query details inside readable tokens when avoidable.</li>
+        <li>Rate limit pagination to prevent scraping and expensive full-table crawling.</li>
+        <li>Keep filters tenant-scoped so one customer cannot infer another customer&#x27;s data volume.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-11">Reliability concerns</h3>
+      <ul>
+        <li>Offset pagination can skip or duplicate rows when data changes during traversal.</li>
+        <li>Cursor tokens can expire if the underlying sort key disappears or access changes.</li>
+        <li>Changing default sort order can break clients that store old tokens.</li>
+        <li>Deep pagination can still be expensive if the index does not match the query.</li>
+        <li>Clients may retry pages, so reads and billing side effects must be safe.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-12">Performance and cost</h3>
+      <p>
+        Pagination reduces API latency, memory usage, database work, response size,
+        and bandwidth. It also lowers failure blast radius because one bad request
+        can only ask for a bounded amount of work. The cost is API complexity: clients
+        must handle tokens, empty pages, retries, ordering, and partial results.
+      </p>
+
+      <h3 id="lesson-0010-section-13">Key trade-offs</h3>
+      <ul>
+        <li><strong>Simplicity vs scale:</strong> offset pagination is easy, but cursor pagination scales better on large changing lists.</li>
+        <li><strong>Freshness vs stable traversal:</strong> live data may change while the client pages through it.</li>
+        <li><strong>User convenience vs system safety:</strong> &quot;show all&quot; is convenient, but can overload production systems.</li>
+        <li><strong>Detailed totals vs fast responses:</strong> exact counts can be expensive on large filtered datasets.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-14">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Allowing clients to request unlimited or extremely large page sizes.</li>
+        <li>Using offset pagination for very deep pages on huge tables.</li>
+        <li>Sorting only by a non-unique field, causing unstable page boundaries.</li>
+        <li>Returning exact total counts that require expensive full scans.</li>
+        <li>Letting page tokens reveal tenant IDs, raw SQL, or internal schema details.</li>
+        <li>Forgetting that deleted or newly inserted rows can change what the next page contains.</li>
+        <li>Using pagination as the only solution for exports instead of background jobs.</li>
+      </ul>
+
+      <h3 id="lesson-0010-section-15">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0007">Database indexes</a> make paginated
+        queries fast only when the index matches the filter and sort. <a href="#lesson-0005">Message queues</a>
+        are better for full exports that should not block API requests.
+        <a href="#lesson-0004">Load balancing</a> spreads API traffic,
+        but it cannot protect the database from one unbounded query. <a href="#lesson-0009">Containerization</a>
+        makes APIs easier to scale, but pagination reduces the work each container
+        must perform. <a href="#lesson-0008">Eventual consistency</a>
+        matters when paginated data changes while the client is traversing it.
+      </p>
+
+      <h3 id="lesson-0010-section-16">Design exercise</h3>
+      <p class="prompt">
+        You own <code>GET /events</code> for an analytics product. Some accounts have
+        500 events; others have 500 million. Design the pagination contract: page
+        size limits, cursor fields, default sort, index shape, token security, and
+        what you would do when a customer asks for a full CSV export.
+      </p>
+
+      <h3 id="lesson-0010-section-17">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://google.aip.dev/158">
+          Google API Improvement Proposals: AIP-158 Pagination
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0009">Previous lesson</a><a href="#lesson-0011">Next lesson</a></nav></article><article id="lesson-0011" aria-label="Observability">
+      <p class="eyebrow">Lesson 0011 · Operations</p>
+      <h2 class="chapter-title">Observability</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0011-section-1">The problem it solves</a><a href="#lesson-0011-section-2">How it works</a><a href="#lesson-0011-section-3">Main components</a><a href="#lesson-0011-section-4">Example 1: slow checkout request</a><a href="#lesson-0011-section-5">Example 2: production queue backlog</a><a href="#lesson-0011-section-6">When to use it</a><a href="#lesson-0011-section-7">When not to overdo it</a><a href="#lesson-0011-section-8">Implementation considerations</a><a href="#lesson-0011-section-9">Security considerations</a><a href="#lesson-0011-section-10">Reliability concerns</a><a href="#lesson-0011-section-11">Performance and cost</a><a href="#lesson-0011-section-12">Key trade-offs</a><a href="#lesson-0011-section-13">Common mistakes and edge cases</a><a href="#lesson-0011-section-14">Connection to previous lessons</a><a href="#lesson-0011-section-15">Design exercise</a><a href="#lesson-0011-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0011"><p class="diagram-title" id="diagram-0011">Illustration 11: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Application</strong><span>Metrics, logs, traces</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Collector</strong><span>Process and export telemetry</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Storage</strong><span>Retain sampled / filtered data</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Investigate</strong><span>Correlate request and job IDs</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Dashboards / alerts</strong><span>Latency, errors, saturation, backlog</span></div></div><figcaption>Telemetry connects symptoms to requests and dependencies. Collection itself consumes resources; protect sensitive fields and watch for missing or dropped telemetry.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        Observability is the ability to understand what a production system is doing
+        by looking at its external signals: logs, metrics, traces, and events.
+      </p>
+
+      <h3 id="lesson-0011-section-1">The problem it solves</h3>
+      <p>
+        Production systems fail in ways you did not predict. A database index may be
+        missing, a queue may fall behind, a container may restart, or one customer may
+        trigger a slow API path. Without observability, engineers guess.
+      </p>
+      <p>
+        Observability gives you evidence. It helps answer: what broke, who is affected,
+        when did it start, where is the bottleneck, and whether the fix worked.
+      </p>
+      <p class="flow">Service emits telemetry → Collector / agent → Storage → Dashboards, alerts, traces, logs</p>
+
+      <h3 id="lesson-0011-section-2">How it works</h3>
+      <ol>
+        <li>Application code and infrastructure emit telemetry.</li>
+        <li>Telemetry is collected from services, containers, databases, queues, and load balancers.</li>
+        <li>The data is enriched with labels such as service, route, region, customer tier, and version.</li>
+        <li>Storage systems index the data for search, dashboards, alerting, and trace lookup.</li>
+        <li>Engineers use the data to detect incidents, debug root causes, and verify fixes.</li>
+      </ol>
+      <p>
+        Good observability is not only collecting more data. It is collecting the
+        right data with enough context to make production decisions quickly.
+      </p>
+
+      <h3 id="lesson-0011-section-3">Main components</h3>
+      <ul>
+        <li><strong>Metrics:</strong> numeric time-series data, such as request rate, latency, error rate, CPU, and queue depth.</li>
+        <li><strong>Logs:</strong> structured event records that explain what happened inside a service.</li>
+        <li><strong>Traces:</strong> request journeys across services, useful for seeing where time was spent.</li>
+        <li><strong>Events:</strong> important changes, such as deployments, config changes, autoscaling, or incident actions.</li>
+        <li><strong>Dashboards:</strong> visual views of service health and business-critical paths.</li>
+        <li><strong>Alerts:</strong> notifications based on symptoms that need human or automated action.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-4">Example 1: slow checkout request</h3>
+      <p>
+        A user reports that checkout is slow. Metrics show p95 checkout latency
+        increased from 400 ms to 3 seconds. Logs show no clear application error.
+        A distributed trace shows the payment service is fast, but the inventory
+        service spends 2.4 seconds waiting on a database query.
+      </p>
+      <p>
+        The team checks the query plan and finds a missing index. The fix is not
+        &quot;add more containers&quot;; the fix is a safe database index migration. Observability
+        prevents the team from scaling the wrong layer.
+      </p>
+
+      <h3 id="lesson-0011-section-5">Example 2: production queue backlog</h3>
+      <p>
+        A billing system uses a queue to send invoices. Normally, workers process
+        300 messages per second and the oldest message age stays under 2 minutes.
+        After a release, the oldest message age grows to 45 minutes while API traffic
+        still looks healthy.
+      </p>
+      <p>
+        Metrics show worker error rate increased. Logs show the new code rejects
+        some invoice payloads. Traces show retries hammer the same downstream CRM.
+        The team rolls back the worker image, moves poison messages to a dead-letter
+        queue, and adds a schema compatibility test. Without queue observability,
+        users might only notice hours later when invoices do not arrive.
+      </p>
+
+      <h3 id="lesson-0011-section-6">When to use it</h3>
+      <ul>
+        <li>Every production service needs basic observability before it is trusted.</li>
+        <li>You operate APIs, workers, databases, queues, containers, or scheduled jobs.</li>
+        <li>You need to debug failures across multiple services.</li>
+        <li>You need alerts based on user-visible symptoms, not only machine health.</li>
+        <li>You want to measure whether reliability, performance, and cost changes worked.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-7">When not to overdo it</h3>
+      <ul>
+        <li>A small internal script may not need full tracing and dashboards.</li>
+        <li>High-cardinality labels can explode cost without improving debugging.</li>
+        <li>Verbose logs can hide useful signals and leak sensitive data.</li>
+        <li>Too many alerts can train teams to ignore real incidents.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Start with golden signals: latency, traffic, errors, and saturation.</li>
+        <li>Use structured logs with request IDs, service name, route, status, and safe business context.</li>
+        <li>Propagate trace IDs across services, queues, and background workers.</li>
+        <li>Record deployment and config-change events so incidents can be tied to changes.</li>
+        <li>Alert on symptoms, such as failed checkout rate, not only CPU or memory.</li>
+        <li>Define service-level objectives for critical user journeys.</li>
+        <li>Review dashboards during incidents and remove panels nobody uses.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-9">Security considerations</h3>
+      <ul>
+        <li>Do not log passwords, tokens, session cookies, payment data, or raw personal data.</li>
+        <li>Restrict access to logs and traces because they may reveal production behavior and customer context.</li>
+        <li>Scrub sensitive headers and payloads before telemetry leaves the service.</li>
+        <li>Keep audit logs for security-relevant actions separate from noisy debug logs.</li>
+        <li>Protect telemetry pipelines; attackers can hide activity by disabling or flooding them.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Telemetry must not take down the app if the collector or vendor is unavailable.</li>
+        <li>Use sampling carefully so rare but important traces are not always dropped.</li>
+        <li>Monitor the observability pipeline itself: dropped logs, delayed metrics, and collector errors.</li>
+        <li>Keep alert thresholds tied to user impact and expected traffic patterns.</li>
+        <li>Run incident reviews to add missing signals discovered during real failures.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-11">Performance and cost</h3>
+      <p>
+        Observability has real cost. Logs, metrics, and traces consume CPU, network,
+        storage, and vendor budget. The goal is not infinite data. The goal is enough
+        high-quality telemetry to detect and debug production problems quickly. Use
+        sampling, retention rules, label discipline, and aggregation to control cost.
+      </p>
+
+      <h3 id="lesson-0011-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Detail vs cost:</strong> more telemetry helps debugging but increases storage and processing cost.</li>
+        <li><strong>Sampling vs completeness:</strong> sampling reduces cost but can miss rare failures.</li>
+        <li><strong>Fast alerts vs noisy alerts:</strong> sensitive alerts catch problems quickly but may create fatigue.</li>
+        <li><strong>Debug context vs privacy:</strong> rich logs help engineers but can expose sensitive data if poorly designed.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Logging unstructured text that cannot be filtered by service, request ID, or customer segment.</li>
+        <li>Alerting on CPU but missing user-facing error rate or latency.</li>
+        <li>Using high-cardinality labels, such as user ID, on every metric.</li>
+        <li>Forgetting background workers, queues, cron jobs, and migrations.</li>
+        <li>Collecting traces but not propagating trace IDs through async boundaries.</li>
+        <li>Keeping debug logs forever and creating avoidable cost and privacy risk.</li>
+        <li>Not marking deployments, making it harder to connect incidents to recent changes.</li>
+      </ul>
+
+      <h3 id="lesson-0011-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0004">Load balancing</a> needs target health,
+        latency, and error metrics. <a href="#lesson-0005">Message queues</a>
+        need queue depth, oldest message age, retries, and dead-letter queue counts.
+        <a href="#lesson-0009">Containerization</a> needs restart,
+        CPU, memory, and image rollout visibility. <a href="#lesson-0010">API pagination</a>
+        should reduce latency and database load, and observability proves whether it
+        did. <a href="#lesson-0008">Eventual consistency</a> needs
+        lag metrics and reconciliation checks.
+      </p>
+
+      <h3 id="lesson-0011-section-15">Design exercise</h3>
+      <p class="prompt">
+        You own a checkout API, an inventory service, a payment service, and an invoice
+        queue. Design the minimum observability plan: five metrics, three structured
+        log fields, one trace you must capture, two alerts, and one dashboard that
+        would help you debug a failed checkout incident.
+      </p>
+
+      <h3 id="lesson-0011-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://opentelemetry.io/docs/concepts/observability-primer/">
+          OpenTelemetry Docs: Observability primer
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0010">Previous lesson</a><a href="#lesson-0012">Next lesson</a></nav></article><article id="lesson-0012" aria-label="Rate Limiting">
+      <p class="eyebrow">Lesson 0012 · Security and Reliability</p>
+      <h2 class="chapter-title">Rate Limiting</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0012-section-1">The problem it solves</a><a href="#lesson-0012-section-2">How it works</a><a href="#lesson-0012-section-3">Main components</a><a href="#lesson-0012-section-4">Common algorithms</a><a href="#lesson-0012-section-5">Example 1: public login API</a><a href="#lesson-0012-section-6">Example 2: production cost spike from exports</a><a href="#lesson-0012-section-7">When to use it</a><a href="#lesson-0012-section-8">When not to rely on it alone</a><a href="#lesson-0012-section-9">Implementation considerations</a><a href="#lesson-0012-section-10">Security considerations</a><a href="#lesson-0012-section-11">Reliability concerns</a><a href="#lesson-0012-section-12">Performance and cost</a><a href="#lesson-0012-section-13">Key trade-offs</a><a href="#lesson-0012-section-14">Common mistakes and edge cases</a><a href="#lesson-0012-section-15">Connection to previous lessons</a><a href="#lesson-0012-section-16">Design exercise</a><a href="#lesson-0012-section-17">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0012"><p class="diagram-title" id="diagram-0012">Illustration 12: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Request</strong><span>Identify caller and operation</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Limit bucket</strong><span>Check budget / available tokens</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Decision</strong><span>Allow within budget; otherwise reject</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Allowed</strong><span>Execute bounded work</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Rejected</strong><span>Return 429; retry guidance when applicable</span></div></div><figcaption>The decision branches into execution or rejection. Limits across many app instances need coordinated accounting when a strict shared budget is required.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        Rate limiting controls how many requests or expensive actions a user,
+        client, IP address, tenant, or service can perform in a period of time.
+      </p>
+
+      <h3 id="lesson-0012-section-1">The problem it solves</h3>
+      <p>
+        APIs can be overloaded by mistakes, aggressive clients, crawlers, attacks,
+        or one large customer. Without limits, one caller can consume database CPU,
+        queue capacity, third-party API quota, email or SMS budget, and container
+        resources that other users need.
+      </p>
+      <p>
+        Rate limiting creates a controlled boundary. It does not make the system
+        infinitely scalable, but it prevents one caller from taking more than their
+        fair share and gives the platform time to recover.
+      </p>
+      <p class="flow">Request → Identify caller → Check limit bucket → Allow or reject → Record decision and metrics</p>
+
+      <h3 id="lesson-0012-section-2">How it works</h3>
+      <ol>
+        <li>The API identifies the caller using API key, user ID, tenant ID, IP address, or service identity.</li>
+        <li>The rate limiter checks how much quota that caller has used in a time window.</li>
+        <li>If quota remains, the request continues and usage is recorded.</li>
+        <li>If quota is exhausted, the API returns a clear rejection, commonly HTTP <code>429 Too Many Requests</code>.</li>
+        <li>The response may include retry guidance such as <code>Retry-After</code>.</li>
+      </ol>
+      <p>
+        Good rate limiting protects scarce resources, not only request count. A cheap
+        status check and a report export should not consume the same amount of quota.
+      </p>
+
+      <h3 id="lesson-0012-section-3">Main components</h3>
+      <ul>
+        <li><strong>Identity key:</strong> who the limit applies to, such as user, tenant, token, IP, or route.</li>
+        <li><strong>Limit rule:</strong> the allowed volume, such as 100 requests per minute.</li>
+        <li><strong>Algorithm:</strong> the counting method, such as fixed window, sliding window, token bucket, or leaky bucket.</li>
+        <li><strong>Storage:</strong> where counters or tokens are kept, often Redis or an API gateway.</li>
+        <li><strong>Response behavior:</strong> what the caller receives when limited.</li>
+        <li><strong>Observability:</strong> metrics and logs showing allowed, rejected, and near-limit traffic.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-4">Common algorithms</h3>
+      <ul>
+        <li><strong>Fixed window:</strong> simple counters per minute or hour; easy but can allow bursts at window boundaries.</li>
+        <li><strong>Sliding window:</strong> smoother counting over the last real interval; more accurate but more complex.</li>
+        <li><strong>Token bucket:</strong> tokens refill over time; supports controlled bursts while preserving average rate.</li>
+        <li><strong>Leaky bucket:</strong> requests drain at a steady rate; useful when downstream systems need smooth traffic.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-5">Example 1: public login API</h3>
+      <p>
+        A login endpoint is cheap when used normally but dangerous during credential
+        stuffing. The API limits failed login attempts by IP address, username, and
+        device fingerprint. After repeated failures, it slows or blocks attempts and
+        may require extra verification.
+      </p>
+      <p>
+        This protects user accounts and database capacity. The limit must be careful:
+        a shared office IP or mobile network can represent many real users, so the
+        design should combine multiple signals instead of blocking only by IP.
+      </p>
+
+      <h3 id="lesson-0012-section-6">Example 2: production cost spike from exports</h3>
+      <p>
+        An analytics SaaS product has an export endpoint that starts background CSV
+        jobs. One enterprise customer accidentally runs a script that starts 30,000
+        exports in an hour. Queue depth grows, object storage writes increase, email
+        notifications spike, and the data warehouse bill jumps.
+      </p>
+      <p>
+        A better design limits export creation by tenant and by user, uses a separate
+        quota for expensive exports, rejects excess requests with a clear retry time,
+        and exposes current quota in the UI. The system also alerts when one tenant
+        approaches a cost or job-creation threshold.
+      </p>
+
+      <h3 id="lesson-0012-section-7">When to use it</h3>
+      <ul>
+        <li>Any public API, login endpoint, webhook receiver, file upload, or export endpoint.</li>
+        <li>Endpoints that call paid third-party services such as SMS, email, maps, or AI APIs.</li>
+        <li>Multi-tenant systems where one tenant can affect others.</li>
+        <li>Background job creation endpoints that can flood queues.</li>
+        <li>Internal service-to-service APIs that need protection from retry storms.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-8">When not to rely on it alone</h3>
+      <ul>
+        <li>Rate limiting does not replace authentication, authorization, or input validation.</li>
+        <li>It does not fix slow queries, inefficient code, or missing pagination.</li>
+        <li>It does not stop distributed attacks unless limits are applied at the right layer.</li>
+        <li>It should not block critical internal recovery actions without a bypass plan.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-9">Implementation considerations</h3>
+      <ul>
+        <li>Limit by the right identity: user, tenant, API key, IP, route, or a combination.</li>
+        <li>Use different limits for cheap reads, expensive writes, exports, uploads, and login attempts.</li>
+        <li>Return helpful errors with <code>429</code>, retry timing, and documentation.</li>
+        <li>Keep counters in a fast shared store if many app instances enforce the same limit.</li>
+        <li>Use fail-open or fail-closed deliberately if the limiter storage is unavailable.</li>
+        <li>Add admin controls for temporary quota increases and emergency blocks.</li>
+        <li>Test clients to make sure they back off instead of retrying harder.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-10">Security considerations</h3>
+      <ul>
+        <li>Apply strict limits to authentication, password reset, invite, OTP, and token creation endpoints.</li>
+        <li>Do not trust headers such as <code>X-Forwarded-For</code> unless set by your trusted proxy.</li>
+        <li>Protect against quota bypass through multiple API keys, accounts, regions, or paths.</li>
+        <li>Keep rate-limit decisions auditable for abuse investigation.</li>
+        <li>Avoid revealing too much about account existence through different rate-limit messages.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-11">Reliability concerns</h3>
+      <ul>
+        <li>The limiter itself must be fast and highly available.</li>
+        <li>A centralized limiter can become a bottleneck if every request depends on it.</li>
+        <li>Retry storms can happen when many clients receive errors and retry at the same time.</li>
+        <li>Clock drift can affect window-based algorithms across distributed systems.</li>
+        <li>Bad limits can block real users during traffic spikes or incidents.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-12">Performance and cost</h3>
+      <p>
+        Rate limiting improves system stability by reducing overload before expensive
+        work starts. It can lower database load, queue backlog, storage writes, and
+        third-party service bills. The cost is extra infrastructure, storage lookups,
+        operational tuning, and occasional customer support when legitimate users hit
+        limits.
+      </p>
+
+      <h3 id="lesson-0012-section-13">Key trade-offs</h3>
+      <ul>
+        <li><strong>Protection vs usability:</strong> strict limits protect the system but can block legitimate bursts.</li>
+        <li><strong>Simplicity vs fairness:</strong> IP-based limits are simple but unfair for shared networks and weak against distributed clients.</li>
+        <li><strong>Central accuracy vs latency:</strong> a shared limiter is more consistent but adds a network dependency.</li>
+        <li><strong>Fail-open vs fail-closed:</strong> fail-open preserves availability, while fail-closed protects resources during limiter failures.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-14">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Using one global request limit for both cheap and expensive endpoints.</li>
+        <li>Forgetting tenant-level limits in a multi-tenant system.</li>
+        <li>Letting retries bypass limits and amplify an outage.</li>
+        <li>Applying limits after the expensive database query has already run.</li>
+        <li>Not telling clients when to retry, causing aggressive retry loops.</li>
+        <li>Blocking all users behind a shared NAT or corporate proxy.</li>
+        <li>Not monitoring near-limit traffic before users start failing.</li>
+      </ul>
+
+      <h3 id="lesson-0012-section-15">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0010">API pagination</a> bounds response size;
+        rate limiting bounds request frequency and expensive actions. <a href="#lesson-0011">Observability</a>
+        shows whether limits are protecting the system or hurting real users.
+        <a href="#lesson-0005">Message queues</a> need job creation limits
+        so producers do not overwhelm workers. <a href="#lesson-0004">Load balancing</a>
+        spreads traffic, but rate limiting decides whether traffic should be accepted
+        at all. <a href="#lesson-0007">Database indexes</a> make queries
+        faster, but limits prevent expensive query abuse.
+      </p>
+
+      <h3 id="lesson-0012-section-16">Design exercise</h3>
+      <p class="prompt">
+        You run a public API with login, search, file upload, and report export
+        endpoints. Design a rate-limit plan: what identity keys would you use, which
+        endpoints need separate limits, what happens when Redis is down, what response
+        do clients receive, and which metrics prove the limits are working?
+      </p>
+
+      <h3 id="lesson-0012-section-17">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/">
+          OWASP API Security: Unrestricted Resource Consumption
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0011">Previous lesson</a><a href="#lesson-0013">Next lesson</a></nav></article><article id="lesson-0013" aria-label="Circuit Breakers">
+      <p class="eyebrow">Lesson 0013 · Reliability</p>
+      <h2 class="chapter-title">Circuit Breakers</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0013-section-1">The problem it solves</a><a href="#lesson-0013-section-2">How it works</a><a href="#lesson-0013-section-3">Main components</a><a href="#lesson-0013-section-4">Example 1: payment provider outage</a><a href="#lesson-0013-section-5">Example 2: production cascading failure</a><a href="#lesson-0013-section-6">When to use it</a><a href="#lesson-0013-section-7">When not to use it</a><a href="#lesson-0013-section-8">Implementation considerations</a><a href="#lesson-0013-section-9">Security considerations</a><a href="#lesson-0013-section-10">Reliability concerns</a><a href="#lesson-0013-section-11">Performance and cost</a><a href="#lesson-0013-section-12">Key trade-offs</a><a href="#lesson-0013-section-13">Common mistakes and edge cases</a><a href="#lesson-0013-section-14">Connection to previous lessons</a><a href="#lesson-0013-section-15">Design exercise</a><a href="#lesson-0013-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0013"><p class="diagram-title" id="diagram-0013">Illustration 13: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Closed</strong><span>Call dependency normally</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Failure threshold reached</strong><span>Open the circuit</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Open</strong><span>Reject calls quickly / safe fallback</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>After cooldown</strong><span>Permit limited trial calls</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Half-open</strong><span>Success: close; failure: reopen</span></div></div><figcaption>The breaker uses recent failures to change state. Half-open probes test recovery; a fallback must preserve business correctness, especially for payment operations.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        A circuit breaker stops calling a dependency that is failing, waits for a
+        recovery period, then carefully tests whether the dependency is healthy again.
+      </p>
+
+      <h3 id="lesson-0013-section-1">The problem it solves</h3>
+      <p>
+        Distributed systems depend on other services: databases, payment providers,
+        search APIs, queues, email providers, and internal microservices. When one
+        dependency becomes slow or fails, callers often retry. Those retries can make
+        the failing dependency even worse and consume all caller resources.
+      </p>
+      <p>
+        A circuit breaker prevents this cascading failure. After enough failures, it
+        temporarily fails fast instead of sending more traffic to a dependency that
+        probably cannot handle it.
+      </p>
+      <p class="flow">Request → Circuit breaker → Healthy dependency: call it · Failing dependency: fail fast / fallback</p>
+
+      <h3 id="lesson-0013-section-2">How it works</h3>
+      <ol>
+        <li><strong>Closed:</strong> calls flow normally while the dependency is healthy.</li>
+        <li><strong>Failure tracking:</strong> the breaker counts errors, timeouts, or slow responses.</li>
+        <li><strong>Open:</strong> after a threshold is crossed, calls fail fast without hitting the dependency.</li>
+        <li><strong>Cooldown:</strong> the breaker waits for a configured recovery period.</li>
+        <li><strong>Half-open:</strong> a small number of test calls are allowed.</li>
+        <li><strong>Recover or reopen:</strong> if test calls succeed, the breaker closes; if they fail, it opens again.</li>
+      </ol>
+      <p>
+        The core idea is simple: when a dependency is clearly unhealthy, stop adding
+        pressure. Give it time to recover and protect the rest of your system.
+      </p>
+
+      <h3 id="lesson-0013-section-3">Main components</h3>
+      <ul>
+        <li><strong>Failure threshold:</strong> how many failures or what error rate opens the breaker.</li>
+        <li><strong>Timeout:</strong> how long the caller waits before treating the call as failed.</li>
+        <li><strong>Open duration:</strong> how long the breaker fails fast before testing recovery.</li>
+        <li><strong>Half-open probes:</strong> limited test calls used to check if the dependency recovered.</li>
+        <li><strong>Fallback:</strong> a safe alternate response, cached result, queue, or graceful error.</li>
+        <li><strong>Metrics:</strong> breaker state, rejected calls, dependency latency, and failure rate.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-4">Example 1: payment provider outage</h3>
+      <p>
+        A checkout service calls a payment provider. Normally the provider responds
+        in 300 ms. During an outage, calls hang for 10 seconds and then fail. Without
+        a circuit breaker, checkout containers fill with waiting requests, users retry,
+        and the whole checkout API becomes slow.
+      </p>
+      <p>
+        With a circuit breaker, the checkout service opens the breaker after repeated
+        failures. New payment attempts fail fast with a clear temporary error. The app
+        can offer &quot;try again later&quot; or save the order as pending payment. The payment
+        provider gets less traffic while it recovers.
+      </p>
+
+      <h3 id="lesson-0013-section-5">Example 2: production cascading failure</h3>
+      <p>
+        A recommendation service depends on a profile service. At peak traffic, the
+        profile service starts timing out because a database read replica is overloaded.
+        The recommendation service receives 8,000 requests per second and retries each
+        profile call twice. That turns 8,000 failing calls into 24,000 calls per second.
+      </p>
+      <p>
+        The circuit breaker opens when the profile-service failure rate stays above
+        50% for one minute. Recommendation responses fall back to popular items instead
+        of personalized items. User experience is degraded, but the site stays up and
+        the profile service has room to recover.
+      </p>
+
+      <h3 id="lesson-0013-section-6">When to use it</h3>
+      <ul>
+        <li>A service calls a remote dependency that can fail or become slow.</li>
+        <li>Retries could overload the dependency or caller.</li>
+        <li>A fallback response is safer than waiting for a doomed request.</li>
+        <li>The dependency is shared by many callers and needs protection.</li>
+        <li>You want failures to be contained instead of spreading across the system.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-7">When not to use it</h3>
+      <ul>
+        <li>The operation is local, fast, and not likely to cause cascading failure.</li>
+        <li>Failing fast would be worse than waiting, such as a critical one-time admin action.</li>
+        <li>You have no safe fallback and the error would be confusing without product handling.</li>
+        <li>The real issue is missing timeouts; set timeouts before tuning circuit breakers.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Set short, explicit timeouts for every remote call before adding retries or breakers.</li>
+        <li>Track failures by dependency and operation, not only globally by service.</li>
+        <li>Use bounded retries with jitter so callers do not retry in synchronized waves.</li>
+        <li>Choose fallbacks carefully: cached data, default response, queued work, or clear failure.</li>
+        <li>Expose breaker state in metrics and dashboards.</li>
+        <li>Make half-open probes small so recovery checks do not create another traffic spike.</li>
+        <li>Test dependency failure in staging or controlled production experiments.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-9">Security considerations</h3>
+      <ul>
+        <li>Do not bypass authorization or fraud checks as a fallback unless the business has approved that risk.</li>
+        <li>Do not expose internal dependency names, hostnames, or stack details in user-facing errors.</li>
+        <li>Be careful with cached fallback data; stale data can leak revoked permissions or old personal data.</li>
+        <li>Protect breaker controls because forcing breakers open or closed can affect availability.</li>
+        <li>Log enough to investigate incidents, but avoid logging secrets from failed dependency calls.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-10">Reliability concerns</h3>
+      <ul>
+        <li>A breaker threshold that is too sensitive can block healthy traffic during brief blips.</li>
+        <li>A threshold that is too loose can allow cascading failure before opening.</li>
+        <li>Fallbacks can become overloaded if every request suddenly uses them.</li>
+        <li>Half-open recovery can cause traffic bursts if too many instances test at once.</li>
+        <li>Different app instances may disagree on breaker state unless you design for shared or local state intentionally.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-11">Performance and cost</h3>
+      <p>
+        Circuit breakers reduce wasted work during failures. They save caller threads,
+        database connections, queue capacity, network calls, and third-party API
+        costs. The cost is added complexity: thresholds, fallback behavior, testing,
+        dashboards, and product decisions for degraded states.
+      </p>
+
+      <h3 id="lesson-0013-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Availability vs completeness:</strong> fallback responses keep the app usable but may be less complete.</li>
+        <li><strong>Fast failure vs user success:</strong> failing fast protects systems but may reject requests that could have eventually succeeded.</li>
+        <li><strong>Local state vs shared state:</strong> local breakers are simple, but shared breakers coordinate better across many instances.</li>
+        <li><strong>Protection vs false positives:</strong> aggressive thresholds prevent overload but can open during short harmless spikes.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Adding retries without timeouts or circuit breakers.</li>
+        <li>Retrying non-idempotent operations, such as payments, without idempotency keys.</li>
+        <li>Using the same breaker for cheap and expensive operations.</li>
+        <li>Opening the breaker on all errors, including client errors like HTTP 400.</li>
+        <li>Creating a fallback that quietly returns wrong business data.</li>
+        <li>Not alerting when a breaker opens, so degraded mode becomes invisible.</li>
+        <li>Letting every instance half-open at the same time and flood the dependency.</li>
+      </ul>
+
+      <h3 id="lesson-0013-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0012">Rate limiting</a> protects your system from
+        too much incoming traffic; circuit breakers protect it from failing outgoing
+        dependencies. <a href="#lesson-0011">Observability</a> is required
+        to tune breaker thresholds and know when fallback mode is active.
+        <a href="#lesson-0005">Message queues</a> can be a fallback for
+        work that can finish later. <a href="#lesson-0001">Cache-aside</a>
+        can provide stale-but-safe fallback reads. <a href="#lesson-0008">Eventual consistency</a>
+        helps explain why fallback data may be temporarily stale.
+      </p>
+
+      <h3 id="lesson-0013-section-15">Design exercise</h3>
+      <p class="prompt">
+        Your checkout API calls payment, inventory, tax, and email services. Payment
+        must be correct, inventory should be current, tax can retry briefly, and email
+        can happen later. Design circuit breaker rules: timeout, failure threshold,
+        fallback behavior, retry policy, and the alerts you would create for each dependency.
+      </p>
+
+      <h3 id="lesson-0013-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker">
+          Microsoft Azure Architecture Center: Circuit Breaker Pattern
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0012">Previous lesson</a><a href="#lesson-0014">Next lesson</a></nav></article><article id="lesson-0014" aria-label="Cost-Aware Architecture">
+      <p class="eyebrow">Lesson 0014 · Cost Optimization</p>
+      <h2 class="chapter-title">Cost-Aware Architecture</h2><nav class="chapter-map" aria-label="Lesson sections"><a href="#lesson-0014-section-1">The problem it solves</a><a href="#lesson-0014-section-2">How it works</a><a href="#lesson-0014-section-3">Main components</a><a href="#lesson-0014-section-4">Example 1: expensive report endpoint</a><a href="#lesson-0014-section-5">Example 2: production bill spike</a><a href="#lesson-0014-section-6">When to use it</a><a href="#lesson-0014-section-7">When not to over-optimize</a><a href="#lesson-0014-section-8">Implementation considerations</a><a href="#lesson-0014-section-9">Security considerations</a><a href="#lesson-0014-section-10">Reliability concerns</a><a href="#lesson-0014-section-11">Performance and cost</a><a href="#lesson-0014-section-12">Key trade-offs</a><a href="#lesson-0014-section-13">Common mistakes and edge cases</a><a href="#lesson-0014-section-14">Connection to previous lessons</a><a href="#lesson-0014-section-15">Design exercise</a><a href="#lesson-0014-section-16">Primary source</a></nav><figure class="diagram" aria-labelledby="diagram-0014"><p class="diagram-title" id="diagram-0014">Illustration 14: components and behavior</p><div class="diagram-row"><div class="diagram-node"><strong>Workload</strong><span>Completed reports / requests</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Allocated cost</strong><span>Compute + storage + transfer</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Unit cost</strong><span>Allocated cost / completed units</span></div></div><div class="diagram-row"><div class="diagram-node"><strong>Design change</strong><span>Reduce unnecessary work</span></div><span class="diagram-arrow" aria-hidden="true">&#8594;</span><div class="diagram-node"><strong>Measure again</strong><span>Check cost AND latency / reliability</span></div></div><figcaption>Compare cost per useful outcome, rather than only the total bill. A cheaper design can lose its advantage if it increases errors, delays, or operational effort.</figcaption></figure><p class="source-note">Original teaching illustration. Numerical scenarios in these lessons are illustrative, not reported company incidents. Primary sources appear at the end of each chapter.</p>
+      <p class="muted">
+        Cost-aware architecture means designing systems so cost is visible, bounded,
+        and connected to business value, not treated as a surprise after deployment.
+      </p>
+
+      <h3 id="lesson-0014-section-1">The problem it solves</h3>
+      <p>
+        Cloud systems can scale quickly, but bills can scale just as quickly. A slow
+        query may require bigger databases. An unbounded API may transfer huge data.
+        A queue backlog may create thousands of workers. A verbose logging setup may
+        store terabytes of data nobody reads.
+      </p>
+      <p>
+        Cost-aware architecture gives engineers a practical question: what does it
+        cost to serve one user action, one tenant, one API request, one order, one
+        export, or one background job?
+      </p>
+      <p class="flow">Traffic / workload → Resources used → Cost allocation → Unit cost → Architecture decision</p>
+
+      <h3 id="lesson-0014-section-2">How it works</h3>
+      <ol>
+        <li>Choose the business unit you care about, such as cost per order or cost per tenant.</li>
+        <li>Measure the resources used by that unit: compute, database, cache, storage, network, logs, and third-party APIs.</li>
+        <li>Tag or group infrastructure so cost can be traced to services, teams, environments, and customers.</li>
+        <li>Set budgets and alerts for unexpected growth.</li>
+        <li>Optimize the biggest cost drivers without breaking reliability, security, or user experience.</li>
+        <li>Repeat as traffic, pricing, and architecture change.</li>
+      </ol>
+      <p>
+        The goal is not always the lowest bill. The goal is the lowest responsible
+        cost for the required reliability, performance, security, and product value.
+      </p>
+
+      <h3 id="lesson-0014-section-3">Main components</h3>
+      <ul>
+        <li><strong>Unit cost:</strong> cost per useful business unit, such as request, signup, order, invoice, or tenant.</li>
+        <li><strong>Cost allocation:</strong> tags, labels, accounts, projects, or namespaces that connect spend to ownership.</li>
+        <li><strong>Demand management:</strong> reducing unnecessary work through caching, pagination, batching, and limits.</li>
+        <li><strong>Supply management:</strong> matching capacity to demand with autoscaling, right-sizing, and scheduling.</li>
+        <li><strong>Pricing model:</strong> choosing on-demand, reserved, spot, serverless, or managed services deliberately.</li>
+        <li><strong>Review loop:</strong> regular cost review, anomaly alerts, and architecture follow-up.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-4">Example 1: expensive report endpoint</h3>
+      <p>
+        A report endpoint costs very little for small customers but becomes expensive
+        for enterprise tenants. Each request scans millions of rows, generates a PDF,
+        stores a file, and writes detailed logs. The team first thinks it needs a
+        larger database.
+      </p>
+      <p>
+        A cost-aware review shows the real issue: users repeatedly generate the same
+        report. The team adds caching for completed reports, uses pagination for
+        interactive views, and moves large exports to a queue. The database upgrade
+        is delayed because repeated work is removed.
+      </p>
+
+      <h3 id="lesson-0014-section-5">Example 2: production bill spike</h3>
+      <p>
+        A media app launches a new image-processing feature. One viral customer uploads
+        2 million images in a weekend. Autoscaling works correctly, but compute cost
+        rises 7x, object storage writes increase sharply, and observability cost grows
+        because every processing step logs a large JSON payload.
+      </p>
+      <p>
+        The team introduces per-tenant quotas, cheaper lifecycle storage for originals,
+        batch processing for low-priority transformations, log sampling for successful
+        jobs, and alerts on cost per processed image. The feature stays available, but
+        cost now grows closer to business value.
+      </p>
+
+      <h3 id="lesson-0014-section-6">When to use it</h3>
+      <ul>
+        <li>A workload is growing and infrastructure cost is becoming material.</li>
+        <li>A feature uses expensive resources such as data warehouses, AI APIs, SMS, storage, or high network transfer.</li>
+        <li>You operate a multi-tenant SaaS product where one customer can drive disproportionate cost.</li>
+        <li>You need to choose between scaling up, scaling out, caching, batching, or redesigning a flow.</li>
+        <li>You want engineering teams to own cost as part of production quality.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-7">When not to over-optimize</h3>
+      <ul>
+        <li>The service is early-stage and cost is tiny compared with product learning speed.</li>
+        <li>Optimization would add complexity that increases operational risk.</li>
+        <li>The savings are smaller than the engineering time required to achieve them.</li>
+        <li>The change would weaken security, reliability, or customer experience.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-8">Implementation considerations</h3>
+      <ul>
+        <li>Tag resources by service, environment, owner, and tenant tier where possible.</li>
+        <li>Track unit cost for key flows: signup, checkout, report, search, export, and background job.</li>
+        <li>Set budgets and anomaly alerts before the system grows.</li>
+        <li>Right-size databases, containers, queues, and caches using real utilization metrics.</li>
+        <li>Use autoscaling carefully; it solves capacity but can hide runaway demand.</li>
+        <li>Move expensive synchronous work to async jobs when the user does not need an immediate result.</li>
+        <li>Review observability retention, high-cardinality labels, and verbose logs regularly.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-9">Security considerations</h3>
+      <ul>
+        <li>Do not cut security controls just to lower cost.</li>
+        <li>Protect billing dashboards and cost allocation data because they reveal architecture and customer behavior.</li>
+        <li>Set quotas for abuse-prone paid actions such as SMS, email, AI calls, exports, and file processing.</li>
+        <li>Use least privilege for cost tools that can modify budgets, resources, or reservations.</li>
+        <li>Keep audit logs for cost-impacting admin actions like quota increases and resource changes.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-10">Reliability concerns</h3>
+      <ul>
+        <li>Aggressive downscaling can cause cold starts, queue delays, or failed requests.</li>
+        <li>Spot or interruptible capacity can save money but needs graceful interruption handling.</li>
+        <li>Reserved capacity can lower cost but may become waste if architecture changes.</li>
+        <li>Deleting &quot;unused&quot; resources without ownership review can break disaster recovery or audits.</li>
+        <li>Cost alerts should be actionable; noisy alerts get ignored like noisy reliability alerts.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-11">Performance and cost</h3>
+      <p>
+        Cost and performance are connected. Faster queries often use less CPU and I/O.
+        Smaller responses reduce bandwidth and client work. Better caching reduces
+        database pressure. But some cost reductions can hurt performance, such as
+        under-provisioning a database or moving too much work to slow cold-start paths.
+        Optimize with measurements, not guesses.
+      </p>
+
+      <h3 id="lesson-0014-section-12">Key trade-offs</h3>
+      <ul>
+        <li><strong>Lower cost vs simpler operations:</strong> managed services cost more directly but can reduce engineering burden.</li>
+        <li><strong>On-demand flexibility vs committed discounts:</strong> commitments reduce price but reduce flexibility.</li>
+        <li><strong>Autoscaling vs budget predictability:</strong> autoscaling protects availability but can grow spend quickly.</li>
+        <li><strong>Retention vs investigation depth:</strong> shorter telemetry retention saves money but limits incident analysis.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-13">Common mistakes and edge cases</h3>
+      <ul>
+        <li>Optimizing the largest bill line without checking unit cost or business value.</li>
+        <li>Ignoring network egress, logs, backups, snapshots, and third-party API fees.</li>
+        <li>Letting dev, staging, and preview environments run like production all weekend.</li>
+        <li>Using autoscaling without quotas, budgets, or anomaly alerts.</li>
+        <li>Buying commitments before workload patterns are stable.</li>
+        <li>Reducing observability so much that incidents become harder and more expensive.</li>
+        <li>Making one customer&#x27;s heavy workload subsidized by all other tenants.</li>
+      </ul>
+
+      <h3 id="lesson-0014-section-14">Connection to previous lessons</h3>
+      <p>
+        <a href="#lesson-0001">Cache-aside</a> can reduce repeated database
+        work. <a href="#lesson-0010">API pagination</a> reduces network
+        and database cost per request. <a href="#lesson-0012">Rate limiting</a>
+        protects against runaway usage. <a href="#lesson-0011">Observability</a>
+        gives the measurements needed for unit cost. <a href="#lesson-0009">Containerization</a>
+        and <a href="#lesson-0002">horizontal scaling</a> make capacity
+        flexible, but flexible capacity still needs cost guardrails.
+      </p>
+
+      <h3 id="lesson-0014-section-15">Design exercise</h3>
+      <p class="prompt">
+        You run a SaaS analytics product. One dashboard request reads from Postgres,
+        Redis, object storage, and a data warehouse. Define the unit cost you would
+        track, the resource tags you need, three cost metrics, two budget alerts, and
+        one architecture change you would try before buying a bigger database.
+      </p>
+
+      <h3 id="lesson-0014-section-16">Primary source</h3>
+      <p>
+        Read:
+        <a href="https://docs.aws.amazon.com/wellarchitected/latest/cost-optimization-pillar/welcome.html">
+          AWS Well-Architected Framework: Cost Optimization Pillar
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    <nav class="chapter-nav" aria-label="Chapter navigation"><a href="#contents">Contents</a><a href="#topic-index">Topic index</a><a href="#lesson-0013">Previous lesson</a></nav></article></main></div></body></html>

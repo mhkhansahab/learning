@@ -1,0 +1,386 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Skill Optimization</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-12"><h1><span class="chapter-number">Lesson 12</span> Skill Optimization</h1><div class="meta"><time datetime="2026-07-07">2026-07-07</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-12-section-1">1. What It Means</a></li><li><a href="#lesson-12-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-12-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-12-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-12-section-5">5. Real-World Example 1: Pull Request Review Skill</a></li><li><a href="#lesson-12-section-6">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-12-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-12-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-12-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Skill Optimization workflow"><ol class="flow"><li><strong>Failures</strong><span>Collect real examples</span></li><li><strong>Diagnose</strong><span>Find the workflow weakness</span></li><li><strong>Improve</strong><span>Change the relevant skill step</span></li><li><strong>Compare</strong><span>Test quality, cost and safety</span></li></ol><figcaption>Figure 12. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-12-section-1">1. What It Means</h2>
+<p><strong>Skill optimization</strong> means improving an AI agent skill so it works better, more safely, and more consistently over time.</p>
+<p>An <strong>agent skill</strong> is a reusable workflow that tells an AI agent how to do a specific task.</p>
+<p>Example:</p>
+<pre><code class="language-text">Skill: Review a pull request
+Skill: Triage a support ticket
+Skill: Diagnose a deployment failure
+Skill: Summarize a sales call
+</code></pre>
+<p>Skill optimization is what you do after the first version exists.</p>
+<p>Simple meaning:</p>
+<blockquote>
+<p>Skill optimization is the process of finding where an agent skill fails, then improving its instructions, tools, examples, checks, and limits.</p>
+</blockquote>
+<p>You are not just “making the prompt better.”</p>
+<p>You may improve:</p>
+<ul>
+<li>Trigger rules</li>
+<li>Workflow steps</li>
+<li>Tool choices</li>
+<li>Output format</li>
+<li>Examples</li>
+<li>Guardrails</li>
+<li>Evaluation tests</li>
+<li>Memory usage</li>
+<li>Stop conditions</li>
+<li>Error handling</li>
+<li>Human approval rules</li>
+</ul>
+<p>This is related to a broader idea in AI systems: optimizing language model pipelines against measurable outcomes instead of relying only on manual prompt trial and error. A useful research source is the DSPy paper: <a href="https://arxiv.org/abs/2310.03714">https://arxiv.org/abs/2310.03714</a></p>
+<hr>
+<h2 id="lesson-12-section-2">2. Why It Matters In Production Systems</h2>
+<p>A skill may work well in simple demos but fail with real users.</p>
+<p>Real users send messy requests.</p>
+<p>They provide missing data, mixed goals, unclear language, private information, and edge cases.</p>
+<p>Without optimization, an agent skill may:</p>
+<ul>
+<li>Trigger at the wrong time</li>
+<li>Use the wrong tool</li>
+<li>Skip an important check</li>
+<li>Return inconsistent output</li>
+<li>Ask too many questions</li>
+<li>Fail silently</li>
+<li>Take unsafe actions</li>
+<li>Cost too much</li>
+<li>Produce answers that are hard to review</li>
+</ul>
+<p>In production, the first version of a skill is rarely the final version.</p>
+<p>A good team treats skills like software:</p>
+<ul>
+<li>Version them</li>
+<li>Test them</li>
+<li>Monitor them</li>
+<li>Improve them</li>
+<li>Roll back bad changes</li>
+</ul>
+<p>The key idea:</p>
+<blockquote>
+<p>A skill should improve from real failures, not from guesswork.</p>
+</blockquote>
+<hr>
+<h2 id="lesson-12-section-3">3. How It Works Step By Step</h2>
+<p>Imagine you have a skill called:</p>
+<pre><code class="language-text">support-ticket-triage
+</code></pre>
+<p>Its job is to classify support tickets by category and priority.</p>
+<p>Optimization may work like this:</p>
+<ol>
+<li><p><strong>Collect real failures</strong></p>
+<p>Example failure:</p>
+<pre><code class="language-text">Ticket: &quot;I can see another customer&#39;s invoice.&quot;
+Agent output: category = billing, priority = medium
+Correct output: category = security, priority = critical
+</code></pre>
+</li>
+<li><p><strong>Identify the failure type</strong></p>
+<p>Ask:</p>
+<ul>
+<li>Was the trigger wrong?</li>
+<li>Was the instruction unclear?</li>
+<li>Was an example missing?</li>
+<li>Was the tool result bad?</li>
+<li>Was the output format weak?</li>
+<li>Was a guardrail missing?</li>
+</ul>
+</li>
+<li><p><strong>Improve the skill</strong></p>
+<p>Add a rule:</p>
+<pre><code class="language-text">If the ticket mentions seeing another user&#39;s data, leaked data, account takeover, or credentials, classify as security and critical.
+</code></pre>
+</li>
+<li><p><strong>Add a test case</strong></p>
+<p>Add the failed ticket to the evaluation set.</p>
+</li>
+<li><p><strong>Run old and new versions</strong></p>
+<p>Compare:</p>
+<ul>
+<li>Did the new version fix the failure?</li>
+<li>Did it break other cases?</li>
+<li>Did cost or latency increase?</li>
+</ul>
+</li>
+<li><p><strong>Deploy gradually</strong></p>
+<p>Start with a small percentage of traffic or internal users.</p>
+</li>
+<li><p><strong>Monitor results</strong></p>
+<p>Track:</p>
+<ul>
+<li>Accuracy</li>
+<li>Escalation rate</li>
+<li>Invalid output rate</li>
+<li>Tool failure rate</li>
+<li>Cost</li>
+<li>Latency</li>
+<li>Human correction rate</li>
+</ul>
+</li>
+<li><p><strong>Repeat</strong></p>
+<p>Optimization is a loop.</p>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-12-section-4">4. How To Apply It In A Project</h2>
+<p>Use a structured optimization process.</p>
+<p>Start with one skill.</p>
+<p>Example:</p>
+<pre><code class="language-text">Skill: refund-request-review
+</code></pre>
+<p>Then create a simple scorecard.</p>
+<pre><code class="language-text">Metric 1: Correct policy retrieval
+Metric 2: Correct refund eligibility decision
+Metric 3: No private data leak
+Metric 4: Correct output format
+Metric 5: Human approval requested when required
+</code></pre>
+<p>Then collect examples:</p>
+<pre><code class="language-json">{
+  &quot;input&quot;: &quot;Customer wants refund for damaged item after opening package.&quot;,
+  &quot;expected&quot;: {
+    &quot;retrieve&quot;: [&quot;damaged_item_policy&quot;],
+    &quot;decision&quot;: &quot;eligible_for_review&quot;,
+    &quot;approval_required&quot;: false
+  }
+}
+</code></pre>
+<p>Improve the skill only when you know what failed.</p>
+<p>Common optimization levers:</p>
+<p><strong>Improve trigger</strong></p>
+<p>Bad:</p>
+<pre><code class="language-text">Use this skill for support.
+</code></pre>
+<p>Better:</p>
+<pre><code class="language-text">Use this skill when the user asks whether a customer refund should be approved, rejected, or escalated.
+</code></pre>
+<p><strong>Improve steps</strong></p>
+<p>Add missing workflow steps.</p>
+<p>Example:</p>
+<pre><code class="language-text">1. Check order ownership.
+2. Retrieve refund policy.
+3. Check return window.
+4. Check product category.
+5. Detect fraud risk.
+6. Decide approval, rejection, or escalation.
+</code></pre>
+<p><strong>Improve examples</strong></p>
+<p>Add edge cases.</p>
+<p>Example:</p>
+<pre><code class="language-text">Opened item but damaged on arrival -&gt; eligible for review.
+Opened item with no damage -&gt; maybe not eligible.
+High-value refund -&gt; manager approval required.
+</code></pre>
+<p><strong>Improve checks</strong></p>
+<p>Add final validation.</p>
+<p>Example:</p>
+<pre><code class="language-text">Before final answer, verify that the decision is supported by a policy and order data.
+</code></pre>
+<hr>
+<h2 id="lesson-12-section-5">5. Real-World Example 1: Pull Request Review Skill</h2>
+<p><strong>Use case:</strong> A software team uses an AI agent to review pull requests.</p>
+<p><strong>Initial skill behavior:</strong></p>
+<p>The agent comments on style issues:</p>
+<pre><code class="language-text">Consider renaming this variable.
+</code></pre>
+<p>But it misses real risks:</p>
+<ul>
+<li>Missing authorization check</li>
+<li>Race condition</li>
+<li>Payment double-submit bug</li>
+<li>No test for a critical path</li>
+</ul>
+<p><strong>Failure example:</strong></p>
+<p>A PR changes this route:</p>
+<pre><code class="language-text">POST /admin/users/delete
+</code></pre>
+<p>The AI says:</p>
+<pre><code class="language-text">Looks good. Maybe rename deleteUser to removeUser.
+</code></pre>
+<p>But the route forgot to check whether the caller is an admin.</p>
+<p><strong>Optimization:</strong></p>
+<p>Update the skill:</p>
+<pre><code class="language-text">Review priority:
+1. Security and authorization bugs
+2. Data loss or payment risk
+3. Behavioral regressions
+4. Missing tests for changed behavior
+5. Maintainability issues only if meaningful
+</code></pre>
+<p>Add a checklist:</p>
+<pre><code class="language-text">For every API route change, check authentication, authorization, input validation, and audit logging.
+</code></pre>
+<p>Add an evaluation case:</p>
+<pre><code class="language-text">Input: PR adds admin delete route without role check.
+Expected finding: High severity authorization bug.
+</code></pre>
+<p><strong>Outcome:</strong></p>
+<p>The skill now focuses on production risk, not cosmetic feedback.</p>
+<hr>
+<h2 id="lesson-12-section-6">6. Real-World Example 2: Sales Call Summary Skill</h2>
+<p><strong>Use case:</strong> A sales team uses an AI agent to summarize call transcripts.</p>
+<p><strong>Initial skill behavior:</strong></p>
+<p>The summary sounds nice but misses important CRM fields.</p>
+<p>Example input:</p>
+<pre><code class="language-text">Customer wants migration done before September. Budget is approved. Legal review is the blocker. Sarah is final decision maker.
+</code></pre>
+<p>Bad output:</p>
+<pre><code class="language-text">The customer is interested and wants to continue the discussion.
+</code></pre>
+<p>This is too vague.</p>
+<p><strong>Optimization:</strong></p>
+<p>Update the skill output format:</p>
+<pre><code class="language-json">{
+  &quot;decision_maker&quot;: &quot;...&quot;,
+  &quot;budget_status&quot;: &quot;...&quot;,
+  &quot;timeline&quot;: &quot;...&quot;,
+  &quot;main_pain_point&quot;: &quot;...&quot;,
+  &quot;blocker&quot;: &quot;...&quot;,
+  &quot;next_step&quot;: &quot;...&quot;,
+  &quot;crm_risk&quot;: &quot;low | medium | high&quot;
+}
+</code></pre>
+<p>Add rules:</p>
+<pre><code class="language-text">If legal review is mentioned, include it as a blocker.
+If a timeline is mentioned, extract the date or month.
+If budget is approved, do not say budget is unknown.
+</code></pre>
+<p>Add examples:</p>
+<pre><code class="language-json">{
+  &quot;input&quot;: &quot;Budget is approved but legal is blocking.&quot;,
+  &quot;expected&quot;: {
+    &quot;budget_status&quot;: &quot;approved&quot;,
+    &quot;blocker&quot;: &quot;legal review&quot;
+  }
+}
+</code></pre>
+<p><strong>Outcome:</strong></p>
+<p>The skill produces structured CRM data that sales managers can search and report on.</p>
+<hr>
+<h2 id="lesson-12-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<p><strong>Mistake 1: Optimizing from one example only</strong></p>
+<p>One failure matters, but do not overfit.</p>
+<p><strong>Overfitting</strong> means improving for one case while making general behavior worse.</p>
+<p>Fix:</p>
+<pre><code class="language-text">Add the failed case to the test set, then run all important cases.
+</code></pre>
+<p><strong>Mistake 2: Making the skill too long</strong></p>
+<p>Adding every rule can make the skill hard for the model to follow.</p>
+<p>Fix:</p>
+<ul>
+<li>Keep core workflow short</li>
+<li>Move detailed policy to retrieval</li>
+<li>Use examples for edge cases</li>
+<li>Split broad skills into smaller skills</li>
+</ul>
+<p><strong>Mistake 3: No measurable target</strong></p>
+<p>Bad:</p>
+<pre><code class="language-text">Make it better.
+</code></pre>
+<p>Better:</p>
+<pre><code class="language-text">Reduce invalid JSON from 8% to below 1%.
+Increase correct priority classification from 75% to 90%.
+</code></pre>
+<p><strong>Mistake 4: Ignoring tool failures</strong></p>
+<p>Sometimes the skill is fine, but the tool is bad.</p>
+<p>Example:</p>
+<ul>
+<li>Search tool returns old policy</li>
+<li>CRM tool misses latest notes</li>
+<li>Calendar tool times out</li>
+</ul>
+<p>Do not fix the prompt when the tool is the problem.</p>
+<p><strong>Mistake 5: Optimizing only for accuracy</strong></p>
+<p>Production also cares about:</p>
+<ul>
+<li>Cost</li>
+<li>Latency</li>
+<li>Safety</li>
+<li>User trust</li>
+<li>Maintainability</li>
+</ul>
+<p><strong>Trade-off: More rules vs more flexibility</strong></p>
+<p>More rules can improve consistency.</p>
+<p>But too many rules can make the agent rigid or confused.</p>
+<p>A good skill is clear enough to guide behavior but not so crowded that it becomes hard to follow.</p>
+<hr>
+<h2 id="lesson-12-section-8">8. Practical Best Practices</h2>
+<ol>
+<li><p><strong>Keep a failure log</strong></p>
+<p>Store real failures with:</p>
+<ul>
+<li>Input</li>
+<li>Actual output</li>
+<li>Expected output</li>
+<li>Failure type</li>
+<li>Root cause</li>
+<li>Fix</li>
+</ul>
+</li>
+<li><p><strong>Group failures by pattern</strong></p>
+<p>Example groups:</p>
+<ul>
+<li>Wrong trigger</li>
+<li>Missing rule</li>
+<li>Bad retrieval</li>
+<li>Tool failure</li>
+<li>Unsafe action</li>
+<li>Wrong output format</li>
+</ul>
+</li>
+<li><p><strong>Use evals before changing production</strong></p>
+<p>Every skill improvement should be tested.</p>
+</li>
+<li><p><strong>Version skills</strong></p>
+<p>Example:</p>
+<pre><code class="language-text">refund-review-v1
+refund-review-v2
+refund-review-v3
+</code></pre>
+</li>
+<li><p><strong>Prefer small changes</strong></p>
+<p>Change one thing at a time when possible.</p>
+</li>
+<li><p><strong>Add examples for edge cases</strong></p>
+<p>Especially for cases the model keeps missing.</p>
+</li>
+<li><p><strong>Measure cost and latency</strong></p>
+<p>A better skill that is 4x slower may not be acceptable.</p>
+</li>
+<li><p><strong>Separate policy from workflow</strong></p>
+<p>The skill should say how to work.</p>
+<p>Retrieval or tools should provide current policy.</p>
+</li>
+<li><p><strong>Add final self-checks</strong></p>
+<p>Example:</p>
+<pre><code class="language-text">Before final answer, confirm the output follows the required schema and any risky action has approval.
+</code></pre>
+</li>
+<li><p><strong>Review with domain experts</strong></p>
+</li>
+</ol>
+<p>   For legal, finance, medical, security, or compliance workflows, expert review is required.</p>
+<hr>
+<h2 id="lesson-12-section-9">9. Small Practice Exercise</h2>
+<p>Imagine you have a skill called:</p>
+<pre><code class="language-text">deployment-failure-diagnosis
+</code></pre>
+<p>It often gives generic answers like:</p>
+<pre><code class="language-text">Check the logs and try again.
+</code></pre>
+<p>But you want specific root-cause analysis.</p>
+<p>Answer these:</p>
+<ol>
+<li>What failure pattern do you see?</li>
+<li>What new workflow steps would you add?</li>
+<li>What evidence should be required before final answer?</li>
+<li>What test case would you add?</li>
+<li>What metric would show improvement?</li>
+</ol>
+<p>A strong answer should include:</p>
+<ul>
+<li>Failure pattern: vague diagnosis without evidence</li>
+<li>Add steps: read exact error, inspect recent changes, check config, identify failing command</li>
+<li>Require evidence: log line, changed file, or failing command output</li>
+<li>Add test: CI log with known Node version mismatch</li>
+<li>Metric: percentage of answers with correct root cause and evidence reference</li>
+</ul>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

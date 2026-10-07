@@ -1,0 +1,15 @@
+.DS_Store
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+node_modules/
+__pycache__/
+*.pyc
+output/
+
+# Existing automation working files stay local; publish category snapshots instead.
+/assets/
+/lessons/
+/genai-handbook.html

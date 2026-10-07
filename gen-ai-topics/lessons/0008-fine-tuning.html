@@ -1,0 +1,392 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fine-Tuning</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-8"><h1><span class="chapter-number">Lesson 08</span> Fine-Tuning</h1><div class="meta"><time datetime="2026-07-02">2026-07-02</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-8-section-1">1. What It Means</a></li><li><a href="#lesson-8-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-8-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-8-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-8-section-5">5. Real-World Example 1: Support Ticket Classification</a></li><li><a href="#lesson-8-section-6">6. Real-World Example 2: Brand-Consistent Email Drafting</a></li><li><a href="#lesson-8-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-8-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-8-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Fine-Tuning workflow"><ol class="flow"><li><strong>Examples</strong><span>Collect reviewed training data</span></li><li><strong>Train</strong><span>Adapt the base model</span></li><li><strong>Evaluate</strong><span>Test on held-out cases</span></li><li><strong>Monitor</strong><span>Check production quality</span></li></ol><figcaption>Figure 8. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-8-section-1">1. What It Means</h2>
+<p><strong>Fine-tuning</strong> means training an existing AI model further using your own examples.</p>
+<p>You are not building a model from zero.</p>
+<p>You start with a base model that already understands language, then teach it a specific pattern.</p>
+<p>Example:</p>
+<pre><code class="language-text">Input: Customer message
+Output: Correct support classification
+</code></pre>
+<p>If you give the model many high-quality examples, it can become better at that repeated task.</p>
+<p>Simple meaning:</p>
+<blockquote>
+<p>Fine-tuning teaches a model to behave more like your examples.</p>
+</blockquote>
+<p>Fine-tuning is useful when you want the model to consistently learn:</p>
+<ul>
+<li>A specific output format</li>
+<li>A classification style</li>
+<li>A writing tone</li>
+<li>Domain-specific labels</li>
+<li>Repeated decision patterns</li>
+<li>A narrow task with many examples</li>
+</ul>
+<p>It is usually <strong>not</strong> the first thing to try.</p>
+<p>Usually start with:</p>
+<ol>
+<li>Better prompt</li>
+<li>Better examples in the prompt</li>
+<li>Better retrieval or context</li>
+<li>Evaluation harness</li>
+<li>Fine-tuning only if the pattern is still not reliable</li>
+</ol>
+<p>OpenAI’s model optimization docs describe fine-tuning as part of a wider loop with evals and prompting, not as a standalone magic fix: <a href="https://platform.openai.com/docs/guides/fine-tuning">https://platform.openai.com/docs/guides/fine-tuning</a></p>
+<hr>
+<h2 id="lesson-8-section-2">2. Why It Matters In Production Systems</h2>
+<p>Fine-tuning matters when a production AI system needs consistent behavior at scale.</p>
+<p>For example:</p>
+<ul>
+<li>A support system must classify tickets into the same categories every time.</li>
+<li>A legal assistant must produce summaries in a strict format.</li>
+<li>A sales assistant must write in the company’s approved tone.</li>
+<li>A moderation system must follow a custom policy.</li>
+<li>A small model must perform a narrow task cheaply.</li>
+</ul>
+<p>Fine-tuning can help with:</p>
+<ul>
+<li><strong>Consistency:</strong> fewer random format changes</li>
+<li><strong>Lower prompt size:</strong> fewer examples needed in every request</li>
+<li><strong>Lower latency:</strong> shorter prompts can be faster</li>
+<li><strong>Lower cost:</strong> smaller fine-tuned models may handle narrow tasks</li>
+<li><strong>Better task fit:</strong> model learns from many examples, not just a few</li>
+</ul>
+<p>But it also adds operational cost.</p>
+<p>You now need:</p>
+<ul>
+<li>Training data</li>
+<li>Data cleaning</li>
+<li>Evaluation</li>
+<li>Versioning</li>
+<li>Monitoring</li>
+<li>Rollback plan</li>
+<li>Privacy review</li>
+</ul>
+<p>Fine-tuning is production work, not just a model setting.</p>
+<hr>
+<h2 id="lesson-8-section-3">3. How It Works Step By Step</h2>
+<p>A simple fine-tuning process looks like this:</p>
+<ol>
+<li><p><strong>Choose a narrow task</strong></p>
+<p>Example:</p>
+<blockquote>
+<p>Classify customer support tickets into <code>billing</code>, <code>bug</code>, <code>feature_request</code>, or <code>account_access</code>.</p>
+</blockquote>
+</li>
+<li><p><strong>Collect examples</strong></p>
+<p>Example training row:</p>
+<pre><code class="language-json">{
+  &quot;input&quot;: &quot;I was charged twice this month.&quot;,
+  &quot;output&quot;: &quot;billing&quot;
+}
+</code></pre>
+</li>
+<li><p><strong>Clean the dataset</strong></p>
+<p>Remove bad examples.</p>
+<p>Fix inconsistent labels.</p>
+<p>Example problem:</p>
+<pre><code class="language-text">One person labels refund issues as &quot;billing&quot;.
+Another person labels them as &quot;payment&quot;.
+</code></pre>
+<p>That will confuse the model.</p>
+</li>
+<li><p><strong>Split data</strong></p>
+<p>Use one part for training and another part for testing.</p>
+<p>Example:</p>
+<ul>
+<li>80% training data</li>
+<li>20% test data</li>
+</ul>
+</li>
+<li><p><strong>Train the model</strong></p>
+<p>The provider creates a fine-tuned model based on your examples.</p>
+</li>
+<li><p><strong>Evaluate the model</strong></p>
+<p>Compare:</p>
+<ul>
+<li>Base model</li>
+<li>Prompt-only model</li>
+<li>Fine-tuned model</li>
+</ul>
+<p>Use real test cases.</p>
+</li>
+<li><p><strong>Deploy carefully</strong></p>
+<p>Do not immediately send all traffic to the new model.</p>
+<p>Start with a small percentage.</p>
+</li>
+<li><p><strong>Monitor production</strong></p>
+<p>Track:</p>
+<ul>
+<li>Accuracy</li>
+<li>Cost</li>
+<li>Latency</li>
+<li>Error rate</li>
+<li>User complaints</li>
+<li>Drift over time</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-8-section-4">4. How To Apply It In A Project</h2>
+<p>Use this decision path.</p>
+<p>First ask:</p>
+<pre><code class="language-text">Is the problem caused by missing knowledge?
+</code></pre>
+<p>If yes, use <strong>RAG or context</strong>, not fine-tuning.</p>
+<p>Example:</p>
+<blockquote>
+<p>“What is our latest refund policy?”</p>
+</blockquote>
+<p>Fine-tuning is bad for this because policies change.</p>
+<p>Use retrieval from the policy database.</p>
+<p>Next ask:</p>
+<pre><code class="language-text">Is the problem caused by inconsistent behavior?
+</code></pre>
+<p>If yes, fine-tuning may help.</p>
+<p>Example:</p>
+<blockquote>
+<p>“Classify this ticket into exactly one of our 12 support categories.”</p>
+</blockquote>
+<p>That is a repeated pattern.</p>
+<p>Then ask:</p>
+<pre><code class="language-text">Do we have enough high-quality examples?
+</code></pre>
+<p>If no, do not fine-tune yet.</p>
+<p>Improve prompts and collect examples first.</p>
+<p>A practical project plan:</p>
+<ol>
+<li>Build a prompt-based version.</li>
+<li>Create an evaluation set.</li>
+<li>Measure baseline accuracy.</li>
+<li>Collect failed cases.</li>
+<li>Clean and label training examples.</li>
+<li>Fine-tune.</li>
+<li>Compare against baseline.</li>
+<li>Deploy only if it clearly improves the metric.</li>
+</ol>
+<p>Success should be measured, not guessed.</p>
+<hr>
+<h2 id="lesson-8-section-5">5. Real-World Example 1: Support Ticket Classification</h2>
+<p><strong>Use case:</strong> A SaaS company receives thousands of support tickets.</p>
+<p>They need each ticket classified into:</p>
+<pre><code class="language-text">billing
+login_issue
+bug_report
+feature_request
+cancellation
+security
+</code></pre>
+<p><strong>Input:</strong></p>
+<blockquote>
+<p>“I cannot access my account after enabling two-factor authentication.”</p>
+</blockquote>
+<p><strong>Expected output:</strong></p>
+<pre><code class="language-json">{
+  &quot;category&quot;: &quot;login_issue&quot;,
+  &quot;priority&quot;: &quot;medium&quot;
+}
+</code></pre>
+<p><strong>Prompt-only problem:</strong></p>
+<p>The model sometimes outputs:</p>
+<pre><code class="language-json">{
+  &quot;category&quot;: &quot;security&quot;,
+  &quot;priority&quot;: &quot;high&quot;
+}
+</code></pre>
+<p>That may be understandable, but it does not match the company’s routing rules.</p>
+<p><strong>Fine-tuning dataset:</strong></p>
+<p>The team prepares examples:</p>
+<pre><code class="language-json">{
+  &quot;input&quot;: &quot;I cannot access my account after enabling two-factor authentication.&quot;,
+  &quot;output&quot;: {
+    &quot;category&quot;: &quot;login_issue&quot;,
+    &quot;priority&quot;: &quot;medium&quot;
+  }
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;input&quot;: &quot;My invoice shows two charges for June.&quot;,
+  &quot;output&quot;: {
+    &quot;category&quot;: &quot;billing&quot;,
+    &quot;priority&quot;: &quot;medium&quot;
+  }
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;input&quot;: &quot;I found a way to see another user&#39;s data.&quot;,
+  &quot;output&quot;: {
+    &quot;category&quot;: &quot;security&quot;,
+    &quot;priority&quot;: &quot;critical&quot;
+  }
+}
+</code></pre>
+<p><strong>Outcome:</strong></p>
+<p>The fine-tuned model learns the company’s exact routing rules.</p>
+<p>Support tickets go to the right team more often.</p>
+<p><strong>Important guardrail:</strong></p>
+<p>Security-related tickets should still be escalated by backend rules. Do not depend only on model classification.</p>
+<hr>
+<h2 id="lesson-8-section-6">6. Real-World Example 2: Brand-Consistent Email Drafting</h2>
+<p><strong>Use case:</strong> A company wants sales emails in a specific voice.</p>
+<p>Their approved style:</p>
+<ul>
+<li>Short paragraphs</li>
+<li>Warm but not too casual</li>
+<li>No hype</li>
+<li>Clear next step</li>
+<li>No fake urgency</li>
+<li>No unsupported claims</li>
+</ul>
+<p><strong>Input:</strong></p>
+<pre><code class="language-text">Customer: Acme Corp
+Context: They asked about onboarding timeline.
+Goal: Send follow-up email.
+</code></pre>
+<p><strong>Expected output:</strong></p>
+<pre><code class="language-text">Hi Sarah,
+
+Thanks for discussing the onboarding timeline today.
+
+Based on your August target, the next useful step is to confirm the migration owner, data sources, and legal review timeline.
+
+I can send a short onboarding plan tomorrow with milestones and responsibilities.
+
+Best,
+Ali
+</code></pre>
+<p><strong>Prompt-only problem:</strong></p>
+<p>The model sometimes writes:</p>
+<pre><code class="language-text">We are thrilled to revolutionize your workflow with our cutting-edge platform!
+</code></pre>
+<p>That does not match the brand.</p>
+<p><strong>Fine-tuning approach:</strong></p>
+<p>The team collects 1,000 approved sales emails.</p>
+<p>Each example includes:</p>
+<ul>
+<li>Customer context</li>
+<li>Goal</li>
+<li>Approved email</li>
+</ul>
+<p>The fine-tuned model learns the company’s writing style.</p>
+<p><strong>Outcome:</strong></p>
+<p>Emails need less editing.</p>
+<p>Sales reps save time.</p>
+<p><strong>Important limitation:</strong></p>
+<p>Fine-tuning should not teach current customer facts. Those should come from CRM or retrieval.</p>
+<p>Fine-tuning teaches style and structure. It should not replace live data.</p>
+<hr>
+<h2 id="lesson-8-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<p><strong>Mistake 1: Fine-tuning to add knowledge</strong></p>
+<p>Bad use:</p>
+<blockquote>
+<p>“Fine-tune the model on our latest pricing page.”</p>
+</blockquote>
+<p>Pricing changes.</p>
+<p>Use retrieval instead.</p>
+<p>Fine-tuning is better for behavior, format, tone, and repeated decision patterns.</p>
+<p><strong>Mistake 2: Training on messy examples</strong></p>
+<p>If your examples are inconsistent, the model learns inconsistency.</p>
+<p>Bad labels create bad behavior.</p>
+<p><strong>Mistake 3: No evaluation set</strong></p>
+<p>If you do not measure before and after, you do not know if fine-tuning helped.</p>
+<p><strong>Mistake 4: Too broad a task</strong></p>
+<p>Bad:</p>
+<blockquote>
+<p>“Fine-tune a model to be our whole company assistant.”</p>
+</blockquote>
+<p>Better:</p>
+<blockquote>
+<p>“Fine-tune a model to classify support tickets into our approved categories.”</p>
+</blockquote>
+<p><strong>Mistake 5: Ignoring privacy</strong></p>
+<p>Training data may include customer names, emails, secrets, or sensitive business information.</p>
+<p>Clean the data before training.</p>
+<p><strong>Mistake 6: No rollback plan</strong></p>
+<p>A fine-tuned model can be worse than the original model.</p>
+<p>You need a way to return to the old version.</p>
+<p><strong>Trade-off: Accuracy vs maintenance</strong></p>
+<p>Fine-tuning can improve consistency.</p>
+<p>But it creates a new asset to maintain.</p>
+<p>When rules change, you may need new data and a new fine-tune.</p>
+<hr>
+<h2 id="lesson-8-section-8">8. Practical Best Practices</h2>
+<ol>
+<li><p><strong>Start with prompting and evals</strong></p>
+<p>Do not fine-tune before you know the baseline.</p>
+</li>
+<li><p><strong>Use fine-tuning for repeated behavior</strong></p>
+<p>Good use cases:</p>
+<ul>
+<li>Classification</li>
+<li>Strict formatting</li>
+<li>Brand tone</li>
+<li>Domain-specific style</li>
+<li>Repeated structured extraction</li>
+</ul>
+</li>
+<li><p><strong>Use RAG for changing knowledge</strong></p>
+<p>Policies, prices, product docs, and customer records should usually come from retrieval or tools.</p>
+</li>
+<li><p><strong>Keep tasks narrow</strong></p>
+<p>One fine-tuned model should have a clear job.</p>
+</li>
+<li><p><strong>Clean the data carefully</strong></p>
+<p>Remove duplicates, bad labels, private data, and contradictory examples.</p>
+</li>
+<li><p><strong>Create a strong test set</strong></p>
+<p>Include:</p>
+<ul>
+<li>Normal cases</li>
+<li>Edge cases</li>
+<li>Hard cases</li>
+<li>Recently failed production cases</li>
+</ul>
+</li>
+<li><p><strong>Compare against cheaper options</strong></p>
+<p>Sometimes a better prompt is enough.</p>
+<p>Sometimes a smaller fine-tuned model is cheaper at scale.</p>
+</li>
+<li><p><strong>Version everything</strong></p>
+<p>Track:</p>
+<ul>
+<li>Dataset version</li>
+<li>Prompt version</li>
+<li>Model version</li>
+<li>Evaluation results</li>
+<li>Deployment date</li>
+</ul>
+</li>
+<li><p><strong>Monitor after deployment</strong></p>
+<p>Fine-tuned models can still fail.</p>
+<p>Watch quality, cost, latency, and user feedback.</p>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-8-section-9">9. Small Practice Exercise</h2>
+<p>Imagine you are building an AI assistant for a real estate company.</p>
+<p>The assistant must classify incoming leads into:</p>
+<pre><code class="language-text">buyer
+seller
+renter
+investor
+not_relevant
+</code></pre>
+<p>A user message says:</p>
+<blockquote>
+<p>“I own a 3-bedroom apartment and want to know what price I can get if I list it next month.”</p>
+</blockquote>
+<p>Answer these:</p>
+<ol>
+<li>Is fine-tuning useful for this task?</li>
+<li>What should one training example look like?</li>
+<li>What should not be stored in the training data?</li>
+<li>What metric would you use to decide if fine-tuning helped?</li>
+<li>Would you use fine-tuning, RAG, or both?</li>
+</ol>
+<p>A strong answer:</p>
+<ul>
+<li>Fine-tuning can help classify lead type.</li>
+<li>The correct label is likely <code>seller</code>.</li>
+<li>Private phone numbers and emails should be removed.</li>
+<li>Measure classification accuracy on real leads.</li>
+<li>Use fine-tuning for classification, but use RAG/tools for current market pricing.</li>
+</ul>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Database Indexes: Make Reads Fast Without Guesswork</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0007 · Databases</p>
+      <h1>Database Indexes</h1>
+      <p class="muted">
+        A database index is a separate data structure that helps the database find
+        matching rows faster without scanning the whole table.
+      </p>
+
+      <h2>The problem it solves</h2>
+      <p>
+        As tables grow, simple queries can become slow. A query that was fast on
+        10,000 rows may become painful on 100 million rows. Without a useful index,
+        the database may need to check many rows to find a small result set.
+      </p>
+      <p>
+        Indexes solve lookup problems. They help queries filter, join, sort, and
+        enforce uniqueness efficiently. But they are not free: every index takes
+        storage and must be updated when rows are inserted, updated, or deleted.
+      </p>
+      <p class="flow">Query → Planner chooses index → Index lookup → Matching row IDs → Table rows → Result</p>
+
+      <h2>How it works</h2>
+      <ol>
+        <li>You create an index on one or more columns used by important queries.</li>
+        <li>The database keeps a sorted or searchable structure beside the table.</li>
+        <li>When a query runs, the query planner estimates whether the index is useful.</li>
+        <li>If useful, the database reads a smaller part of the index instead of scanning the full table.</li>
+        <li>The database fetches matching rows and returns the result.</li>
+      </ol>
+      <p>
+        The planner can still ignore an index. For example, if a query returns most
+        of the table, scanning the table may be cheaper than jumping through the index
+        and then reading many table pages anyway.
+      </p>
+
+      <h2>Main components</h2>
+      <ul>
+        <li><strong>Indexed columns:</strong> the fields used for filtering, joining, sorting, or uniqueness.</li>
+        <li><strong>Index type:</strong> the structure, such as B-tree, hash, GIN, GiST, or BRIN.</li>
+        <li><strong>Query planner:</strong> the database component that decides whether to use the index.</li>
+        <li><strong>Selectivity:</strong> how much the index narrows the result set.</li>
+        <li><strong>Statistics:</strong> database metadata that helps the planner estimate cost.</li>
+        <li><strong>Maintenance cost:</strong> extra work on writes because the index must stay updated.</li>
+      </ul>
+
+      <h2>Example 1: finding a user's orders</h2>
+      <p>
+        An <code>orders</code> table has 20 million rows. The app often runs:
+        <code>WHERE user_id = ? ORDER BY created_at DESC LIMIT 20</code>. Without a
+        helpful index, the database may scan many orders, filter by user, sort them,
+        and return the latest 20.
+      </p>
+      <p>
+        A compound index on <code>(user_id, created_at DESC)</code> matches the query
+        shape. The database can jump to that user's orders in the correct order and
+        stop after 20 rows. This is usually much faster than scanning and sorting.
+      </p>
+
+      <h2>Example 2: production incident from missing index</h2>
+      <p>
+        A support dashboard filters tickets by <code>account_id</code> and
+        <code>status = 'open'</code>. At launch, each account has a few hundred tickets.
+        Six months later, enterprise accounts have millions. During business hours,
+        dashboard traffic reaches 1,200 requests per minute and the query starts
+        doing repeated full table scans.
+      </p>
+      <p>
+        CPU rises to 95%, read I/O spikes, and unrelated APIs slow down because they
+        share the same database. The fix is not just "add an index quickly." The team
+        creates an index safely, ideally using an online or concurrent method, verifies
+        the query plan, and adds monitoring for slow queries. A partial index on open
+        tickets may be better than indexing every historical closed ticket.
+      </p>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>A frequent query filters by a column and returns a small part of the table.</li>
+        <li>A query needs sorted results quickly, especially with <code>LIMIT</code>.</li>
+        <li>A join repeatedly uses the same foreign key or lookup column.</li>
+        <li>You need to enforce uniqueness, such as one email per user.</li>
+        <li>A production slow-query log shows the same expensive query pattern repeatedly.</li>
+      </ul>
+
+      <h2>When not to use it</h2>
+      <ul>
+        <li>The table is tiny and scans are already cheap.</li>
+        <li>The query returns a large percentage of the table.</li>
+        <li>The column has very low selectivity, such as a boolean used alone.</li>
+        <li>The table is write-heavy and the index is rarely used.</li>
+        <li>You are guessing without checking query plans or real workload data.</li>
+      </ul>
+
+      <h2>Implementation considerations</h2>
+      <ul>
+        <li>Design indexes around real query shapes, not individual columns in isolation.</li>
+        <li>Use <code>EXPLAIN</code> or your database's query plan tool before and after changes.</li>
+        <li>Keep column order intentional in compound indexes; equality filters often come before range and sort columns.</li>
+        <li>Consider partial indexes for common filtered subsets, such as active or unprocessed rows.</li>
+        <li>Remove unused duplicate indexes after proving they are not needed.</li>
+        <li>Create large production indexes with a zero-downtime migration approach.</li>
+      </ul>
+
+      <h2>Security considerations</h2>
+      <ul>
+        <li>Indexes may duplicate sensitive values, so database encryption and access controls still matter.</li>
+        <li>Unique indexes can reveal data existence through error messages if the app exposes them poorly.</li>
+        <li>Expression indexes on normalized data, such as lowercased emails, should follow the same privacy rules as source columns.</li>
+        <li>Slow unindexed queries can become a denial-of-service risk if attackers can trigger expensive filters.</li>
+        <li>Do not give application users direct access to index metadata if it reveals sensitive schema details.</li>
+      </ul>
+
+      <h2>Reliability concerns</h2>
+      <ul>
+        <li>Creating an index on a large table can consume CPU, I/O, locks, and replication bandwidth.</li>
+        <li>Bad indexes can make writes slower and increase database recovery time.</li>
+        <li>Stale statistics can cause the planner to choose the wrong plan.</li>
+        <li>Adding many indexes can hide query problems until write throughput collapses.</li>
+        <li>Index bloat may grow over time and require maintenance depending on the database.</li>
+      </ul>
+
+      <h2>Performance and cost</h2>
+      <p>
+        A good index can turn a slow query into a fast lookup. It can reduce CPU,
+        disk reads, memory pressure, and response time. The cost is storage, slower
+        writes, more backup size, more replication work, and more operational care.
+        Indexes are performance tools, but they are also capacity and cost decisions.
+      </p>
+
+      <h2>Key trade-offs</h2>
+      <ul>
+        <li><strong>Read speed vs write speed:</strong> indexes make reads faster but inserts and updates heavier.</li>
+        <li><strong>Specificity vs flexibility:</strong> a targeted compound index is fast for one query shape but may not help others.</li>
+        <li><strong>Storage cost vs latency:</strong> more indexes use more disk but can reduce expensive scans.</li>
+        <li><strong>Fast fix vs safe rollout:</strong> adding an index may fix latency, but production creation still needs migration discipline.</li>
+      </ul>
+
+      <h2>Common mistakes and edge cases</h2>
+      <ul>
+        <li>Creating one index per column without matching the actual query.</li>
+        <li>Expecting an index to help when the query returns most rows.</li>
+        <li>Putting compound index columns in the wrong order.</li>
+        <li>Indexing a column but wrapping it in a function that prevents normal index use.</li>
+        <li>Forgetting that indexes must be maintained during every write.</li>
+        <li>Adding an index locally on tiny data and assuming production behavior will match.</li>
+        <li>Not checking whether an old index became unused after the product changed.</li>
+      </ul>
+
+      <h2>Connection to previous lessons</h2>
+      <p>
+        <a href="0006-zero-downtime-database-migrations.html">Zero-downtime migrations</a>
+        matter because large indexes must be added safely. <a href="0001-cache-aside.html">Cache-aside</a>
+        can reduce repeated database reads, but a cache should not hide permanently
+        bad query design. <a href="0003-vertical-scaling.html">Vertical scaling</a>
+        may buy time for a slow database, but the correct index can remove the real
+        bottleneck. <a href="0005-message-queues.html">Message queues</a> can help
+        process index-related backfills or cleanup work gradually.
+      </p>
+
+      <h2>Design exercise</h2>
+      <p class="prompt">
+        A table <code>events</code> has 200 million rows. The main query is
+        <code>WHERE account_id = ? AND event_type = ? AND created_at &gt; ? ORDER BY created_at DESC LIMIT 100</code>.
+        What index would you try first, how would you verify the query plan, and
+        what production metrics would you watch while creating the index?
+      </p>
+
+      <h2>Primary source</h2>
+      <p>
+        Read:
+        <a href="https://www.postgresql.org/docs/current/indexes.html">
+          PostgreSQL Docs: Indexes
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    </main>
+  </body>
+</html>

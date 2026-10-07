@@ -1,0 +1,381 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory In AI Agents</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-7"><h1><span class="chapter-number">Lesson 07</span> Memory In AI Agents</h1><div class="meta"><time datetime="2026-07-01">2026-07-01</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-7-section-1">1. What It Means</a></li><li><a href="#lesson-7-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-7-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-7-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-7-section-5">5. Real-World Example 1: Coding Agent Memory</a></li><li><a href="#lesson-7-section-6">6. Real-World Example 2: Customer Support Agent Memory</a></li><li><a href="#lesson-7-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-7-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-7-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Memory In AI Agents workflow"><ol class="flow"><li><strong>Select</strong><span>Choose what to retain</span></li><li><strong>Store</strong><span>Record scope and provenance</span></li><li><strong>Retrieve</strong><span>Find relevant memories</span></li><li><strong>Refresh</strong><span>Correct or expire old facts</span></li></ol><figcaption>Figure 7. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-7-section-1">1. What It Means</h2>
+<p><strong>Memory</strong> in an AI agent means the system can keep useful information beyond one single message.</p>
+<p>A normal chat model only sees what is inside its current context window.</p>
+<p>A <strong>context window</strong> is the amount of text the model can read at one time.</p>
+<p>Memory lets the agent remember things such as:</p>
+<ul>
+<li>User preferences</li>
+<li>Past decisions</li>
+<li>Project facts</li>
+<li>Repeated instructions</li>
+<li>Previous mistakes</li>
+<li>Useful summaries</li>
+<li>Long-running task state</li>
+<li>Important business rules</li>
+</ul>
+<p>Simple meaning:</p>
+<blockquote>
+<p>Memory helps an AI agent carry useful knowledge from the past into future work.</p>
+</blockquote>
+<p>Memory can exist in different forms:</p>
+<p><strong>Short-term memory</strong></p>
+<p>Information used during the current task.</p>
+<p>Example:</p>
+<pre><code class="language-text">The user asked to compare three vendors.
+The user cares most about cost and implementation time.
+</code></pre>
+<p><strong>Long-term memory</strong></p>
+<p>Information saved across sessions.</p>
+<p>Example:</p>
+<pre><code class="language-text">The user prefers simple English and production-ready advice.
+</code></pre>
+<p><strong>Task memory</strong></p>
+<p>Information about a specific workflow.</p>
+<p>Example:</p>
+<pre><code class="language-text">Deployment failed because Node version was wrong last time.
+Check .nvmrc before debugging deploy issues.
+</code></pre>
+<p><strong>User memory</strong></p>
+<p>Information about user preferences.</p>
+<p>Example:</p>
+<pre><code class="language-text">The user wants concise answers and dislikes vague theory.
+</code></pre>
+<p><strong>Project memory</strong></p>
+<p>Information about a codebase, product, or business.</p>
+<p>Example:</p>
+<pre><code class="language-text">The backend service runs on port 3000.
+The frontend service runs on port 3002.
+</code></pre>
+<p>Memory is an active research area. A useful primary source is the MemGPT paper, which discusses managing memory beyond a model’s limited context window: <a href="https://arxiv.org/abs/2310.08560">https://arxiv.org/abs/2310.08560</a></p>
+<hr>
+<h2 id="lesson-7-section-2">2. Why It Matters In Production Systems</h2>
+<p>Without memory, an AI agent can feel forgetful.</p>
+<p>The user must repeat the same information again and again.</p>
+<p>That creates problems:</p>
+<ul>
+<li>Slower workflows</li>
+<li>Repeated mistakes</li>
+<li>Poor personalization</li>
+<li>Weak long-running task handling</li>
+<li>More tokens wasted on repeated context</li>
+<li>Inconsistent behavior across sessions</li>
+</ul>
+<p>In production, memory helps agents become more useful.</p>
+<p>For example:</p>
+<ul>
+<li>A coding agent remembers repo-specific commands.</li>
+<li>A support agent remembers customer preferences.</li>
+<li>A learning agent avoids repeating recent lessons.</li>
+<li>A sales assistant remembers account history.</li>
+<li>A project manager agent remembers open decisions.</li>
+</ul>
+<p>But memory also creates risk.</p>
+<p>If memory is wrong, private, outdated, or overused, the agent can make bad decisions.</p>
+<p>The key production idea:</p>
+<blockquote>
+<p>Memory should be useful, controlled, reviewable, and safe.</p>
+</blockquote>
+<p>Do not treat memory as magic. Treat it like a database that needs rules.</p>
+<hr>
+<h2 id="lesson-7-section-3">3. How It Works Step By Step</h2>
+<p>A typical memory system works like this:</p>
+<ol>
+<li><p><strong>User interacts with the agent</strong></p>
+<p>Example:</p>
+<blockquote>
+<p>“For future lessons, explain concepts in detail with real-world examples.”</p>
+</blockquote>
+</li>
+<li><p><strong>Agent detects possible memory</strong></p>
+<p>The system asks:</p>
+<ul>
+<li>Is this information useful later?</li>
+<li>Is it stable?</li>
+<li>Is it safe to store?</li>
+<li>Did the user clearly express a preference?</li>
+</ul>
+</li>
+<li><p><strong>Memory is written</strong></p>
+<p>Example memory:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;user_preference&quot;,
+  &quot;content&quot;: &quot;User prefers detailed lessons with real-world examples.&quot;,
+  &quot;created_at&quot;: &quot;2026-07-01&quot;,
+  &quot;source&quot;: &quot;user_instruction&quot;
+}
+</code></pre>
+</li>
+<li><p><strong>Later request arrives</strong></p>
+<p>Example:</p>
+<blockquote>
+<p>“Teach me a new GenAI concept.”</p>
+</blockquote>
+</li>
+<li><p><strong>Relevant memories are retrieved</strong></p>
+<p>The system searches memory and finds:</p>
+<pre><code class="language-text">User prefers detailed lessons.
+Avoid recent topics.
+Use simple English.
+</code></pre>
+</li>
+<li><p><strong>Memory is added to context</strong></p>
+<p>The agent uses the memory while answering.</p>
+</li>
+<li><p><strong>Agent responds</strong></p>
+<p>The lesson becomes more detailed and avoids recent repeats.</p>
+</li>
+<li><p><strong>Memory may be updated</strong></p>
+<p>If the user changes preference, old memory should be updated or replaced.</p>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-7-section-4">4. How To Apply It In A Project</h2>
+<p>Start small. Do not store everything.</p>
+<p>A practical memory design:</p>
+<p><strong>Step 1: Decide what memory is allowed</strong></p>
+<p>Good memory candidates:</p>
+<ul>
+<li>Stable user preferences</li>
+<li>Project-specific facts</li>
+<li>Repeated workflow rules</li>
+<li>Long-running task state</li>
+<li>Important decisions</li>
+</ul>
+<p>Bad memory candidates:</p>
+<ul>
+<li>Passwords</li>
+<li>API keys</li>
+<li>Payment details</li>
+<li>Private health data unless your system is designed for it</li>
+<li>Temporary facts that will quickly become stale</li>
+<li>Guesswork that the user did not confirm</li>
+</ul>
+<p><strong>Step 2: Define memory types</strong></p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  &quot;types&quot;: [
+    &quot;user_preference&quot;,
+    &quot;project_fact&quot;,
+    &quot;workflow_rule&quot;,
+    &quot;decision&quot;,
+    &quot;task_state&quot;
+  ]
+}
+</code></pre>
+<p><strong>Step 3: Store source and date</strong></p>
+<p>Every memory should say where it came from.</p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  &quot;content&quot;: &quot;Use npm run test:authorization for auth verification.&quot;,
+  &quot;source&quot;: &quot;deployment-debug-session&quot;,
+  &quot;created_at&quot;: &quot;2026-06-20&quot;
+}
+</code></pre>
+<p><strong>Step 4: Retrieve only relevant memory</strong></p>
+<p>Do not load all memories every time.</p>
+<p>If the user asks about deployment, retrieve deployment memories.</p>
+<p>If the user asks about lessons, retrieve teaching preferences.</p>
+<p><strong>Step 5: Add freshness rules</strong></p>
+<p>Some memories expire.</p>
+<p>Example:</p>
+<pre><code class="language-text">Pricing memory expires after 30 days.
+Deployment command memory should be verified if older than 90 days.
+User writing preference can remain until changed.
+</code></pre>
+<p><strong>Step 6: Let users correct memory</strong></p>
+<p>Users should be able to say:</p>
+<blockquote>
+<p>“Forget that.”
+“Update this preference.”
+“That is no longer true.”</p>
+</blockquote>
+<hr>
+<h2 id="lesson-7-section-5">5. Real-World Example 1: Coding Agent Memory</h2>
+<p><strong>Use case:</strong> A developer uses an AI coding agent across many sessions.</p>
+<p><strong>Without memory:</strong></p>
+<p>The user repeatedly says:</p>
+<blockquote>
+<p>“Use the existing test command.”
+“Do not change unrelated files.”
+“The frontend API routes are in this folder.”
+“The deploy script is the source of truth.”</p>
+</blockquote>
+<p>The agent wastes time rediscovering the same facts.</p>
+<p><strong>With memory:</strong></p>
+<p>The system stores:</p>
+<pre><code class="language-json">{
+  &quot;type&quot;: &quot;project_fact&quot;,
+  &quot;content&quot;: &quot;For this repo, deployment logic is controlled by scripts/deploy-main.sh.&quot;,
+  &quot;source&quot;: &quot;previous deployment debugging session&quot;,
+  &quot;created_at&quot;: &quot;2026-06-18&quot;
+}
+</code></pre>
+<p>Later, the user asks:</p>
+<blockquote>
+<p>“Why did deployment fail again?”</p>
+</blockquote>
+<p>The agent retrieves the memory and starts in the right place.</p>
+<p><strong>Better behavior:</strong></p>
+<p>Instead of giving generic advice, it checks:</p>
+<ul>
+<li>Deployment script</li>
+<li>Node version</li>
+<li>Package manager version</li>
+<li>Migration step</li>
+<li>PM2 process names</li>
+<li>Logs from the real deploy path</li>
+</ul>
+<p><strong>Outcome:</strong></p>
+<p>The coding agent becomes faster and more repo-aware.</p>
+<p><strong>Risk:</strong></p>
+<p>If the deployment process changed yesterday, old memory may be stale.</p>
+<p><strong>Production fix:</strong></p>
+<p>Mark memory as “possibly stale” and verify important facts before acting.</p>
+<hr>
+<h2 id="lesson-7-section-6">6. Real-World Example 2: Customer Support Agent Memory</h2>
+<p><strong>Use case:</strong> A SaaS company has an AI assistant for customer success.</p>
+<p><strong>Customer history:</strong></p>
+<ul>
+<li>Customer uses the enterprise plan.</li>
+<li>They prefer email updates, not phone calls.</li>
+<li>They had a serious onboarding issue last month.</li>
+<li>Their renewal is in August.</li>
+</ul>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“Draft a reply to Acme about their onboarding concern.”</p>
+</blockquote>
+<p><strong>Without memory:</strong></p>
+<p>The AI writes a generic response:</p>
+<blockquote>
+<p>“We are sorry for the inconvenience. Our team will help you.”</p>
+</blockquote>
+<p><strong>With memory:</strong></p>
+<p>The agent retrieves:</p>
+<pre><code class="language-json">{
+  &quot;customer&quot;: &quot;Acme&quot;,
+  &quot;plan&quot;: &quot;enterprise&quot;,
+  &quot;preferred_contact&quot;: &quot;email&quot;,
+  &quot;recent_issue&quot;: &quot;onboarding delay&quot;,
+  &quot;renewal_month&quot;: &quot;August&quot;
+}
+</code></pre>
+<p><strong>Better output:</strong></p>
+<blockquote>
+<p>“Hi Acme team, thanks for raising this. We understand the onboarding delay affected your rollout timeline. I’ll send a written update by email today with the migration support plan, owner, and next milestones before your August renewal review.”</p>
+</blockquote>
+<p><strong>Outcome:</strong></p>
+<p>The reply is more relevant and more useful.</p>
+<p><strong>Risk:</strong></p>
+<p>Customer memory may include sensitive information.</p>
+<p><strong>Production fix:</strong></p>
+<p>Use access control. Only authorized employees should access account memory.</p>
+<hr>
+<h2 id="lesson-7-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<p><strong>Mistake 1: Saving everything</strong></p>
+<p>More memory is not always better.</p>
+<p>Too much memory creates noise.</p>
+<p>The agent may retrieve irrelevant or outdated information.</p>
+<p><strong>Mistake 2: Saving unverified guesses</strong></p>
+<p>Bad memory:</p>
+<pre><code class="language-text">User probably prefers short answers.
+</code></pre>
+<p>Better memory:</p>
+<pre><code class="language-text">User said: “Keep answers concise and practical.”
+</code></pre>
+<p>Memory should come from evidence.</p>
+<p><strong>Mistake 3: No expiration</strong></p>
+<p>Some facts become outdated.</p>
+<p>Examples:</p>
+<ul>
+<li>Pricing</li>
+<li>API behavior</li>
+<li>Team members</li>
+<li>Server config</li>
+<li>Legal rules</li>
+<li>Product features</li>
+</ul>
+<p>Use freshness rules.</p>
+<p><strong>Mistake 4: Mixing private data with general memory</strong></p>
+<p>Do not store sensitive data casually.</p>
+<p>Memory needs the same security care as a database.</p>
+<p><strong>Mistake 5: Memory silently changes behavior</strong></p>
+<p>Users should understand when memory affects important output.</p>
+<p>For high-impact domains, the system should show or explain important assumptions.</p>
+<p><strong>Trade-off: Personalization vs privacy</strong></p>
+<p>More memory improves personalization.</p>
+<p>But it also increases privacy and security risk.</p>
+<p>Production systems must choose carefully what to store.</p>
+<hr>
+<h2 id="lesson-7-section-8">8. Practical Best Practices</h2>
+<ol>
+<li><p><strong>Store only useful, stable information</strong></p>
+<p>Ask:</p>
+<blockquote>
+<p>“Will this still help later?”</p>
+</blockquote>
+</li>
+<li><p><strong>Store memory with metadata</strong></p>
+<p>Include:</p>
+<ul>
+<li>Type</li>
+<li>Source</li>
+<li>Date</li>
+<li>Owner</li>
+<li>Confidence</li>
+<li>Expiry, if needed</li>
+</ul>
+</li>
+<li><p><strong>Separate memory types</strong></p>
+<p>Keep user preferences, project facts, and task state separate.</p>
+</li>
+<li><p><strong>Retrieve selectively</strong></p>
+<p>Do not load all memories into every prompt.</p>
+</li>
+<li><p><strong>Verify high-risk memory</strong></p>
+<p>If memory affects money, security, legal, medical, or production systems, verify it first.</p>
+</li>
+<li><p><strong>Allow correction and deletion</strong></p>
+<p>Users should control their memory.</p>
+</li>
+<li><p><strong>Avoid sensitive secrets</strong></p>
+<p>Never store passwords, API keys, or private tokens as memory.</p>
+</li>
+<li><p><strong>Log memory usage</strong></p>
+<p>Record which memories were used in important decisions.</p>
+</li>
+<li><p><strong>Evaluate memory quality</strong></p>
+<p>Test:</p>
+<ul>
+<li>Did the agent retrieve the right memory?</li>
+<li>Did it ignore irrelevant memory?</li>
+<li>Did it handle stale memory safely?</li>
+<li>Did it avoid storing private data?</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-7-section-9">9. Small Practice Exercise</h2>
+<p>Imagine you are building an AI project assistant for a software team.</p>
+<p>The user says:</p>
+<blockquote>
+<p>“For this repo, always run <code>npm run test:authorization</code> before changing auth code.”</p>
+</blockquote>
+<p>Answer these:</p>
+<ol>
+<li>Should this be stored as memory?</li>
+<li>What type of memory is it?</li>
+<li>What metadata should be saved?</li>
+<li>When should the agent retrieve it?</li>
+<li>When should the agent verify it instead of trusting it blindly?</li>
+</ol>
+<p>A strong answer:</p>
+<ul>
+<li>Yes, store it.</li>
+<li>Type: <code>project_workflow_rule</code></li>
+<li>Source: direct user instruction</li>
+<li>Retrieve it for auth-related code changes</li>
+<li>Verify if package scripts changed or the memory is old</li>
+<li>Do not apply it to unrelated repos</li>
+</ul>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

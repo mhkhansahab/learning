@@ -1,0 +1,128 @@
+:root {
+  color-scheme: light;
+  --ink: #202a29;
+  --muted: #53625f;
+  --line: #d7dfdc;
+  --accent: #176451;
+  --soft: #eef5f2;
+  --rose: #9a394b;
+  --code-ink: #182638;
+  --code-paper: #eef1f5;
+}
+* { box-sizing: border-box; }
+html { scroll-padding-top: 28px; }
+body { margin: 0; background: #fff; color: var(--ink); font: 17px/1.75 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; letter-spacing: 0; }
+a { color: var(--accent); overflow-wrap: anywhere; text-underline-offset: 4px; }
+a:hover { color: var(--rose); }
+a:focus-visible, summary:focus-visible { outline: 2px solid var(--rose); outline-offset: 4px; }
+::selection { background: #d8eae2; color: #172c23; }
+header, main, footer { max-width: 1280px; margin: auto; padding: 32px 40px; }
+header { border-bottom: 1px solid var(--line); padding-bottom: 26px; }
+h1 { font-size: 34px; line-height: 1.2; margin: 0 0 12px; }
+h2 { font-size: 30px; line-height: 1.25; margin: 0 0 18px; }
+h3 { font-size: 23px; line-height: 1.35; margin: 40px 0 14px; }
+h4 { font-size: 19px; line-height: 1.4; margin: 28px 0 12px; }
+p { margin: 12px 0 20px; }
+li { margin: 9px 0; }
+.meta { display: flex; gap: 10px 16px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+header .meta { margin: 12px 0; }
+.header-links { margin-bottom: 0; font-size: 15px; }
+.handbook { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 56px; align-items: start; }
+.reading { min-width: 0; max-width: 800px; }
+#contents { position: sticky; top: 24px; max-height: calc(100vh - 48px); overflow: auto; padding-right: 12px; }
+.lesson-nav { margin: 0; padding: 0; background: transparent; border-radius: 0; }
+.lesson-nav > summary { font-size: 18px; margin-bottom: 14px; }
+nav ol { margin: 0; padding-left: 28px; }
+nav li { margin: 0 0 4px; padding-left: 4px; font-size: 14px; line-height: 1.55; }
+nav li a { display: block; padding: 7px 0; text-decoration: none; }
+nav li a:hover { text-decoration: underline; }
+nav li::marker { color: var(--muted); font-variant-numeric: tabular-nums; }
+.index-links { display: flex; flex-wrap: wrap; gap: 16px; padding-top: 16px; margin-top: 14px; border-top: 1px solid var(--line); font-size: 14px; }
+.coverage { padding: 16px 0; margin: 0 0 30px; border-bottom: 1px solid var(--line); background: transparent; border-radius: 0; font-size: 14px; color: var(--muted); }
+.coverage summary { color: var(--ink); }
+.coverage p { margin: 14px 0 0; }
+.chapter { padding: 48px 0; border-top: 1px solid var(--line); }
+.reading > article:first-of-type { border-top: 0; padding-top: 12px; }
+.chapter-number { display: block; margin-bottom: 10px; font: 14px/1.4 system-ui, sans-serif; color: var(--muted); }
+.chapter .body { max-width: 72ch; }
+.badge { font-size: 13px; color: #285542; background: #edf4ef; padding: 1px 7px; border-radius: 3px; }
+.section-nav { margin: 22px 0; padding: 12px 0; background: transparent; border-radius: 0; border-block: 1px solid var(--line); font-size: 14px; }
+.section-nav ul { padding-left: 20px; margin: 14px 0 4px; }
+.section-nav li { margin: 6px 0; }
+.diagram { margin: 24px 0 32px; padding: 18px 0; border-bottom: 1px solid var(--line); }
+.flow { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 20px; list-style: none; padding: 0; margin: 0; }
+.flow li { margin: 0; min-height: 126px; padding: 14px 12px; background: var(--soft); position: relative; font-size: 14px; line-height: 1.5; }
+.flow li:nth-child(even) { background: #fbeff1; }
+.flow li:not(:last-child)::after { content: '\2192'; position: absolute; right: -17px; top: 46px; color: var(--muted); }
+.flow strong { display: block; font-size: 15px; margin-bottom: 8px; }
+.flow span { display: block; }
+figcaption { color: var(--muted); font-size: 13px; line-height: 1.65; margin-top: 14px; }
+code { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+:not(pre) > code { color: #243a50; background: #eff1f3; padding: 2px 5px; border-radius: 2px; font-size: .88em; overflow-wrap: anywhere; }
+pre {
+  color: var(--code-ink); background: var(--code-paper); border: 1px solid #dce2e9;
+  padding: 20px; margin: 22px 0; border-radius: 4px; overflow-x: auto; max-width: 100%;
+  font: 14px/1.75 ui-monospace, SFMono-Regular, Menlo, monospace; tab-size: 2;
+}
+/* Reset block code explicitly so nested lists cannot apply inline-code styling. */
+pre code, li pre code {
+  display: block; color: var(--code-ink); background: transparent; padding: 0; border: 0;
+  border-radius: 0; font: inherit; white-space: pre; overflow-wrap: normal;
+}
+blockquote { border-left: 1px solid var(--line); margin: 24px 0; padding: 0 20px; color: var(--muted); }
+details { background: var(--soft); padding: 18px 20px; border-radius: 4px; margin: 24px 0; }
+summary { cursor: pointer; font-weight: 600; }
+table { border-collapse: collapse; width: 100%; font-size: 15px; }
+td, th { padding: 12px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; overflow-wrap: anywhere; }
+dl { max-width: 72ch; }
+dt { font-weight: 650; margin-top: 24px; }
+dd { margin: 6px 0 20px; }
+footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line); }
+.back { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; padding-top: 18px; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
+.standalone { max-width: 880px; }
+@media (max-width: 1000px) {
+  .handbook { grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
+  header, main, footer { padding-inline: 24px; }
+  .flow { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+  .flow li:nth-child(2)::after { content: none; }
+}
+@media (max-width: 720px) {
+  header, main, footer { padding: 24px 20px; }
+  h1 { font-size: 29px; }
+  h2 { font-size: 26px; }
+  h3 { font-size: 21px; }
+  body { font-size: 16px; }
+  .handbook { display: block; }
+  #contents { position: static; max-height: none; padding: 0 0 24px; margin-bottom: 20px; border-bottom: 1px solid var(--line); }
+  .lesson-nav nav { max-height: 240px; overflow-y: auto; }
+  .chapter { padding: 36px 0; }
+  .flow { grid-template-columns: 1fr; gap: 24px; }
+  .flow li { min-height: 0; padding: 14px 16px; }
+  .flow li:not(:last-child)::after { content: '\2193'; right: 50%; top: auto; bottom: -25px; }
+  pre { padding: 16px; font-size: 13px; }
+  table { font-size: 14px; }
+  td, th { padding: 8px; }
+}
+@media print {
+  body { background: #fff; font-size: 11pt; }
+  header, main, footer { max-width: none; padding: 12px 0; }
+  .handbook { display: block; }
+  #contents { position: static; max-height: none; overflow: visible; padding: 0; }
+  .lesson-nav nav { max-height: none; overflow: visible; }
+  nav ol { columns: 2; }
+  .reading { max-width: none; }
+  .chapter { break-before: page; border: 0; padding: 12px 0; }
+  h2, h3, h4 { break-after: avoid; }
+  .diagram, pre, details { break-inside: avoid; }
+  .flow { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .flow li { font-size: 10pt; }
+  .flow li strong { font-size: 11pt; }
+  .flow li:nth-child(2)::after { content: '\2192'; }
+  .flow li:not(:last-child)::after { right: -17px; top: 46px; bottom: auto; }
+  pre { background: #fff; color: #182638; white-space: pre-wrap; }
+  pre code, li pre code { color: #182638; background: transparent; white-space: pre-wrap; overflow-wrap: anywhere; }
+  .back, .section-nav { display: none; }
+  details p { display: block !important; }
+  details::after { content: 'Expand this section in the browser before printing to include its contents.'; font-size: 9pt; color: #53625f; }
+}

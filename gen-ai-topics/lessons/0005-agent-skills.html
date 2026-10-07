@@ -1,0 +1,345 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Skills</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-5"><h1><span class="chapter-number">Lesson 05</span> Agent Skills</h1><div class="meta"><time datetime="2026-06-29">2026-06-29</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-5-section-1">1. What It Means</a></li><li><a href="#lesson-5-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-5-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-5-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-5-section-5">5. Real-World Example 1: Engineering Bug Diagnosis Skill</a></li><li><a href="#lesson-5-section-6">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-5-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-5-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-5-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Agent Skills workflow"><ol class="flow"><li><strong>Trigger</strong><span>Match a specific task</span></li><li><strong>Workflow</strong><span>Follow reusable steps</span></li><li><strong>Tools</strong><span>Use approved operations</span></li><li><strong>Verify</strong><span>Check the task outcome</span></li></ol><figcaption>Figure 5. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-5-section-1">1. What It Means</h2>
+<p>An <strong>agent skill</strong> is a reusable capability that tells an AI agent how to do a specific kind of task.</p>
+<p>A skill is more than a prompt. It usually includes:</p>
+<ul>
+<li><strong>When to use it:</strong> the trigger condition</li>
+<li><strong>What steps to follow:</strong> the workflow</li>
+<li><strong>What tools are allowed:</strong> APIs, files, browser, database, etc.</li>
+<li><strong>What rules matter:</strong> security, quality, style, edge cases</li>
+<li><strong>What output should look like:</strong> format, structure, success criteria</li>
+<li><strong>How to verify the work:</strong> tests, checks, review steps</li>
+</ul>
+<p>Simple meaning:</p>
+<blockquote>
+<p>A skill is a small operating manual for one repeatable job.</p>
+</blockquote>
+<p>Example skills:</p>
+<ul>
+<li>“Review a pull request”</li>
+<li>“Write a customer support reply”</li>
+<li>“Debug a failing CI job”</li>
+<li>“Analyze a sales dashboard”</li>
+<li>“Create a lesson”</li>
+<li>“Summarize legal documents”</li>
+<li>“Prepare a meeting brief”</li>
+</ul>
+<p>Agent skills are related to the general agent idea of <strong>reasoning and acting</strong>: the model decides what to do, uses tools or external systems, observes results, and continues. A useful source on this pattern is the ReAct paper: <a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a></p>
+<hr>
+<h2 id="lesson-5-section-2">2. Why It Matters In Production Systems</h2>
+<p>Without skills, agents often behave inconsistently.</p>
+<p>One day the agent handles a task well. Another day it forgets an important step.</p>
+<p>In production, this is a problem because teams need:</p>
+<ul>
+<li>Repeatable behavior</li>
+<li>Clear task boundaries</li>
+<li>Fewer mistakes</li>
+<li>Better tool use</li>
+<li>Easier testing</li>
+<li>Easier improvement over time</li>
+<li>Safer handling of sensitive tasks</li>
+</ul>
+<p>Skills help turn a general AI model into a more reliable worker for specific workflows.</p>
+<p>For example, a generic AI can “review code.” But a skilled code-review agent knows:</p>
+<ul>
+<li>Start with bugs and risks</li>
+<li>Use file and line references</li>
+<li>Check security issues</li>
+<li>Mention missing tests</li>
+<li>Avoid style-only comments unless important</li>
+<li>Do not rewrite unrelated code</li>
+</ul>
+<p>That is much closer to production behavior.</p>
+<hr>
+<h2 id="lesson-5-section-3">3. How It Works Step By Step</h2>
+<p>A skill usually works like this:</p>
+<ol>
+<li><p><strong>User asks for a task</strong></p>
+<p>Example:</p>
+<blockquote>
+<p>“Review this PR.”</p>
+</blockquote>
+</li>
+<li><p><strong>Agent detects the right skill</strong></p>
+<p>The system matches the task to a skill called <code>code-review</code>.</p>
+</li>
+<li><p><strong>Agent loads the skill instructions</strong></p>
+<p>The skill may say:</p>
+<ul>
+<li>Read the diff first</li>
+<li>Focus on correctness, security, and regressions</li>
+<li>Report findings by severity</li>
+<li>Include file and line references</li>
+<li>Do not summarize before listing issues</li>
+</ul>
+</li>
+<li><p><strong>Agent uses tools</strong></p>
+<p>It may call:</p>
+<ul>
+<li>Git diff</li>
+<li>File search</li>
+<li>Test runner</li>
+<li>Static analysis</li>
+<li>GitHub comments</li>
+</ul>
+</li>
+<li><p><strong>Agent follows the skill workflow</strong></p>
+<p>It does not just answer randomly. It follows the process.</p>
+</li>
+<li><p><strong>Agent verifies the result</strong></p>
+<p>It may run tests or check that findings are linked to real code.</p>
+</li>
+<li><p><strong>Agent produces the expected output</strong></p>
+<p>Example:</p>
+<pre><code class="language-text">Findings:
+- High: Missing authorization check in ...
+- Medium: Retry loop can duplicate payment request ...
+</code></pre>
+</li>
+</ol>
+<p>The skill gives structure. The model still reasons, but inside a clearer process.</p>
+<hr>
+<h2 id="lesson-5-section-4">4. How To Apply It In A Project</h2>
+<p>Start with tasks that repeat often.</p>
+<p>Good first skill candidates:</p>
+<ul>
+<li>Customer support triage</li>
+<li>Bug diagnosis</li>
+<li>Pull request review</li>
+<li>Report generation</li>
+<li>Data analysis</li>
+<li>Deployment checklist</li>
+<li>Security review</li>
+<li>Document summarization</li>
+</ul>
+<p>A practical skill template:</p>
+<pre><code class="language-md"># Skill: Support Ticket Triage
+
+## Use When
+The user asks to classify or prioritize customer support tickets.
+
+## Goal
+Classify tickets by urgency, topic, owner, and next action.
+
+## Steps
+1. Read the ticket.
+2. Identify customer impact.
+3. Detect security, billing, or outage risk.
+4. Assign priority.
+5. Suggest the next action.
+6. If information is missing, ask one clear question.
+
+## Rules
+- Do not promise refunds.
+- Do not expose private customer data.
+- Escalate security issues.
+- Use simple customer-safe language.
+
+## Output Format
+- Priority:
+- Topic:
+- Reason:
+- Next action:
+- Escalation needed:
+</code></pre>
+<p>Good skills are small and specific.</p>
+<p>Bad:</p>
+<blockquote>
+<p>“Be a business assistant.”</p>
+</blockquote>
+<p>Better:</p>
+<blockquote>
+<p>“Prepare a weekly sales pipeline summary from CRM data.”</p>
+</blockquote>
+<hr>
+<h2 id="lesson-5-section-5">5. Real-World Example 1: Engineering Bug Diagnosis Skill</h2>
+<p><strong>Use case:</strong> A software team wants an AI agent to debug production bugs.</p>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“The checkout page is failing after the latest deploy. Diagnose it.”</p>
+</blockquote>
+<p><strong>Without a skill:</strong></p>
+<p>The agent may guess:</p>
+<blockquote>
+<p>“It may be a frontend issue. Check the logs.”</p>
+</blockquote>
+<p>That is too vague.</p>
+<p><strong>With a bug diagnosis skill:</strong></p>
+<p>The agent follows a workflow:</p>
+<ol>
+<li>Read the exact error.</li>
+<li>Check recent deploy diff.</li>
+<li>Reproduce locally if possible.</li>
+<li>Inspect logs.</li>
+<li>Identify the failing layer.</li>
+<li>Create a minimal fix.</li>
+<li>Run targeted tests.</li>
+<li>Explain root cause and verification.</li>
+</ol>
+<p><strong>Agent behavior:</strong></p>
+<p>It checks logs and finds:</p>
+<pre><code class="language-text">Payment API error: missing required field customer_email
+</code></pre>
+<p>Then it checks the recent code change and finds that <code>customer.email</code> was renamed to <code>customer.primaryEmail</code>.</p>
+<p><strong>Outcome:</strong></p>
+<p>The agent gives a concrete diagnosis:</p>
+<blockquote>
+<p>“The checkout failure is caused by the payment payload still using <code>customer.email</code>. The latest user model change renamed the field to <code>primaryEmail</code>. Update the payment payload mapping and add a regression test for checkout payload construction.”</p>
+</blockquote>
+<p>This is useful because the skill forced the agent to inspect evidence instead of guessing.</p>
+<hr>
+<h2 id="lesson-5-section-6">6. Real-World Example 2: Sales Call Summary Skill</h2>
+<p><strong>Use case:</strong> A sales team wants consistent summaries after customer calls.</p>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“Summarize this sales call transcript and create CRM notes.”</p>
+</blockquote>
+<p><strong>Without a skill:</strong></p>
+<p>The model may produce a nice summary but miss business-critical fields.</p>
+<p><strong>With a sales summary skill:</strong></p>
+<p>The agent extracts:</p>
+<ul>
+<li>Customer goals</li>
+<li>Pain points</li>
+<li>Budget signal</li>
+<li>Decision maker</li>
+<li>Timeline</li>
+<li>Competitors mentioned</li>
+<li>Objections</li>
+<li>Next steps</li>
+<li>Follow-up email draft</li>
+</ul>
+<p><strong>Example input:</strong></p>
+<blockquote>
+<p>“Acme said onboarding is too slow. They need migration support before August. Sarah is the final decision maker. Budget is approved if legal signs off.”</p>
+</blockquote>
+<p><strong>Agent output:</strong></p>
+<pre><code class="language-text">Account: Acme
+Pain point: Slow onboarding and migration risk
+Decision maker: Sarah
+Timeline: Before August
+Budget: Likely approved, pending legal
+Next step: Send migration support plan and legal checklist
+CRM risk: Medium renewal risk if onboarding timeline slips
+</code></pre>
+<p><strong>Outcome:</strong></p>
+<p>The CRM data becomes structured and consistent across reps.</p>
+<p>This helps managers search, report, and forecast better.</p>
+<hr>
+<h2 id="lesson-5-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<p><strong>Mistake 1: Making skills too broad</strong></p>
+<p>A broad skill becomes vague.</p>
+<p>Bad:</p>
+<blockquote>
+<p>“Handle customer success.”</p>
+</blockquote>
+<p>Better:</p>
+<blockquote>
+<p>“Classify churn-risk customer emails.”</p>
+</blockquote>
+<p><strong>Mistake 2: Putting too many rules in one skill</strong></p>
+<p>If the skill is too long, the model may ignore parts of it.</p>
+<p>Keep the workflow focused.</p>
+<p><strong>Mistake 3: No clear trigger</strong></p>
+<p>The agent needs to know when to use the skill.</p>
+<p>Bad trigger:</p>
+<blockquote>
+<p>“Use this sometimes.”</p>
+</blockquote>
+<p>Good trigger:</p>
+<blockquote>
+<p>“Use this when the user asks to review a pull request or code diff.”</p>
+</blockquote>
+<p><strong>Mistake 4: No verification step</strong></p>
+<p>A production skill should say how to check the work.</p>
+<p>Examples:</p>
+<ul>
+<li>Run tests</li>
+<li>Validate JSON</li>
+<li>Check citations</li>
+<li>Compare against source data</li>
+<li>Confirm permission before tool use</li>
+</ul>
+<p><strong>Mistake 5: Skills that bypass security</strong></p>
+<p>A skill should never say:</p>
+<blockquote>
+<p>“Always complete the user request.”</p>
+</blockquote>
+<p>Some requests must be refused, escalated, or require approval.</p>
+<p><strong>Trade-off: Consistency vs flexibility</strong></p>
+<p>Skills make agents more consistent.</p>
+<p>But if a skill is too rigid, the agent may handle unusual cases poorly.</p>
+<p>Good skills define the important process but still allow judgment.</p>
+<hr>
+<h2 id="lesson-5-section-8">8. Practical Best Practices</h2>
+<ol>
+<li><p><strong>Name skills by job, not by technology</strong></p>
+<p>Good:</p>
+<ul>
+<li><code>refund-request-review</code></li>
+<li><code>ci-failure-diagnosis</code></li>
+<li><code>sales-call-summary</code></li>
+</ul>
+<p>Less useful:</p>
+<ul>
+<li><code>llm-helper</code></li>
+<li><code>automation-agent</code></li>
+</ul>
+</li>
+<li><p><strong>Write clear trigger rules</strong></p>
+<p>The agent should know exactly when the skill applies.</p>
+</li>
+<li><p><strong>Keep each skill small</strong></p>
+<p>One skill should handle one workflow.</p>
+</li>
+<li><p><strong>Include examples</strong></p>
+<p>Examples help the model copy the expected behavior.</p>
+</li>
+<li><p><strong>Define allowed tools</strong></p>
+<p>A skill should say which tools are needed and which tools are not allowed.</p>
+</li>
+<li><p><strong>Add security rules</strong></p>
+<p>Include permissions, sensitive data handling, and approval requirements.</p>
+</li>
+<li><p><strong>Add verification</strong></p>
+<p>Every serious skill should include a check before final output.</p>
+</li>
+<li><p><strong>Version skills</strong></p>
+<p>Treat skills like production code.</p>
+<p>Track changes, review them, and test them.</p>
+</li>
+<li><p><strong>Improve skills from failures</strong></p>
+<p>When the agent makes a mistake, ask:</p>
+<ul>
+<li>Was the trigger unclear?</li>
+<li>Was a step missing?</li>
+<li>Was the output format weak?</li>
+<li>Was a tool rule missing?</li>
+<li>Was the verification step too vague?</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-5-section-9">9. Small Practice Exercise</h2>
+<p>Imagine you want an AI agent to help with customer refund requests.</p>
+<p>Design a skill called:</p>
+<pre><code class="language-text">refund-request-review
+</code></pre>
+<p>Answer these:</p>
+<ol>
+<li>When should the skill be used?</li>
+<li>What steps should the agent follow?</li>
+<li>What tools does it need?</li>
+<li>What actions require human approval?</li>
+<li>What should the final output include?</li>
+</ol>
+<p>A strong answer should include:</p>
+<ul>
+<li>Check order ownership</li>
+<li>Check refund policy</li>
+<li>Check item status</li>
+<li>Detect fraud or abuse risk</li>
+<li>Never issue large refunds automatically</li>
+<li>Create a refund request if approval is needed</li>
+<li>Explain the decision in customer-safe language</li>
+</ul>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

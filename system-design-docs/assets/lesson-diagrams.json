@@ -1,0 +1,111 @@
+{
+  "0001": {
+    "tags": ["Caching", "Data freshness"],
+    "rows": [
+      [["Application", "Read product 42"], ["Cache lookup", "Hit: return cached data"]],
+      [["Cache miss", "No stored value"], ["Database", "Read authoritative value"], ["Cache + response", "Store with TTL; return value"]]
+    ],
+    "caption": "Two read paths. A hit avoids a database read; a miss reads the database and fills the cache. Updates need an invalidation or freshness policy."
+  },
+  "0002": {
+    "tags": ["Scaling", "Availability"],
+    "rows": [
+      [["Clients", "Concurrent requests"], ["Load balancer", "Select a healthy instance"], ["App pool", "App A | App B | App C"]],
+      [["Every app instance", "Uses shared state"], ["Database / session store", "Data remains available across instances"]]
+    ],
+    "caption": "Add application instances to share traffic. Local-only sessions break when a user's next request reaches a different instance; shared storage can still become the bottleneck."
+  },
+  "0003": {
+    "tags": ["Scaling", "Capacity"],
+    "rows": [[["Before", "One machine: 4 CPU / 16 GB RAM"], ["Resize", "Plan restart or failover"], ["After", "One machine: 16 CPU / 64 GB RAM"]]],
+    "caption": "The same machine role gets more resources. This helps a measured CPU or memory limit, but a larger single machine still needs a separate availability plan."
+  },
+  "0004": {
+    "tags": ["Traffic routing", "Availability"],
+    "rows": [
+      [["Client", "Send request"], ["Load balancer", "Route using health checks"], ["Healthy pool", "App A and App B receive traffic"]],
+      [["App C fails health check", "Remove from routing"], ["Remaining capacity", "A and B carry extra traffic"]]
+    ],
+    "caption": "Health checks change which servers are eligible for traffic. Removing a failed server protects requests only if the remaining servers have enough capacity."
+  },
+  "0005": {
+    "tags": ["Async work", "Reliability"],
+    "rows": [
+      [["Producer", "Submit job"], ["Durable queue", "Buffer pending work"], ["Worker", "Process, then acknowledge"]],
+      [["Worker fails", "No success acknowledgment"], ["Retry", "Redeliver after timeout / delay"], ["Dead-letter queue", "After configured failure limit"]]
+    ],
+    "caption": "Success removes work from the queue. A failure can lead to redelivery, so processing must tolerate duplicates. The retry path needs limits and an owner for dead-letter messages."
+  },
+  "0006": {
+    "tags": ["Databases", "Deployment"],
+    "rows": [
+      [["Expand", "Add compatible schema"], ["Transition", "Deploy compatible code; backfill in batches"], ["Switch", "Verify and use new schema"]],
+      [["Compatibility check", "Old code and jobs no longer depend on old schema"], ["Contract", "Remove old schema safely"]]
+    ],
+    "caption": "Schema removal comes last. The compatibility window lets old and new application versions coexist while the backfill runs. Verify the cutover before deleting old data."
+  },
+  "0007": {
+    "tags": ["Databases", "Query performance"],
+    "rows": [
+      [["Query", "WHERE user_id = 42"], ["Planner", "Choose a useful access path"], ["Index", "Find matching entries"]],
+      [["Matching entries", "Locate required data"], ["Rows / index-only data", "Read projected columns"], ["Result", "Return matching orders"]]
+    ],
+    "caption": "An index can reduce how much data a query reads. The planner may still prefer a scan; some queries can use index-only scans. Writes also need to maintain the index."
+  },
+  "0008": {
+    "tags": ["Databases", "Data freshness"],
+    "rows": [
+      [["Write", "Profile name becomes version 2"], ["Primary", "Version 2 committed"], ["Replica / search view", "May still show version 1"]],
+      [["Replication catches up", "Update is applied"], ["Replica / search view", "Now shows version 2"]]
+    ],
+    "caption": "Different readers can temporarily see different versions. Convergence depends on updates reaching and being applied by the replica or derived view. A lagging permission view can create a security risk."
+  },
+  "0009": {
+    "tags": ["Deployment", "Isolation"],
+    "rows": [
+      [["Build", "Code + runtime dependencies"], ["Image registry", "Store versioned image"], ["Container runtime", "Start containers from image"]],
+      [["Running containers", "Separate processes and resource limits"], ["Host kernel", "Shared by containers on this host"]]
+    ],
+    "caption": "A versioned image travels between environments. Containers provide process isolation while sharing the host kernel; persistent data and secrets need separate handling."
+  },
+  "0010": {
+    "tags": ["APIs", "Query performance"],
+    "rows": [
+      [["Client", "page_size = 50 + optional cursor"], ["API", "Validate scope and cap size"], ["Database", "Stable order; bounded query"]],
+      [["Response", "Up to 50 items + next cursor"], ["Next request", "Continue after last sort key"]]
+    ],
+    "caption": "Each request reads a bounded page. A stable sort key needs a tie-breaker, such as an ID. A cursor does not bypass authorization or automatically guarantee a snapshot across pages."
+  },
+  "0011": {
+    "tags": ["Operations", "Reliability"],
+    "rows": [
+      [["Application", "Metrics, logs, traces"], ["Collector", "Process and export telemetry"], ["Storage", "Retain sampled / filtered data"]],
+      [["Investigate", "Correlate request and job IDs"], ["Dashboards / alerts", "Latency, errors, saturation, backlog"]]
+    ],
+    "caption": "Telemetry connects symptoms to requests and dependencies. Collection itself consumes resources; protect sensitive fields and watch for missing or dropped telemetry."
+  },
+  "0012": {
+    "tags": ["APIs", "Security", "Capacity"],
+    "rows": [
+      [["Request", "Identify caller and operation"], ["Limit bucket", "Check budget / available tokens"], ["Decision", "Allow within budget; otherwise reject"]],
+      [["Allowed", "Execute bounded work"], ["Rejected", "Return 429; retry guidance when applicable"]]
+    ],
+    "caption": "The decision branches into execution or rejection. Limits across many app instances need coordinated accounting when a strict shared budget is required."
+  },
+  "0013": {
+    "tags": ["Reliability", "State machines"],
+    "rows": [
+      [["Closed", "Call dependency normally"], ["Failure threshold reached", "Open the circuit"], ["Open", "Reject calls quickly / safe fallback"]],
+      [["After cooldown", "Permit limited trial calls"], ["Half-open", "Success: close; failure: reopen"]]
+    ],
+    "caption": "The breaker uses recent failures to change state. Half-open probes test recovery; a fallback must preserve business correctness, especially for payment operations."
+  },
+  "0014": {
+    "tags": ["Cost", "Operations"],
+    "rows": [
+      [["Workload", "Completed reports / requests"], ["Allocated cost", "Compute + storage + transfer"], ["Unit cost", "Allocated cost / completed units"]],
+      [["Design change", "Reduce unnecessary work"], ["Measure again", "Check cost AND latency / reliability"]]
+    ],
+    "caption": "Compare cost per useful outcome, rather than only the total bill. A cheaper design can lose its advantage if it increases errors, delays, or operational effort."
+  }
+}

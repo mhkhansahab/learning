@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Horizontal Scaling: Add More Machines</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0002 · Scalability</p>
+      <h1>Horizontal Scaling</h1>
+      <p class="muted">Handle more traffic by adding application instances instead of making one machine larger.</p>
+
+      <h2>The concept</h2>
+      <p>
+        Horizontal scaling, or scaling out, runs multiple instances of the same
+        service. A load balancer distributes requests across healthy instances.
+      </p>
+      <p class="flow">clients → load balancer → app 1 / app 2 / app 3</p>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>Traffic can exceed the capacity of one machine.</li>
+        <li>The service needs higher availability.</li>
+        <li>Demand changes enough to benefit from automatic scaling.</li>
+      </ul>
+
+      <h2>Real-world example</h2>
+      <p>
+        A ticketing API normally runs three instances. Before a major sale, it
+        automatically grows to twenty instances, then scales back after demand falls.
+      </p>
+
+      <h2>Important requirement</h2>
+      <p>
+        Application instances should be stateless. Store sessions, uploaded files,
+        and shared state in external systems such as Redis, object storage, or a database.
+        Any healthy instance must be able to handle the next request.
+      </p>
+
+      <h2>Trade-offs</h2>
+      <ul>
+        <li><strong>Benefit:</strong> more capacity and better fault tolerance.</li>
+        <li><strong>Cost:</strong> load balancing, monitoring, and deployment become more complex.</li>
+        <li><strong>Limit:</strong> the database may become the next bottleneck.</li>
+        <li><strong>Risk:</strong> scaling too slowly can still cause overload during sudden spikes.</li>
+      </ul>
+
+      <h2>Common mistakes</h2>
+      <ul>
+        <li>Keeping user sessions only in instance memory.</li>
+        <li>Scaling on CPU alone without watching latency or queue depth.</li>
+        <li>Stopping instances before active requests finish.</li>
+        <li>Adding servers without load testing downstream dependencies.</li>
+      </ul>
+
+      <h2>Think today</h2>
+      <p class="prompt">
+        Your API grows from two instances to ten, but latency stays high. Which shared
+        dependency would you inspect first, and what metric would confirm the bottleneck?
+      </p>
+
+      <h2>Connect yesterday</h2>
+      <p>
+        <a href="0001-cache-aside.html">Cache-aside</a> can reduce database pressure
+        after application servers scale out, but it does not remove database limits.
+      </p>
+
+      <h2>Primary source</h2>
+      <p>
+        Read:
+        <a href="https://docs.aws.amazon.com/autoscaling/ec2/userguide/what-is-amazon-ec2-auto-scaling.html">
+          AWS: What is Amazon EC2 Auto Scaling?
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the pattern is unclear.</p>
+    </main>
+  </body>
+</html>

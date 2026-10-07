@@ -1,0 +1,402 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Production Agent Architecture</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-11"><h1><span class="chapter-number">Lesson 11</span> Production Agent Architecture</h1><div class="meta"><time datetime="2026-07-06">2026-07-06</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-11-section-1">1. What It Means</a></li><li><a href="#lesson-11-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-11-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-11-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-11-section-5">5. Real-World Example 1: Ecommerce Support Agent</a></li><li><a href="#lesson-11-section-6">6. Real-World Example 2: Internal Engineering Agent</a></li><li><a href="#lesson-11-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-11-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-11-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Production Agent Architecture workflow"><ol class="flow"><li><strong>Request</strong><span>Authenticate the user</span></li><li><strong>Orchestrate</strong><span>Manage model, context and tools</span></li><li><strong>Control</strong><span>Validate and limit actions</span></li><li><strong>Observe</strong><span>Evaluate and monitor outcomes</span></li></ol><figcaption>Figure 11. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-11-section-1">1. What It Means</h2>
+<p><strong>Production agent architecture</strong> means the full system design around an AI agent so it can run safely and reliably for real users.</p>
+<p>A production agent is not just:</p>
+<pre><code class="language-text">User -&gt; LLM -&gt; Answer
+</code></pre>
+<p>A real production agent usually looks more like:</p>
+<pre><code class="language-text">User
+  -&gt; API layer
+  -&gt; Auth and permissions
+  -&gt; Agent orchestrator
+  -&gt; Prompt/context builder
+  -&gt; Retrieval system
+  -&gt; Tool layer
+  -&gt; Guardrails
+  -&gt; Memory
+  -&gt; Model
+  -&gt; Observability
+  -&gt; Final response
+</code></pre>
+<p>Simple meaning:</p>
+<blockquote>
+<p>Production agent architecture is how you connect the model, tools, data, safety checks, memory, logs, and business rules into one reliable system.</p>
+</blockquote>
+<p>Important parts:</p>
+<ul>
+<li><strong>API layer:</strong> receives user requests</li>
+<li><strong>Authentication:</strong> proves who the user is</li>
+<li><strong>Authorization:</strong> checks what the user is allowed to do</li>
+<li><strong>Agent orchestrator:</strong> controls the agent loop</li>
+<li><strong>Context builder:</strong> prepares instructions, memory, retrieved data, and tool results</li>
+<li><strong>Retrieval:</strong> finds relevant documents</li>
+<li><strong>Tools:</strong> let the agent call real systems</li>
+<li><strong>Guardrails:</strong> block unsafe requests or outputs</li>
+<li><strong>Memory:</strong> stores useful long-term facts</li>
+<li><strong>Observability:</strong> logs behavior, cost, latency, and failures</li>
+<li><strong>Evaluation:</strong> tests whether the system is improving or getting worse</li>
+</ul>
+<p>The model is only one component. The architecture around it decides whether the product is safe and useful.</p>
+<hr>
+<h2 id="lesson-11-section-2">2. Why It Matters In Production Systems</h2>
+<p>A demo can work with one prompt and one model call.</p>
+<p>A production system needs more control.</p>
+<p>Without proper architecture, the agent may:</p>
+<ul>
+<li>Access data the user should not see</li>
+<li>Call dangerous tools too freely</li>
+<li>Use stale documents</li>
+<li>Forget important workflow rules</li>
+<li>Give answers without evidence</li>
+<li>Become slow and expensive</li>
+<li>Fail silently</li>
+<li>Be impossible to debug</li>
+<li>Break after a prompt or model change</li>
+</ul>
+<p>In production, you need to answer questions like:</p>
+<ul>
+<li>Who is the user?</li>
+<li>What data can they access?</li>
+<li>Which tools can the agent use?</li>
+<li>What happens if a tool fails?</li>
+<li>What actions need human approval?</li>
+<li>What did the agent do step by step?</li>
+<li>How much did this request cost?</li>
+<li>Can we replay or debug a bad answer?</li>
+<li>Can we roll back a bad prompt or model version?</li>
+</ul>
+<p>Good architecture makes those answers clear.</p>
+<hr>
+<h2 id="lesson-11-section-3">3. How It Works Step By Step</h2>
+<p>Imagine a user asks:</p>
+<blockquote>
+<p>“Cancel my subscription and refund my last payment.”</p>
+</blockquote>
+<p>A production agent should not immediately do it.</p>
+<p>A safer architecture handles it like this:</p>
+<ol>
+<li><p><strong>Receive request</strong></p>
+<p>The API receives the user message and creates a <code>request_id</code>.</p>
+</li>
+<li><p><strong>Authenticate user</strong></p>
+<p>The system confirms who the user is.</p>
+</li>
+<li><p><strong>Check permissions</strong></p>
+<p>The backend checks whether the user can manage this subscription.</p>
+</li>
+<li><p><strong>Classify the intent</strong></p>
+<p>The agent identifies the task:</p>
+<pre><code class="language-json">{
+  &quot;intent&quot;: &quot;subscription_cancellation_and_refund&quot;,
+  &quot;risk_level&quot;: &quot;high&quot;
+}
+</code></pre>
+</li>
+<li><p><strong>Retrieve relevant policy</strong></p>
+<p>The retrieval system finds:</p>
+<ul>
+<li>Cancellation policy</li>
+<li>Refund policy</li>
+<li>Subscription terms</li>
+</ul>
+</li>
+<li><p><strong>Call read-only tools first</strong></p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  &quot;tool&quot;: &quot;get_subscription_status&quot;,
+  &quot;input&quot;: {
+    &quot;user_id&quot;: &quot;current_user&quot;
+  }
+}
+</code></pre>
+</li>
+<li><p><strong>Apply guardrails</strong></p>
+<p>The system checks:</p>
+<ul>
+<li>Is refund allowed?</li>
+<li>Is cancellation allowed?</li>
+<li>Is this high-risk?</li>
+<li>Is human or user confirmation required?</li>
+</ul>
+</li>
+<li><p><strong>Ask for confirmation</strong></p>
+<p>The agent says:</p>
+<blockquote>
+<p>“I can cancel your subscription. Your last payment is eligible for refund review, but it requires approval. Do you want me to continue?”</p>
+</blockquote>
+</li>
+<li><p><strong>Run write tools only after approval</strong></p>
+<p>Write tools change data.</p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  &quot;tool&quot;: &quot;create_refund_request&quot;,
+  &quot;input&quot;: {
+    &quot;subscription_id&quot;: &quot;sub_123&quot;,
+    &quot;reason&quot;: &quot;customer_request&quot;
+  }
+}
+</code></pre>
+</li>
+<li><p><strong>Log everything</strong></p>
+</li>
+</ol>
+<p>   The system logs:</p>
+<ul>
+<li>Request ID</li>
+<li>User ID</li>
+<li>Retrieved documents</li>
+<li>Tool calls</li>
+<li>Guardrail decisions</li>
+<li>Final response</li>
+<li>Cost and latency</li>
+</ul>
+<ol start="11">
+<li><strong>Return final response</strong></li>
+</ol>
+<p>   The user gets a clear answer based on real system state.</p>
+<hr>
+<h2 id="lesson-11-section-4">4. How To Apply It In A Project</h2>
+<p>Start with a simple architecture. Add complexity only where needed.</p>
+<p>A practical first version:</p>
+<pre><code class="language-text">Frontend
+  -&gt; Backend API
+  -&gt; Agent service
+  -&gt; Model provider
+  -&gt; Tool service
+  -&gt; Database
+  -&gt; Logs and metrics
+</code></pre>
+<p>Then add production controls.</p>
+<p><strong>Step 1: Define agent boundaries</strong></p>
+<p>Decide what the agent can and cannot do.</p>
+<p>Example:</p>
+<pre><code class="language-text">Can:
+- Answer support questions
+- Retrieve policy docs
+- Create support tickets
+
+Cannot:
+- Issue refunds directly
+- Delete accounts
+- Access payroll data
+</code></pre>
+<p><strong>Step 2: Separate read and write actions</strong></p>
+<p>Read tools are safer.</p>
+<p>Examples:</p>
+<ul>
+<li><code>get_order_status</code></li>
+<li><code>search_policy_docs</code></li>
+<li><code>get_customer_plan</code></li>
+</ul>
+<p>Write tools are riskier.</p>
+<p>Examples:</p>
+<ul>
+<li><code>issue_refund</code></li>
+<li><code>cancel_subscription</code></li>
+<li><code>send_email</code></li>
+<li><code>delete_file</code></li>
+</ul>
+<p>Write tools need stricter permissions and confirmation.</p>
+<p><strong>Step 3: Put security in backend code</strong></p>
+<p>Do not rely only on the prompt.</p>
+<p>Bad:</p>
+<pre><code class="language-text">Model, do not show private data.
+</code></pre>
+<p>Better:</p>
+<pre><code class="language-text">Backend refuses to return private data unless the user has permission.
+</code></pre>
+<p><strong>Step 4: Add observability from day one</strong></p>
+<p>At minimum, log:</p>
+<ul>
+<li>Request ID</li>
+<li>Prompt version</li>
+<li>Model name</li>
+<li>Retrieved docs</li>
+<li>Tool calls</li>
+<li>Tool errors</li>
+<li>Final answer</li>
+<li>Cost</li>
+<li>Latency</li>
+</ul>
+<p><strong>Step 5: Add evaluations</strong></p>
+<p>Create test cases for common and risky workflows.</p>
+<p>Example:</p>
+<pre><code class="language-text">User asks for another customer&#39;s invoice.
+Expected: refuse or block access.
+</code></pre>
+<hr>
+<h2 id="lesson-11-section-5">5. Real-World Example 1: Ecommerce Support Agent</h2>
+<p><strong>Use case:</strong> An online store wants an AI support agent.</p>
+<p>The agent can:</p>
+<ul>
+<li>Answer policy questions</li>
+<li>Check order status</li>
+<li>Start return requests</li>
+<li>Create support tickets</li>
+</ul>
+<p><strong>Architecture:</strong></p>
+<pre><code class="language-text">Customer chat
+  -&gt; Support API
+  -&gt; Auth check
+  -&gt; Agent orchestrator
+  -&gt; Policy retrieval
+  -&gt; Order tools
+  -&gt; Return request tool
+  -&gt; Guardrails
+  -&gt; Logs
+</code></pre>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“My shoes arrived damaged. Can I return them?”</p>
+</blockquote>
+<p><strong>Good behavior:</strong></p>
+<ol>
+<li>Retrieve damaged item return policy.</li>
+<li>Check the order belongs to the user.</li>
+<li>Check return window.</li>
+<li>Ask for photo evidence if required.</li>
+<li>Create a return request if allowed.</li>
+<li>Give a clear response.</li>
+</ol>
+<p><strong>Output:</strong></p>
+<blockquote>
+<p>“Your order is within the return window. Damaged items are eligible for return review. I created a return request and you will be asked to upload photos of the damage.”</p>
+</blockquote>
+<p><strong>Bad architecture risk:</strong></p>
+<p>If the model can call <code>create_return_request</code> without ownership checks, one user may create returns for another user’s order.</p>
+<p><strong>Production fix:</strong></p>
+<p>The tool itself must check ownership before creating the return.</p>
+<hr>
+<h2 id="lesson-11-section-6">6. Real-World Example 2: Internal Engineering Agent</h2>
+<p><strong>Use case:</strong> A company wants an AI agent to help engineers debug deployment failures.</p>
+<p>The agent can:</p>
+<ul>
+<li>Read CI logs</li>
+<li>Search repo files</li>
+<li>Read deployment docs</li>
+<li>Suggest fixes</li>
+<li>Run safe local tests</li>
+</ul>
+<p>It cannot:</p>
+<ul>
+<li>Deploy to production automatically</li>
+<li>Delete infrastructure</li>
+<li>Read secrets</li>
+<li>Change billing settings</li>
+</ul>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“Why did the frontend deploy fail?”</p>
+</blockquote>
+<p><strong>Good behavior:</strong></p>
+<ol>
+<li>Read latest CI failure log.</li>
+<li>Identify failing command.</li>
+<li>Search related config.</li>
+<li>Check recent changes.</li>
+<li>Suggest root cause with evidence.</li>
+<li>Recommend fix.</li>
+<li>Run relevant test if allowed.</li>
+</ol>
+<p><strong>Output:</strong></p>
+<blockquote>
+<p>“The deploy failed during the build step because the Node version in CI does not match the package engine requirement. Evidence: CI log shows <code>Unsupported engine</code>, and <code>package.json</code> requires Node 24. Update the CI runtime or deployment image.”</p>
+</blockquote>
+<p><strong>Bad architecture risk:</strong></p>
+<p>If the agent has unrestricted shell or cloud access, a bad instruction could trigger unsafe changes.</p>
+<p><strong>Production fix:</strong></p>
+<p>Use sandboxing, allowlisted commands, approval gates, and read-only cloud access by default.</p>
+<hr>
+<h2 id="lesson-11-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<p><strong>Mistake 1: Treating the model as the whole system</strong></p>
+<p>The model is not enough.</p>
+<p>You also need tools, permissions, retrieval, logging, and tests.</p>
+<p><strong>Mistake 2: No authorization layer</strong></p>
+<p>Authentication answers:</p>
+<blockquote>
+<p>“Who are you?”</p>
+</blockquote>
+<p>Authorization answers:</p>
+<blockquote>
+<p>“What are you allowed to access?”</p>
+</blockquote>
+<p>You need both.</p>
+<p><strong>Mistake 3: Giving the agent too many tools</strong></p>
+<p>More tools mean more power, but also more risk and confusion.</p>
+<p>Start with a small allowlist.</p>
+<p><strong>Mistake 4: No human approval for high-risk actions</strong></p>
+<p>Refunds, account deletion, production deploys, payments, and outbound emails often need confirmation.</p>
+<p><strong>Mistake 5: No fallback path</strong></p>
+<p>If tools fail or data is missing, the agent should not guess.</p>
+<p>It should say what failed and what is needed.</p>
+<p><strong>Mistake 6: No versioning</strong></p>
+<p>Track versions for:</p>
+<ul>
+<li>Prompts</li>
+<li>Tools</li>
+<li>Retrieval config</li>
+<li>Guardrails</li>
+<li>Models</li>
+</ul>
+<p>Without versioning, debugging becomes slow.</p>
+<p><strong>Trade-off: Autonomy vs control</strong></p>
+<p>More autonomy can reduce manual work.</p>
+<p>But more autonomy increases risk.</p>
+<p>Production systems should give autonomy gradually, starting with low-risk tasks.</p>
+<hr>
+<h2 id="lesson-11-section-8">8. Practical Best Practices</h2>
+<ol>
+<li><p><strong>Use a clear agent boundary</strong></p>
+<p>Define exactly what the agent can do.</p>
+</li>
+<li><p><strong>Keep business rules outside the model</strong></p>
+<p>Put critical rules in backend code.</p>
+</li>
+<li><p><strong>Use least privilege</strong></p>
+<p>Give the agent only the tools and data it needs.</p>
+</li>
+<li><p><strong>Separate read tools from write tools</strong></p>
+<p>Make write tools harder to call.</p>
+</li>
+<li><p><strong>Require approval for risky actions</strong></p>
+<p>Use user confirmation or human review.</p>
+</li>
+<li><p><strong>Log every important step</strong></p>
+<p>Record planning, retrieval, tool calls, guardrail decisions, and final output.</p>
+</li>
+<li><p><strong>Design failure behavior</strong></p>
+<p>The agent should know when to stop, ask for help, or escalate.</p>
+</li>
+<li><p><strong>Build evals before scaling</strong></p>
+<p>Test common, edge, and unsafe cases.</p>
+</li>
+<li><p><strong>Start narrow</strong></p>
+<p>A small reliable agent is better than a broad unreliable one.</p>
+</li>
+<li><p><strong>Review production traces</strong></p>
+</li>
+</ol>
+<p>   Real user behavior will show failure cases your test set missed.</p>
+<hr>
+<h2 id="lesson-11-section-9">9. Small Practice Exercise</h2>
+<p>Imagine you are building an AI agent for a SaaS billing team.</p>
+<p>The agent should help users understand invoices and request refunds.</p>
+<p>Design the architecture.</p>
+<p>Answer these:</p>
+<ol>
+<li>What tools should be read-only?</li>
+<li>What tools should be write tools?</li>
+<li>What actions require confirmation?</li>
+<li>What data needs permission checks?</li>
+<li>What should be logged for observability?</li>
+<li>What should the agent do if refund policy and invoice data conflict?</li>
+</ol>
+<p>A strong answer should include:</p>
+<ul>
+<li>Read tools: get invoice, get subscription, retrieve billing policy</li>
+<li>Write tools: create refund request, update billing ticket</li>
+<li>Confirmation before refund-related actions</li>
+<li>Permission checks on invoice and account ownership</li>
+<li>Logs for retrieved policy, tool calls, model output, cost, and latency</li>
+<li>Escalation to billing team if policy and invoice data conflict</li>
+</ul>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

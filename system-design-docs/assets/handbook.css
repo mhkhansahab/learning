@@ -1,0 +1,62 @@
+body { background: white; }
+.book-layout { display: grid; grid-template-columns: 280px minmax(0, 1fr); max-width: 1240px; margin: auto; }
+.contents { position: sticky; top: 0; height: 100vh; overflow: auto; padding: 32px 24px; border-right: 1px solid var(--line); background: #f6f8fa; }
+.contents h2 { margin-top: 0; }
+.contents ol { padding-left: 22px; font-size: 14px; }
+.contents li { margin: 10px 0; }
+.contents a { text-decoration: none; }
+.contents a:hover { text-decoration: underline; }
+main { width: 100%; min-width: 0; margin: 0; padding: 48px; border: 0; border-radius: 0; }
+h1 { font-size: 36px; letter-spacing: 0; }
+h2.chapter-title { font-size: 28px; margin-top: 12px; }
+h3 { font-size: 19px; margin-top: 32px; line-height: 1.35; }
+article { padding: 40px 0; border-top: 1px solid var(--line); }
+article, h3 { scroll-margin-top: 24px; }
+.chapter-nav { display: flex; flex-wrap: wrap; gap: 10px 20px; font-size: 14px; margin: 24px 0; }
+.chapter-map { display: flex; flex-wrap: wrap; gap: 8px 18px; margin: 24px 0; padding: 16px 0; border-block: 1px solid var(--line); font-size: 14px; }
+.chapter-map a { max-width: 100%; overflow-wrap: anywhere; }
+.diagram { margin: 28px 0; padding: 24px 0; border-block: 1px solid var(--line); }
+.diagram-title { margin: 0 0 16px; font-size: 16px; font-weight: 700; }
+.diagram-row { display: flex; align-items: stretch; gap: 0; margin: 16px 0; }
+.diagram-node { flex: 1; min-width: 0; padding: 16px 12px; background: #eef6ff; border-top: 3px solid #0969da; }
+.diagram-node:nth-of-type(3n) { background: #eaf7f0; border-color: #24784b; }
+.diagram-node strong { display: block; font-size: 15px; line-height: 1.4; overflow-wrap: anywhere; }
+.diagram-node span { display: block; color: #364452; font-size: 13px; margin-top: 8px; overflow-wrap: anywhere; }
+.diagram-arrow { width: 28px; flex: 0 0 28px; align-self: center; text-align: center; font-size: 22px; color: #4b5965; }
+figcaption { font-size: 14px; color: var(--muted); max-width: 72ch; }
+.topic-index { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 32px; margin: 24px 0 40px; }
+.topic-index dt { font-weight: 700; }
+.topic-index dd { margin: 4px 0 0; font-size: 14px; }
+.topic-index dd a { display: block; margin: 4px 0; }
+.prompt { background: #edf8f1; border-color: #24784b; }
+.flow { white-space: normal; overflow-wrap: anywhere; }
+.source-note { font-size: 14px; color: var(--muted); }
+@media (max-width: 850px) {
+  .book-layout { display: block; }
+  .contents { position: static; height: auto; border-right: 0; border-bottom: 1px solid var(--line); padding: 24px; }
+  .contents ol { columns: 2; }
+  main { padding: 32px 24px; }
+}
+@media (max-width: 520px) {
+  .contents ol { columns: 1; }
+  h1 { font-size: 30px; }
+  h2.chapter-title { font-size: 26px; overflow-wrap: anywhere; }
+  .topic-index { grid-template-columns: 1fr; }
+  .diagram-row { flex-direction: column; }
+  .diagram-arrow { transform: rotate(90deg); height: 28px; flex-basis: 28px; }
+}
+@media print {
+  @page { size: A4; margin: 18mm; }
+  .book-layout { display: block; }
+  .contents { position: static; height: auto; overflow: visible; background: white; border: 0; padding: 0; break-after: page; }
+  .contents ol { columns: 2; }
+  main { padding: 0; }
+  article { break-before: page; border: 0; padding-top: 0; }
+  h2, h3, .diagram-title { break-after: avoid; }
+  figure, .prompt, .diagram-node { break-inside: avoid; }
+  .chapter-nav, .chapter-map { display: none; }
+  a { color: #17202a; }
+  p, li { orphans: 3; widows: 3; }
+  .diagram-node { background: white; border: 1px solid #65717b; }
+  .topic-index { break-after: page; }
+}

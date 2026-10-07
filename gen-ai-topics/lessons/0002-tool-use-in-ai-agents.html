@@ -1,0 +1,357 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tool Use in AI Agents</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-2"><h1><span class="chapter-number">Lesson 02</span> Tool Use in AI Agents</h1><div class="meta"><time datetime="2026-06-26">2026-06-26</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-2-section-1">1. What It Means</a></li><li><a href="#lesson-2-section-2">2. Why It Matters in Production Systems</a></li><li><a href="#lesson-2-section-3">3. How It Works Step by Step</a></li><li><a href="#lesson-2-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-2-section-5">5. Real-World Example 1: Customer Support Agent</a></li><li><a href="#lesson-2-section-6">6. Real-World Example 2: Internal Sales Assistant</a></li><li><a href="#lesson-2-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-2-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-2-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Tool Use in AI Agents workflow"><ol class="flow"><li><strong>Request</strong><span>Identify the task</span></li><li><strong>Tool call</strong><span>Choose a permitted function</span></li><li><strong>Execute</strong><span>Backend validates arguments</span></li><li><strong>Observe</strong><span>Use the real result</span></li></ol><figcaption>Figure 2. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-2-section-1">1. What It Means</h2>
+<p><strong>Tool use</strong> means an AI model can call an external function, API, database, search system, calculator, file reader, or business system instead of only answering from its own text knowledge.</p>
+<p>A normal chatbot only produces text.</p>
+<p>A tool-using agent can do things like:</p>
+<ul>
+<li>Search your company documents</li>
+<li>Check an order status</li>
+<li>Create a support ticket</li>
+<li>Read a calendar</li>
+<li>Run code</li>
+<li>Query a database</li>
+<li>Send an email after approval</li>
+<li>Calculate exact numbers</li>
+</ul>
+<p>The important idea is simple:</p>
+<blockquote>
+<p>The AI decides what tool is needed, sends structured input to that tool, receives the result, then uses that result to continue the task.</p>
+</blockquote>
+<p>A tool usually has three parts:</p>
+<ul>
+<li><strong>Name:</strong> what the tool is called, for example <code>get_order_status</code></li>
+<li><strong>Input schema:</strong> what information the tool needs, for example <code>{ &quot;order_id&quot;: &quot;12345&quot; }</code></li>
+<li><strong>Output:</strong> what the tool returns, for example <code>{ &quot;status&quot;: &quot;shipped&quot;, &quot;delivery_date&quot;: &quot;2026-06-28&quot; }</code></li>
+</ul>
+<p>The model should not guess when a tool can provide the real answer.</p>
+<hr>
+<h2 id="lesson-2-section-2">2. Why It Matters in Production Systems</h2>
+<p>Tool use is one of the main differences between a demo chatbot and a useful production agent.</p>
+<p>Without tools, the AI can only generate possible answers. That is risky for real systems.</p>
+<p>For example:</p>
+<ul>
+<li>It may guess a customer’s refund status.</li>
+<li>It may invent a database result.</li>
+<li>It may give outdated pricing.</li>
+<li>It may say an action was completed when nothing happened.</li>
+</ul>
+<p>With tools, the agent can connect to real systems.</p>
+<p>This matters because production systems need:</p>
+<ul>
+<li><strong>Accuracy:</strong> use live data instead of guesses</li>
+<li><strong>Action:</strong> actually perform tasks, not just explain them</li>
+<li><strong>Security:</strong> restrict what the AI can access or change</li>
+<li><strong>Auditability:</strong> log every tool call and result</li>
+<li><strong>Reliability:</strong> retry failed operations or ask for missing information</li>
+<li><strong>Control:</strong> require approval before dangerous actions</li>
+</ul>
+<p>Tool use makes AI more useful, but also more dangerous if designed badly. A tool-using agent can affect real users, real money, and real data.</p>
+<hr>
+<h2 id="lesson-2-section-3">3. How It Works Step by Step</h2>
+<p>A typical tool-use flow looks like this:</p>
+<ol>
+<li><p><strong>User asks for something</strong></p>
+<p>Example:</p>
+<blockquote>
+<p>“Where is my order #A1928?”</p>
+</blockquote>
+</li>
+<li><p><strong>Model understands the task</strong></p>
+<p>The model sees that this question requires live order data. It should not answer from memory.</p>
+</li>
+<li><p><strong>Model selects a tool</strong></p>
+<p>It chooses something like:</p>
+<pre><code class="language-json">{
+  &quot;tool&quot;: &quot;get_order_status&quot;,
+  &quot;input&quot;: {
+    &quot;order_id&quot;: &quot;A1928&quot;
+  }
+}
+</code></pre>
+</li>
+<li><p><strong>System runs the tool</strong></p>
+<p>The real backend calls the order database or shipping API.</p>
+</li>
+<li><p><strong>Tool returns data</strong></p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  &quot;order_id&quot;: &quot;A1928&quot;,
+  &quot;status&quot;: &quot;in_transit&quot;,
+  &quot;carrier&quot;: &quot;DHL&quot;,
+  &quot;estimated_delivery&quot;: &quot;2026-06-29&quot;
+}
+</code></pre>
+</li>
+<li><p><strong>Model writes the answer</strong></p>
+<p>The model converts the tool result into simple language:</p>
+<blockquote>
+<p>“Your order A1928 is in transit with DHL. Estimated delivery is June 29, 2026.”</p>
+</blockquote>
+</li>
+<li><p><strong>System logs the action</strong></p>
+<p>In production, you should log:</p>
+<ul>
+<li>User request</li>
+<li>Tool selected</li>
+<li>Tool input</li>
+<li>Tool output</li>
+<li>Final answer</li>
+<li>Errors or retries</li>
+</ul>
+</li>
+</ol>
+<p>This log helps with debugging, security reviews, and quality improvement.</p>
+<hr>
+<h2 id="lesson-2-section-4">4. How To Apply It In A Project</h2>
+<p>Start small. Do not give the agent too many tools at once.</p>
+<p>A practical implementation plan:</p>
+<ol>
+<li><p><strong>Pick one clear workflow</strong></p>
+<p>Example:</p>
+<ul>
+<li>“Check order status”</li>
+<li>“Create support ticket”</li>
+<li>“Find internal policy”</li>
+<li>“Summarize customer account”</li>
+</ul>
+</li>
+<li><p><strong>Design one tool with a strict schema</strong></p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  &quot;name&quot;: &quot;get_order_status&quot;,
+  &quot;description&quot;: &quot;Fetch the current shipping status for one customer order.&quot;,
+  &quot;input&quot;: {
+    &quot;order_id&quot;: &quot;string&quot;
+  }
+}
+</code></pre>
+</li>
+<li><p><strong>Make the tool do one thing well</strong></p>
+<p>Avoid a giant tool like <code>manage_customer</code>. That is too broad.</p>
+<p>Prefer smaller tools:</p>
+<ul>
+<li><code>get_customer_profile</code></li>
+<li><code>get_order_status</code></li>
+<li><code>create_refund_request</code></li>
+<li><code>create_support_ticket</code></li>
+</ul>
+</li>
+<li><p><strong>Add permission checks outside the model</strong></p>
+<p>Never trust the model alone for security.</p>
+<p>The backend should check:</p>
+<ul>
+<li>Is this user allowed to access this order?</li>
+<li>Is this action allowed?</li>
+<li>Does this action need human approval?</li>
+</ul>
+</li>
+<li><p><strong>Add safe failure behavior</strong></p>
+<p>If the tool fails, the model should say:</p>
+<blockquote>
+<p>“I could not check the order right now. Please try again later.”</p>
+</blockquote>
+<p>It should not invent the answer.</p>
+</li>
+<li><p><strong>Test with real scenarios</strong></p>
+<p>Test normal, missing, invalid, and risky inputs.</p>
+<p>Example test cases:</p>
+<ul>
+<li>Valid order ID</li>
+<li>Order ID from another user</li>
+<li>Missing order ID</li>
+<li>Fake order ID</li>
+<li>Tool timeout</li>
+<li>User asks for a refund instead of status</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-2-section-5">5. Real-World Example 1: Customer Support Agent</h2>
+<p><strong>Use case:</strong> An ecommerce company wants an AI assistant to answer order questions.</p>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“Has my order 88421 shipped?”</p>
+</blockquote>
+<p><strong>Agent behavior:</strong></p>
+<p>The agent should call:</p>
+<pre><code class="language-json">{
+  &quot;tool&quot;: &quot;get_order_status&quot;,
+  &quot;input&quot;: {
+    &quot;order_id&quot;: &quot;88421&quot;
+  }
+}
+</code></pre>
+<p><strong>Tool result:</strong></p>
+<pre><code class="language-json">{
+  &quot;status&quot;: &quot;shipped&quot;,
+  &quot;carrier&quot;: &quot;FedEx&quot;,
+  &quot;tracking_number&quot;: &quot;FX29301&quot;,
+  &quot;estimated_delivery&quot;: &quot;2026-06-27&quot;
+}
+</code></pre>
+<p><strong>Final answer:</strong></p>
+<blockquote>
+<p>“Yes. Your order 88421 has shipped with FedEx. The estimated delivery date is June 27, 2026.”</p>
+</blockquote>
+<p><strong>Good outcome:</strong></p>
+<p>The answer is based on live order data.</p>
+<p><strong>Bad design risk:</strong></p>
+<p>If the agent only guesses, it may say the order shipped when it did not. That creates customer frustration and support cost.</p>
+<p><strong>Production detail:</strong></p>
+<p>The backend must verify that the logged-in customer owns order <code>88421</code>. The model should not decide that by itself.</p>
+<hr>
+<h2 id="lesson-2-section-6">6. Real-World Example 2: Internal Sales Assistant</h2>
+<p><strong>Use case:</strong> A sales team wants an AI assistant that prepares account summaries before calls.</p>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“Prepare a quick summary for Acme Corp before my meeting.”</p>
+</blockquote>
+<p>The agent may need multiple tools:</p>
+<pre><code class="language-json">{
+  &quot;tool&quot;: &quot;get_crm_account&quot;,
+  &quot;input&quot;: {
+    &quot;company_name&quot;: &quot;Acme Corp&quot;
+  }
+}
+</code></pre>
+<p>Then:</p>
+<pre><code class="language-json">{
+  &quot;tool&quot;: &quot;get_recent_support_tickets&quot;,
+  &quot;input&quot;: {
+    &quot;account_id&quot;: &quot;acct_781&quot;
+  }
+}
+</code></pre>
+<p>Then:</p>
+<pre><code class="language-json">{
+  &quot;tool&quot;: &quot;get_open_opportunities&quot;,
+  &quot;input&quot;: {
+    &quot;account_id&quot;: &quot;acct_781&quot;
+  }
+}
+</code></pre>
+<p><strong>Tool results may show:</strong></p>
+<ul>
+<li>Acme is a current customer.</li>
+<li>They have 3 open support tickets.</li>
+<li>One renewal opportunity is worth <code>$80,000</code>.</li>
+<li>Last meeting note says they are concerned about onboarding speed.</li>
+</ul>
+<p><strong>Final answer:</strong></p>
+<blockquote>
+<p>“Acme Corp is an active customer with an $80,000 renewal opportunity. They currently have 3 open support tickets, mostly about onboarding speed. In the meeting, focus on support resolution, renewal risk, and next onboarding milestones.”</p>
+</blockquote>
+<p><strong>Good outcome:</strong></p>
+<p>The salesperson gets a useful, current briefing.</p>
+<p><strong>Bad design risk:</strong></p>
+<p>The agent may expose sensitive CRM data to the wrong employee if permission checks are weak.</p>
+<p><strong>Production detail:</strong></p>
+<p>Each tool should respect the user’s role. A junior salesperson may not be allowed to see enterprise pricing or legal notes.</p>
+<hr>
+<h2 id="lesson-2-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<p><strong>Mistake 1: Too many tools</strong></p>
+<p>If the agent has 40 tools, it may choose the wrong one.</p>
+<p>Better: start with a small set of high-value tools.</p>
+<p><strong>Mistake 2: Tool descriptions are unclear</strong></p>
+<p>Bad description:</p>
+<blockquote>
+<p>“Gets data.”</p>
+</blockquote>
+<p>Good description:</p>
+<blockquote>
+<p>“Fetches the shipping status for one order owned by the current user.”</p>
+</blockquote>
+<p>Clear descriptions help the model choose correctly.</p>
+<p><strong>Mistake 3: No permission checks</strong></p>
+<p>The model should not be your security layer.</p>
+<p>Always enforce permissions in backend code.</p>
+<p><strong>Mistake 4: Letting the agent perform dangerous actions too easily</strong></p>
+<p>Actions like refunds, deleting data, sending emails, or changing billing plans should often require confirmation.</p>
+<p>Example:</p>
+<blockquote>
+<p>“I can create a refund request for $120. Do you want me to continue?”</p>
+</blockquote>
+<p><strong>Mistake 5: Trusting tool output blindly</strong></p>
+<p>Tools can fail, return old data, or return partial data.</p>
+<p>The system should handle:</p>
+<ul>
+<li>Empty results</li>
+<li>Timeouts</li>
+<li>Permission errors</li>
+<li>Invalid input</li>
+<li>Conflicting data</li>
+</ul>
+<p><strong>Trade-off: More power means more risk</strong></p>
+<p>Tool use makes agents much more useful, but each tool increases the attack surface.</p>
+<p>An <strong>attack surface</strong> means the number of ways something can be misused or attacked.</p>
+<p>For example, if an agent can send emails, a malicious user may try to trick it into sending private information.</p>
+<hr>
+<h2 id="lesson-2-section-8">8. Practical Best Practices</h2>
+<p>Use these rules when building tool-using agents:</p>
+<ol>
+<li><p><strong>Make tools narrow</strong></p>
+<p>One tool should do one clear job.</p>
+</li>
+<li><p><strong>Use strict input schemas</strong></p>
+<p>Do not accept messy free text when structured fields are possible.</p>
+</li>
+<li><p><strong>Validate inputs in backend code</strong></p>
+<p>Check types, IDs, ownership, and permissions.</p>
+</li>
+<li><p><strong>Separate read tools and write tools</strong></p>
+<p>Reading data is usually lower risk.</p>
+<p>Writing data, sending messages, deleting records, or charging money is higher risk.</p>
+</li>
+<li><p><strong>Require approval for high-risk actions</strong></p>
+<p>Example high-risk actions:</p>
+<ul>
+<li>Send email</li>
+<li>Issue refund</li>
+<li>Delete record</li>
+<li>Change subscription</li>
+<li>Share private data</li>
+</ul>
+</li>
+<li><p><strong>Log every tool call</strong></p>
+<p>Logs help answer:</p>
+<ul>
+<li>What happened?</li>
+<li>Why did the agent do that?</li>
+<li>What data did it use?</li>
+<li>Did the tool fail?</li>
+</ul>
+</li>
+<li><p><strong>Give the model error-handling instructions</strong></p>
+<p>Example:</p>
+<blockquote>
+<p>“If the tool returns no result, say you could not find the order. Do not invent an order status.”</p>
+</blockquote>
+</li>
+<li><p><strong>Test tool selection</strong></p>
+<p>Do not only test the final answer.</p>
+<p>Test whether the agent picked the correct tool with the correct input.</p>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-2-section-9">9. Small Practice Exercise</h2>
+<p>Imagine you are building an AI assistant for a clinic.</p>
+<p>A patient asks:</p>
+<blockquote>
+<p>“Can you move my appointment with Dr. Ahmed from Monday to Wednesday?”</p>
+</blockquote>
+<p>Question:</p>
+<p>What tools would you create?</p>
+<p>Think about:</p>
+<ul>
+<li>What read tool is needed first?</li>
+<li>What write tool is needed later?</li>
+<li>What permission check is required?</li>
+<li>Should the agent ask for confirmation before changing the appointment?</li>
+</ul>
+<p>A strong answer might include tools like:</p>
+<ul>
+<li><code>get_patient_appointments</code></li>
+<li><code>check_doctor_availability</code></li>
+<li><code>reschedule_appointment</code></li>
+</ul>
+<p>And it should require confirmation before the final change.</p>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

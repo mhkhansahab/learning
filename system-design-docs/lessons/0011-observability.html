@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Observability: Understand Production Behavior</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0011 · Operations</p>
+      <h1>Observability</h1>
+      <p class="muted">
+        Observability is the ability to understand what a production system is doing
+        by looking at its external signals: logs, metrics, traces, and events.
+      </p>
+
+      <h2>The problem it solves</h2>
+      <p>
+        Production systems fail in ways you did not predict. A database index may be
+        missing, a queue may fall behind, a container may restart, or one customer may
+        trigger a slow API path. Without observability, engineers guess.
+      </p>
+      <p>
+        Observability gives you evidence. It helps answer: what broke, who is affected,
+        when did it start, where is the bottleneck, and whether the fix worked.
+      </p>
+      <p class="flow">Service emits telemetry → Collector / agent → Storage → Dashboards, alerts, traces, logs</p>
+
+      <h2>How it works</h2>
+      <ol>
+        <li>Application code and infrastructure emit telemetry.</li>
+        <li>Telemetry is collected from services, containers, databases, queues, and load balancers.</li>
+        <li>The data is enriched with labels such as service, route, region, customer tier, and version.</li>
+        <li>Storage systems index the data for search, dashboards, alerting, and trace lookup.</li>
+        <li>Engineers use the data to detect incidents, debug root causes, and verify fixes.</li>
+      </ol>
+      <p>
+        Good observability is not only collecting more data. It is collecting the
+        right data with enough context to make production decisions quickly.
+      </p>
+
+      <h2>Main components</h2>
+      <ul>
+        <li><strong>Metrics:</strong> numeric time-series data, such as request rate, latency, error rate, CPU, and queue depth.</li>
+        <li><strong>Logs:</strong> structured event records that explain what happened inside a service.</li>
+        <li><strong>Traces:</strong> request journeys across services, useful for seeing where time was spent.</li>
+        <li><strong>Events:</strong> important changes, such as deployments, config changes, autoscaling, or incident actions.</li>
+        <li><strong>Dashboards:</strong> visual views of service health and business-critical paths.</li>
+        <li><strong>Alerts:</strong> notifications based on symptoms that need human or automated action.</li>
+      </ul>
+
+      <h2>Example 1: slow checkout request</h2>
+      <p>
+        A user reports that checkout is slow. Metrics show p95 checkout latency
+        increased from 400 ms to 3 seconds. Logs show no clear application error.
+        A distributed trace shows the payment service is fast, but the inventory
+        service spends 2.4 seconds waiting on a database query.
+      </p>
+      <p>
+        The team checks the query plan and finds a missing index. The fix is not
+        "add more containers"; the fix is a safe database index migration. Observability
+        prevents the team from scaling the wrong layer.
+      </p>
+
+      <h2>Example 2: production queue backlog</h2>
+      <p>
+        A billing system uses a queue to send invoices. Normally, workers process
+        300 messages per second and the oldest message age stays under 2 minutes.
+        After a release, the oldest message age grows to 45 minutes while API traffic
+        still looks healthy.
+      </p>
+      <p>
+        Metrics show worker error rate increased. Logs show the new code rejects
+        some invoice payloads. Traces show retries hammer the same downstream CRM.
+        The team rolls back the worker image, moves poison messages to a dead-letter
+        queue, and adds a schema compatibility test. Without queue observability,
+        users might only notice hours later when invoices do not arrive.
+      </p>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>Every production service needs basic observability before it is trusted.</li>
+        <li>You operate APIs, workers, databases, queues, containers, or scheduled jobs.</li>
+        <li>You need to debug failures across multiple services.</li>
+        <li>You need alerts based on user-visible symptoms, not only machine health.</li>
+        <li>You want to measure whether reliability, performance, and cost changes worked.</li>
+      </ul>
+
+      <h2>When not to overdo it</h2>
+      <ul>
+        <li>A small internal script may not need full tracing and dashboards.</li>
+        <li>High-cardinality labels can explode cost without improving debugging.</li>
+        <li>Verbose logs can hide useful signals and leak sensitive data.</li>
+        <li>Too many alerts can train teams to ignore real incidents.</li>
+      </ul>
+
+      <h2>Implementation considerations</h2>
+      <ul>
+        <li>Start with golden signals: latency, traffic, errors, and saturation.</li>
+        <li>Use structured logs with request IDs, service name, route, status, and safe business context.</li>
+        <li>Propagate trace IDs across services, queues, and background workers.</li>
+        <li>Record deployment and config-change events so incidents can be tied to changes.</li>
+        <li>Alert on symptoms, such as failed checkout rate, not only CPU or memory.</li>
+        <li>Define service-level objectives for critical user journeys.</li>
+        <li>Review dashboards during incidents and remove panels nobody uses.</li>
+      </ul>
+
+      <h2>Security considerations</h2>
+      <ul>
+        <li>Do not log passwords, tokens, session cookies, payment data, or raw personal data.</li>
+        <li>Restrict access to logs and traces because they may reveal production behavior and customer context.</li>
+        <li>Scrub sensitive headers and payloads before telemetry leaves the service.</li>
+        <li>Keep audit logs for security-relevant actions separate from noisy debug logs.</li>
+        <li>Protect telemetry pipelines; attackers can hide activity by disabling or flooding them.</li>
+      </ul>
+
+      <h2>Reliability concerns</h2>
+      <ul>
+        <li>Telemetry must not take down the app if the collector or vendor is unavailable.</li>
+        <li>Use sampling carefully so rare but important traces are not always dropped.</li>
+        <li>Monitor the observability pipeline itself: dropped logs, delayed metrics, and collector errors.</li>
+        <li>Keep alert thresholds tied to user impact and expected traffic patterns.</li>
+        <li>Run incident reviews to add missing signals discovered during real failures.</li>
+      </ul>
+
+      <h2>Performance and cost</h2>
+      <p>
+        Observability has real cost. Logs, metrics, and traces consume CPU, network,
+        storage, and vendor budget. The goal is not infinite data. The goal is enough
+        high-quality telemetry to detect and debug production problems quickly. Use
+        sampling, retention rules, label discipline, and aggregation to control cost.
+      </p>
+
+      <h2>Key trade-offs</h2>
+      <ul>
+        <li><strong>Detail vs cost:</strong> more telemetry helps debugging but increases storage and processing cost.</li>
+        <li><strong>Sampling vs completeness:</strong> sampling reduces cost but can miss rare failures.</li>
+        <li><strong>Fast alerts vs noisy alerts:</strong> sensitive alerts catch problems quickly but may create fatigue.</li>
+        <li><strong>Debug context vs privacy:</strong> rich logs help engineers but can expose sensitive data if poorly designed.</li>
+      </ul>
+
+      <h2>Common mistakes and edge cases</h2>
+      <ul>
+        <li>Logging unstructured text that cannot be filtered by service, request ID, or customer segment.</li>
+        <li>Alerting on CPU but missing user-facing error rate or latency.</li>
+        <li>Using high-cardinality labels, such as user ID, on every metric.</li>
+        <li>Forgetting background workers, queues, cron jobs, and migrations.</li>
+        <li>Collecting traces but not propagating trace IDs through async boundaries.</li>
+        <li>Keeping debug logs forever and creating avoidable cost and privacy risk.</li>
+        <li>Not marking deployments, making it harder to connect incidents to recent changes.</li>
+      </ul>
+
+      <h2>Connection to previous lessons</h2>
+      <p>
+        <a href="0004-load-balancing.html">Load balancing</a> needs target health,
+        latency, and error metrics. <a href="0005-message-queues.html">Message queues</a>
+        need queue depth, oldest message age, retries, and dead-letter queue counts.
+        <a href="0009-containerization.html">Containerization</a> needs restart,
+        CPU, memory, and image rollout visibility. <a href="0010-api-pagination.html">API pagination</a>
+        should reduce latency and database load, and observability proves whether it
+        did. <a href="0008-eventual-consistency.html">Eventual consistency</a> needs
+        lag metrics and reconciliation checks.
+      </p>
+
+      <h2>Design exercise</h2>
+      <p class="prompt">
+        You own a checkout API, an inventory service, a payment service, and an invoice
+        queue. Design the minimum observability plan: five metrics, three structured
+        log fields, one trace you must capture, two alerts, and one dashboard that
+        would help you debug a failed checkout incident.
+      </p>
+
+      <h2>Primary source</h2>
+      <p>
+        Read:
+        <a href="https://opentelemetry.io/docs/concepts/observability-primer/">
+          OpenTelemetry Docs: Observability primer
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    </main>
+  </body>
+</html>

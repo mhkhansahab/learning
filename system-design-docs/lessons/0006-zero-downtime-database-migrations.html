@@ -1,0 +1,188 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Zero-Downtime Database Migrations: Change Schemas Safely</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0006 · Databases</p>
+      <h1>Zero-Downtime Database Migrations</h1>
+      <p class="muted">
+        A zero-downtime migration changes a production database in small compatible
+        steps so old code, new code, and live traffic can safely overlap.
+      </p>
+
+      <h2>The problem it solves</h2>
+      <p>
+        Database schema changes can break running applications. If you rename a
+        column while old app servers still read the old name, requests fail. If you
+        add a slow index on a large table, writes may block. If you backfill millions
+        of rows in one transaction, the database can become overloaded.
+      </p>
+      <p>
+        Zero-downtime migration design prevents one release from assuming the entire
+        system changes at the same instant. In real production, old app instances,
+        new app instances, background jobs, and database migrations may all overlap.
+      </p>
+      <p class="flow">Expand schema → Deploy compatible code → Backfill safely → Switch reads/writes → Contract old schema</p>
+
+      <h2>How it works</h2>
+      <ol>
+        <li><strong>Expand:</strong> add the new table, column, index, or nullable field without removing the old path.</li>
+        <li><strong>Dual support:</strong> deploy code that can work with both old and new schema shapes.</li>
+        <li><strong>Backfill:</strong> copy or calculate existing data in small batches.</li>
+        <li><strong>Switch:</strong> move reads and writes to the new schema after data is ready.</li>
+        <li><strong>Contract:</strong> remove the old column, table, or code only after it is no longer used.</li>
+      </ol>
+      <p>
+        This is often called the expand-and-contract pattern. It turns one risky
+        migration into several safe releases. The cost is more steps, but each step
+        is reversible or easier to pause.
+      </p>
+
+      <h2>Main components</h2>
+      <ul>
+        <li><strong>Schema migration:</strong> the database change, such as adding a column or index.</li>
+        <li><strong>Application compatibility:</strong> code that supports both old and new schema versions.</li>
+        <li><strong>Backfill job:</strong> a controlled process that updates old rows in batches.</li>
+        <li><strong>Feature flag:</strong> a switch that lets you move traffic gradually to the new path.</li>
+        <li><strong>Rollback plan:</strong> the exact action to stop, pause, or reverse a bad migration.</li>
+        <li><strong>Observability:</strong> metrics, logs, and checks that prove the migration is safe.</li>
+      </ul>
+
+      <h2>Example 1: adding a user display name</h2>
+      <p>
+        A social app wants to add <code>display_name</code> to the <code>users</code>
+        table. A safe first step is to add the nullable column. Then the application
+        writes both <code>name</code> and <code>display_name</code> for new updates.
+        A batch job fills <code>display_name</code> for existing users. After the team
+        verifies that every active row has the new value, reads switch to the new
+        column. The old column is removed in a later release.
+      </p>
+      <p>
+        The important part is compatibility. During deployment, some servers may still
+        use the old column and some may use the new code. Both must work.
+      </p>
+
+      <h2>Example 2: production migration on a large table</h2>
+      <p>
+        An orders table has 400 million rows and receives 6,000 writes per second
+        during peak traffic. The team needs to add an index for faster customer order
+        history queries. A normal blocking index build could slow writes or lock the
+        table long enough to cause an incident.
+      </p>
+      <p>
+        The production-safe approach is to use the database's online or concurrent
+        index creation mode, run it during a low-risk period, and monitor replication
+        lag, write latency, CPU, disk I/O, and lock waits. If pressure rises above the
+        rollback threshold, the team cancels or pauses the operation. The query path
+        is enabled only after the index is valid and performance is measured.
+      </p>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>Your application has real users and cannot pause for schema changes.</li>
+        <li>Multiple app versions may run at the same time during deploys.</li>
+        <li>The table is large enough that backfills, indexes, or constraints may take time.</li>
+        <li>You are renaming, dropping, moving, or changing the meaning of data.</li>
+        <li>You need a safe rollback if the new code or data path fails.</li>
+      </ul>
+
+      <h2>When not to use it</h2>
+      <ul>
+        <li>A tiny internal app can accept a clear maintenance window.</li>
+        <li>The database is disposable or can be recreated from source data.</li>
+        <li>The change is purely additive and has no performance or compatibility risk.</li>
+        <li>The extra release steps create more risk than a planned short downtime.</li>
+      </ul>
+
+      <h2>Implementation considerations</h2>
+      <ul>
+        <li>Prefer additive changes first: add before rename, remove, or make required.</li>
+        <li>Make new columns nullable first, then enforce <code>NOT NULL</code> after backfill and validation.</li>
+        <li>Backfill in small batches with sleeps or rate limits between batches.</li>
+        <li>Use online index creation when your database supports it.</li>
+        <li>Keep old and new code paths compatible across at least one deploy window.</li>
+        <li>Check background workers and queued jobs; they may run old code after the web deploy.</li>
+        <li>Write migration scripts so they can be safely retried after partial failure.</li>
+      </ul>
+
+      <h2>Security considerations</h2>
+      <ul>
+        <li>Do not expose sensitive copied data through a new column before permissions are updated.</li>
+        <li>Preserve encryption, masking, retention, and audit rules when moving data.</li>
+        <li>Limit who can run production migrations, especially destructive changes.</li>
+        <li>Avoid logging raw row values while debugging migration failures.</li>
+        <li>Test rollback without restoring production data into unsafe environments.</li>
+      </ul>
+
+      <h2>Reliability concerns</h2>
+      <ul>
+        <li>Define stop conditions before starting: max lock time, lag, error rate, or latency.</li>
+        <li>Monitor old and new code paths until the old path is fully removed.</li>
+        <li>Protect the database from aggressive backfills that compete with user traffic.</li>
+        <li>Plan for partial progress; a migration may succeed for 60% of rows and then fail.</li>
+        <li>Keep backups, but do not treat restore-from-backup as your normal rollback plan.</li>
+      </ul>
+
+      <h2>Performance and cost</h2>
+      <p>
+        Safe migrations often take longer because they use batching, online operations,
+        and multiple releases. That is usually better than causing downtime. The cost
+        is extra engineering effort, temporary duplicate writes, storage for old and
+        new columns, and monitoring time. The performance risk is database pressure:
+        locks, replication lag, large transactions, slow indexes, and cache churn.
+      </p>
+
+      <h2>Key trade-offs</h2>
+      <ul>
+        <li><strong>Speed vs safety:</strong> one big migration is faster to write, but harder to recover from.</li>
+        <li><strong>Simplicity vs compatibility:</strong> supporting old and new schema shapes adds temporary code.</li>
+        <li><strong>Immediate cleanup vs rollback:</strong> deleting old columns quickly reduces clutter but removes fallback options.</li>
+        <li><strong>Strong constraints vs rollout flexibility:</strong> constraints protect data but should be added after data is ready.</li>
+      </ul>
+
+      <h2>Common mistakes and edge cases</h2>
+      <ul>
+        <li>Renaming or dropping a column in the same release where code stops using it.</li>
+        <li>Adding a required column without a safe default or backfill plan.</li>
+        <li>Running a large backfill in one transaction.</li>
+        <li>Forgetting that background workers, cron jobs, and old containers may still use the old schema.</li>
+        <li>Using rollback code that assumes the migration fully completed.</li>
+        <li>Adding an index safely but enabling a query before the index is ready.</li>
+        <li>Testing only on a tiny local database where lock and backfill behavior is unrealistic.</li>
+      </ul>
+
+      <h2>Connection to previous lessons</h2>
+      <p>
+        <a href="0005-message-queues.html">Message queues</a> are often used for
+        safe backfills because workers can process rows gradually. <a href="0004-load-balancing.html">Load balancing</a>
+        means old and new app servers may run at the same time, so migrations must
+        support mixed versions. <a href="0001-cache-aside.html">Cache-aside</a>
+        can hide database load, but cached data may also need invalidation when the
+        schema or data shape changes.
+      </p>
+
+      <h2>Design exercise</h2>
+      <p class="prompt">
+        You need to rename <code>users.full_name</code> to <code>users.display_name</code>
+        on a table with 80 million rows and continuous traffic. Design the releases:
+        what do you add first, when do you dual-write, how do you backfill, when do
+        you switch reads, and what metrics decide whether to pause or roll back?
+      </p>
+
+      <h2>Primary source</h2>
+      <p>
+        Read:
+        <a href="https://docs.gitlab.com/development/database/avoiding_downtime_in_migrations/">
+          GitLab Docs: Avoiding downtime in migrations
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    </main>
+  </body>
+</html>

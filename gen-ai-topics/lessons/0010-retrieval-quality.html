@@ -1,0 +1,394 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Retrieval Quality</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-10"><h1><span class="chapter-number">Lesson 10</span> Retrieval Quality</h1><div class="meta"><time datetime="2026-07-05">2026-07-05</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-10-section-1">1. What It Means</a></li><li><a href="#lesson-10-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-10-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-10-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-10-section-5">5. Real-World Example 1: Customer Support Policy Assistant</a></li><li><a href="#lesson-10-section-6">6. Real-World Example 2: Developer Documentation Assistant</a></li><li><a href="#lesson-10-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-10-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-10-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Retrieval Quality workflow"><ol class="flow"><li><strong>Query</strong><span>Understand the information need</span></li><li><strong>Search</strong><span>Find candidate passages</span></li><li><strong>Rank</strong><span>Prioritize useful evidence</span></li><li><strong>Measure</strong><span>Check relevant coverage</span></li></ol><figcaption>Figure 10. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-10-section-1">1. What It Means</h2>
+<p><strong>Retrieval quality</strong> means how well your AI system finds the right information before generating an answer.</p>
+<p>This matters most in RAG systems.</p>
+<p>RAG means <strong>Retrieval-Augmented Generation</strong>. The AI first retrieves documents, then uses them to answer.</p>
+<p>But RAG only works well if retrieval is good.</p>
+<p>Simple meaning:</p>
+<blockquote>
+<p>Retrieval quality decides whether the model gets the right evidence before it answers.</p>
+</blockquote>
+<p>If retrieval brings the wrong documents, even a strong model may give a bad answer.</p>
+<p>Important parts:</p>
+<ul>
+<li><strong>Query:</strong> what the user asks</li>
+<li><strong>Documents:</strong> the knowledge source, such as policies, help docs, contracts, tickets, code, or database records</li>
+<li><strong>Chunks:</strong> smaller pieces of documents used for search</li>
+<li><strong>Embedding:</strong> a numeric representation of text used for semantic search</li>
+<li><strong>Ranking:</strong> ordering search results by relevance</li>
+<li><strong>Reranking:</strong> a second pass that improves result order</li>
+<li><strong>Metadata:</strong> extra fields like date, category, customer, version, region, or access level</li>
+</ul>
+<p>Retrieval quality is not only “did we find something?”</p>
+<p>The real question is:</p>
+<blockquote>
+<p>Did we find the most useful, correct, current, and allowed information?</p>
+</blockquote>
+<hr>
+<h2 id="lesson-10-section-2">2. Why It Matters In Production Systems</h2>
+<p>Many teams blame the model when the real problem is retrieval.</p>
+<p>Example:</p>
+<p>User asks:</p>
+<blockquote>
+<p>“Can I return a damaged item after opening the box?”</p>
+</blockquote>
+<p>The model answers:</p>
+<blockquote>
+<p>“Opened items cannot be returned.”</p>
+</blockquote>
+<p>That may be wrong if the damaged-item policy allows returns.</p>
+<p>The issue may not be the model. The retrieval system may have found the normal return policy but missed the damaged-item policy.</p>
+<p>Poor retrieval causes:</p>
+<ul>
+<li>Wrong answers</li>
+<li>Missing citations</li>
+<li>Hallucinations</li>
+<li>Outdated policy usage</li>
+<li>Private data leaks</li>
+<li>Bad customer support</li>
+<li>Weak legal or compliance answers</li>
+<li>Higher cost because too much irrelevant context is sent</li>
+</ul>
+<p>Good retrieval improves:</p>
+<ul>
+<li>Accuracy</li>
+<li>Trust</li>
+<li>Explainability</li>
+<li>Lower hallucination risk</li>
+<li>Lower token cost</li>
+<li>Better user experience</li>
+</ul>
+<p>RAG evaluation frameworks like RAGAS discuss retrieval-focused checks such as context relevance and answer grounding. Source: <a href="https://arxiv.org/abs/2309.15217">https://arxiv.org/abs/2309.15217</a></p>
+<hr>
+<h2 id="lesson-10-section-3">3. How It Works Step By Step</h2>
+<p>Imagine a user asks:</p>
+<blockquote>
+<p>“What is the refund policy for damaged electronics?”</p>
+</blockquote>
+<p>A retrieval system usually works like this:</p>
+<ol>
+<li><p><strong>Receive the user query</strong></p>
+<pre><code class="language-text">What is the refund policy for damaged electronics?
+</code></pre>
+</li>
+<li><p><strong>Convert the query into a search form</strong></p>
+<p>The system may use embeddings, keywords, or both.</p>
+</li>
+<li><p><strong>Search the index</strong></p>
+<p>The index contains chunks from company documents.</p>
+<p>Example chunks:</p>
+<ul>
+<li>General refund policy</li>
+<li>Electronics warranty policy</li>
+<li>Damaged item policy</li>
+<li>International return rules</li>
+</ul>
+</li>
+<li><p><strong>Retrieve top results</strong></p>
+<p>Example:</p>
+<pre><code class="language-json">[
+  {
+    &quot;doc&quot;: &quot;damaged_items_policy&quot;,
+    &quot;score&quot;: 0.91
+  },
+  {
+    &quot;doc&quot;: &quot;electronics_warranty_policy&quot;,
+    &quot;score&quot;: 0.86
+  },
+  {
+    &quot;doc&quot;: &quot;general_refund_policy&quot;,
+    &quot;score&quot;: 0.79
+  }
+]
+</code></pre>
+</li>
+<li><p><strong>Filter by metadata</strong></p>
+<p>Example:</p>
+<ul>
+<li>Region: Pakistan</li>
+<li>Product type: electronics</li>
+<li>Policy version: current</li>
+<li>Access: public support policy</li>
+</ul>
+</li>
+<li><p><strong>Rerank results</strong></p>
+<p>A reranker may decide the damaged-item policy is more relevant than the general refund policy.</p>
+</li>
+<li><p><strong>Send selected chunks to the model</strong></p>
+<p>The model receives only the most useful evidence.</p>
+</li>
+<li><p><strong>Generate answer with citations</strong></p>
+<p>The model answers based on retrieved content.</p>
+</li>
+<li><p><strong>Log retrieval details</strong></p>
+<p>The system records:</p>
+<ul>
+<li>Query</li>
+<li>Retrieved docs</li>
+<li>Scores</li>
+<li>Final selected chunks</li>
+<li>Whether the answer used them</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-10-section-4">4. How To Apply It In A Project</h2>
+<p>Start by treating retrieval as its own product feature.</p>
+<p>Do not only test the final answer.</p>
+<p>Test whether the system found the right evidence.</p>
+<p>A practical setup:</p>
+<ol>
+<li><p><strong>Create a small test set</strong></p>
+<p>Example:</p>
+<pre><code class="language-json">{
+  &quot;question&quot;: &quot;Can customers return damaged electronics?&quot;,
+  &quot;must_retrieve&quot;: [&quot;damaged_items_policy&quot;, &quot;electronics_return_policy&quot;]
+}
+</code></pre>
+</li>
+<li><p><strong>Check top-k results</strong></p>
+<p><strong>Top-k</strong> means the first <code>k</code> search results.</p>
+<p>Example:</p>
+<pre><code class="language-text">Top 5 retrieved documents should include damaged_items_policy.
+</code></pre>
+</li>
+<li><p><strong>Improve document chunking</strong></p>
+<p>Bad chunk:</p>
+<pre><code class="language-text">Huge 12-page policy document as one chunk.
+</code></pre>
+<p>Better chunks:</p>
+<ul>
+<li>Refund eligibility</li>
+<li>Damaged items</li>
+<li>Electronics exceptions</li>
+<li>Refund timelines</li>
+<li>Required evidence</li>
+</ul>
+</li>
+<li><p><strong>Add metadata</strong></p>
+<p>Useful metadata:</p>
+<ul>
+<li>Document type</li>
+<li>Policy version</li>
+<li>Date</li>
+<li>Region</li>
+<li>Product category</li>
+<li>Access level</li>
+<li>Department</li>
+<li>Customer segment</li>
+</ul>
+</li>
+<li><p><strong>Use hybrid search when needed</strong></p>
+<p><strong>Hybrid search</strong> combines semantic search and keyword search.</p>
+<p>Semantic search understands meaning.</p>
+<p>Keyword search is good for exact terms like:</p>
+<ul>
+<li>Product codes</li>
+<li>Error codes</li>
+<li>Contract IDs</li>
+<li>Legal clause numbers</li>
+<li>API names</li>
+</ul>
+</li>
+<li><p><strong>Add reranking</strong></p>
+<p>Reranking is useful when initial search returns mostly correct but poorly ordered results.</p>
+</li>
+<li><p><strong>Measure retrieval quality</strong></p>
+<p>Useful metrics:</p>
+<ul>
+<li>Did the right document appear in top 3?</li>
+<li>Did the answer use the right document?</li>
+<li>How often did retrieval return nothing?</li>
+<li>How often did it return outdated documents?</li>
+<li>How often did users downvote answers because evidence was wrong?</li>
+</ul>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-10-section-5">5. Real-World Example 1: Customer Support Policy Assistant</h2>
+<p><strong>Use case:</strong> An ecommerce support chatbot answers refund questions.</p>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“My laptop arrived with a cracked screen. Can I return it after opening the package?”</p>
+</blockquote>
+<p><strong>Bad retrieval result:</strong></p>
+<pre><code class="language-json">[
+  &quot;general_return_policy&quot;,
+  &quot;opened_items_policy&quot;,
+  &quot;refund_processing_time&quot;
+]
+</code></pre>
+<p><strong>Bad answer:</strong></p>
+<blockquote>
+<p>“Opened electronics are not eligible for return.”</p>
+</blockquote>
+<p>This answer ignores damage.</p>
+<p><strong>Good retrieval result:</strong></p>
+<pre><code class="language-json">[
+  &quot;damaged_item_return_policy&quot;,
+  &quot;electronics_damage_exception&quot;,
+  &quot;refund_evidence_requirements&quot;
+]
+</code></pre>
+<p><strong>Good answer:</strong></p>
+<blockquote>
+<p>“Yes, damaged electronics can be returned after opening if the damage is reported within the allowed period. You may need to provide photos of the cracked screen and packaging.”</p>
+</blockquote>
+<p><strong>Outcome:</strong></p>
+<p>The answer is correct because retrieval found the exception policy.</p>
+<p><strong>Production lesson:</strong></p>
+<p>Policy exceptions are often more important than general rules.</p>
+<p>Your retrieval system must find them.</p>
+<hr>
+<h2 id="lesson-10-section-6">6. Real-World Example 2: Developer Documentation Assistant</h2>
+<p><strong>Use case:</strong> A developer asks an internal AI assistant about deployment.</p>
+<p><strong>User input:</strong></p>
+<blockquote>
+<p>“How do I deploy the frontend service?”</p>
+</blockquote>
+<p><strong>Bad retrieval result:</strong></p>
+<pre><code class="language-json">[
+  &quot;old_deployment_notes_2023&quot;,
+  &quot;backend_deploy_script&quot;,
+  &quot;local_setup_readme&quot;
+]
+</code></pre>
+<p><strong>Bad answer:</strong></p>
+<blockquote>
+<p>“Run the old deploy command from 2023.”</p>
+</blockquote>
+<p>This may break production.</p>
+<p><strong>Good retrieval result:</strong></p>
+<pre><code class="language-json">[
+  &quot;frontend_deployment_runbook_current&quot;,
+  &quot;ci_cd_pipeline_docs&quot;,
+  &quot;rollback_instructions&quot;
+]
+</code></pre>
+<p><strong>Good answer:</strong></p>
+<blockquote>
+<p>“Use the current CI/CD frontend deployment workflow. The frontend deployment is handled by the pipeline, and rollback instructions are in the current runbook.”</p>
+</blockquote>
+<p><strong>Outcome:</strong></p>
+<p>The assistant gives safe operational guidance.</p>
+<p><strong>Production lesson:</strong></p>
+<p>For engineering docs, retrieval must prefer current docs over stale notes.</p>
+<p>Metadata like <code>current: true</code>, <code>last_updated</code>, and <code>service: frontend</code> matters.</p>
+<hr>
+<h2 id="lesson-10-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<p><strong>Mistake 1: Bad chunking</strong></p>
+<p>If chunks are too large, the model gets noise.</p>
+<p>If chunks are too small, key context is missing.</p>
+<p>Example:</p>
+<p>A chunk that says:</p>
+<pre><code class="language-text">Refund is allowed only if...
+</code></pre>
+<p>but the condition is in the next chunk is not useful.</p>
+<p><strong>Mistake 2: Only using vector similarity</strong></p>
+<p>Vector search is good, but not always enough.</p>
+<p>Exact terms matter for:</p>
+<ul>
+<li>Error codes</li>
+<li>Product IDs</li>
+<li>Legal sections</li>
+<li>API names</li>
+<li>Invoice numbers</li>
+</ul>
+<p>Use hybrid search when exact matching matters.</p>
+<p><strong>Mistake 3: Ignoring metadata</strong></p>
+<p>If old and new policies are both indexed, the system may retrieve outdated content.</p>
+<p>Use metadata filters.</p>
+<p><strong>Mistake 4: Returning too many chunks</strong></p>
+<p>More context is not always better.</p>
+<p>Too many chunks can confuse the model and increase cost.</p>
+<p><strong>Mistake 5: No access control</strong></p>
+<p>Retrieval must respect permissions.</p>
+<p>A user should not retrieve private HR or customer data just because it matches the query.</p>
+<p><strong>Mistake 6: Measuring only final answers</strong></p>
+<p>If the final answer is wrong, you need to know whether the problem was:</p>
+<ul>
+<li>Retrieval</li>
+<li>Prompt</li>
+<li>Model reasoning</li>
+<li>Tool failure</li>
+<li>Outdated source data</li>
+</ul>
+<p>Test retrieval separately.</p>
+<p><strong>Trade-off: Recall vs precision</strong></p>
+<p><strong>Recall</strong> means finding all useful documents.</p>
+<p><strong>Precision</strong> means avoiding irrelevant documents.</p>
+<p>High recall can bring too much noise.</p>
+<p>High precision can miss important exceptions.</p>
+<p>Good production systems balance both.</p>
+<hr>
+<h2 id="lesson-10-section-8">8. Practical Best Practices</h2>
+<ol>
+<li><p><strong>Build a retrieval test set</strong></p>
+<p>For each question, define which documents should be retrieved.</p>
+</li>
+<li><p><strong>Track top-k accuracy</strong></p>
+<p>Check whether the correct document appears in top 3, top 5, or top 10.</p>
+</li>
+<li><p><strong>Use metadata filters</strong></p>
+<p>Filter by:</p>
+<ul>
+<li>User access</li>
+<li>Region</li>
+<li>Product</li>
+<li>Version</li>
+<li>Date</li>
+<li>Department</li>
+</ul>
+</li>
+<li><p><strong>Use hybrid search for exact terms</strong></p>
+<p>Especially for technical, legal, financial, and product support systems.</p>
+</li>
+<li><p><strong>Add reranking for important workflows</strong></p>
+<p>Reranking improves ordering when many results are similar.</p>
+</li>
+<li><p><strong>Log retrieval results</strong></p>
+<p>Store:</p>
+<ul>
+<li>Query</li>
+<li>Retrieved chunks</li>
+<li>Scores</li>
+<li>Metadata filters</li>
+<li>Final chunks sent to model</li>
+</ul>
+</li>
+<li><p><strong>Watch for stale documents</strong></p>
+<p>Add expiry rules or document versioning.</p>
+</li>
+<li><p><strong>Prefer trusted sources</strong></p>
+<p>Public pages, user uploads, internal notes, and official policies should not all have the same trust level.</p>
+</li>
+<li><p><strong>Connect bad answers back to retrieval</strong></p>
+<p>When users downvote answers, inspect whether the right evidence was retrieved.</p>
+</li>
+</ol>
+<hr>
+<h2 id="lesson-10-section-9">9. Small Practice Exercise</h2>
+<p>Imagine you are building an AI assistant for company HR policies.</p>
+<p>User asks:</p>
+<blockquote>
+<p>“Can I work remotely from another country for two months?”</p>
+</blockquote>
+<p>Design the retrieval plan.</p>
+<p>Answer these:</p>
+<ol>
+<li>What documents should be retrieved?</li>
+<li>What metadata filters matter?</li>
+<li>What old or unsafe documents should be excluded?</li>
+<li>Would keyword search, vector search, or hybrid search be best?</li>
+<li>What should the assistant do if it finds conflicting policies?</li>
+</ol>
+<p>A strong answer should include:</p>
+<ul>
+<li>Remote work policy</li>
+<li>International work policy</li>
+<li>Tax or legal compliance policy</li>
+<li>Employee region and contract type</li>
+<li>Current policy version only</li>
+<li>Hybrid search because exact terms like country, visa, tax, and remote work matter</li>
+<li>If policies conflict, do not guess; say the policies conflict and escalate to HR</li>
+</ul>
+</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>

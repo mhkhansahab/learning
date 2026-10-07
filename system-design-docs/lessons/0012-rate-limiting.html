@@ -1,0 +1,195 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Rate Limiting: Protect APIs From Overload and Abuse</title>
+    <link rel="stylesheet" href="../assets/course.css">
+  </head>
+  <body>
+    <main>
+      <p class="eyebrow">Lesson 0012 · Security and Reliability</p>
+      <h1>Rate Limiting</h1>
+      <p class="muted">
+        Rate limiting controls how many requests or expensive actions a user,
+        client, IP address, tenant, or service can perform in a period of time.
+      </p>
+
+      <h2>The problem it solves</h2>
+      <p>
+        APIs can be overloaded by mistakes, aggressive clients, crawlers, attacks,
+        or one large customer. Without limits, one caller can consume database CPU,
+        queue capacity, third-party API quota, email or SMS budget, and container
+        resources that other users need.
+      </p>
+      <p>
+        Rate limiting creates a controlled boundary. It does not make the system
+        infinitely scalable, but it prevents one caller from taking more than their
+        fair share and gives the platform time to recover.
+      </p>
+      <p class="flow">Request → Identify caller → Check limit bucket → Allow or reject → Record decision and metrics</p>
+
+      <h2>How it works</h2>
+      <ol>
+        <li>The API identifies the caller using API key, user ID, tenant ID, IP address, or service identity.</li>
+        <li>The rate limiter checks how much quota that caller has used in a time window.</li>
+        <li>If quota remains, the request continues and usage is recorded.</li>
+        <li>If quota is exhausted, the API returns a clear rejection, commonly HTTP <code>429 Too Many Requests</code>.</li>
+        <li>The response may include retry guidance such as <code>Retry-After</code>.</li>
+      </ol>
+      <p>
+        Good rate limiting protects scarce resources, not only request count. A cheap
+        status check and a report export should not consume the same amount of quota.
+      </p>
+
+      <h2>Main components</h2>
+      <ul>
+        <li><strong>Identity key:</strong> who the limit applies to, such as user, tenant, token, IP, or route.</li>
+        <li><strong>Limit rule:</strong> the allowed volume, such as 100 requests per minute.</li>
+        <li><strong>Algorithm:</strong> the counting method, such as fixed window, sliding window, token bucket, or leaky bucket.</li>
+        <li><strong>Storage:</strong> where counters or tokens are kept, often Redis or an API gateway.</li>
+        <li><strong>Response behavior:</strong> what the caller receives when limited.</li>
+        <li><strong>Observability:</strong> metrics and logs showing allowed, rejected, and near-limit traffic.</li>
+      </ul>
+
+      <h2>Common algorithms</h2>
+      <ul>
+        <li><strong>Fixed window:</strong> simple counters per minute or hour; easy but can allow bursts at window boundaries.</li>
+        <li><strong>Sliding window:</strong> smoother counting over the last real interval; more accurate but more complex.</li>
+        <li><strong>Token bucket:</strong> tokens refill over time; supports controlled bursts while preserving average rate.</li>
+        <li><strong>Leaky bucket:</strong> requests drain at a steady rate; useful when downstream systems need smooth traffic.</li>
+      </ul>
+
+      <h2>Example 1: public login API</h2>
+      <p>
+        A login endpoint is cheap when used normally but dangerous during credential
+        stuffing. The API limits failed login attempts by IP address, username, and
+        device fingerprint. After repeated failures, it slows or blocks attempts and
+        may require extra verification.
+      </p>
+      <p>
+        This protects user accounts and database capacity. The limit must be careful:
+        a shared office IP or mobile network can represent many real users, so the
+        design should combine multiple signals instead of blocking only by IP.
+      </p>
+
+      <h2>Example 2: production cost spike from exports</h2>
+      <p>
+        An analytics SaaS product has an export endpoint that starts background CSV
+        jobs. One enterprise customer accidentally runs a script that starts 30,000
+        exports in an hour. Queue depth grows, object storage writes increase, email
+        notifications spike, and the data warehouse bill jumps.
+      </p>
+      <p>
+        A better design limits export creation by tenant and by user, uses a separate
+        quota for expensive exports, rejects excess requests with a clear retry time,
+        and exposes current quota in the UI. The system also alerts when one tenant
+        approaches a cost or job-creation threshold.
+      </p>
+
+      <h2>When to use it</h2>
+      <ul>
+        <li>Any public API, login endpoint, webhook receiver, file upload, or export endpoint.</li>
+        <li>Endpoints that call paid third-party services such as SMS, email, maps, or AI APIs.</li>
+        <li>Multi-tenant systems where one tenant can affect others.</li>
+        <li>Background job creation endpoints that can flood queues.</li>
+        <li>Internal service-to-service APIs that need protection from retry storms.</li>
+      </ul>
+
+      <h2>When not to rely on it alone</h2>
+      <ul>
+        <li>Rate limiting does not replace authentication, authorization, or input validation.</li>
+        <li>It does not fix slow queries, inefficient code, or missing pagination.</li>
+        <li>It does not stop distributed attacks unless limits are applied at the right layer.</li>
+        <li>It should not block critical internal recovery actions without a bypass plan.</li>
+      </ul>
+
+      <h2>Implementation considerations</h2>
+      <ul>
+        <li>Limit by the right identity: user, tenant, API key, IP, route, or a combination.</li>
+        <li>Use different limits for cheap reads, expensive writes, exports, uploads, and login attempts.</li>
+        <li>Return helpful errors with <code>429</code>, retry timing, and documentation.</li>
+        <li>Keep counters in a fast shared store if many app instances enforce the same limit.</li>
+        <li>Use fail-open or fail-closed deliberately if the limiter storage is unavailable.</li>
+        <li>Add admin controls for temporary quota increases and emergency blocks.</li>
+        <li>Test clients to make sure they back off instead of retrying harder.</li>
+      </ul>
+
+      <h2>Security considerations</h2>
+      <ul>
+        <li>Apply strict limits to authentication, password reset, invite, OTP, and token creation endpoints.</li>
+        <li>Do not trust headers such as <code>X-Forwarded-For</code> unless set by your trusted proxy.</li>
+        <li>Protect against quota bypass through multiple API keys, accounts, regions, or paths.</li>
+        <li>Keep rate-limit decisions auditable for abuse investigation.</li>
+        <li>Avoid revealing too much about account existence through different rate-limit messages.</li>
+      </ul>
+
+      <h2>Reliability concerns</h2>
+      <ul>
+        <li>The limiter itself must be fast and highly available.</li>
+        <li>A centralized limiter can become a bottleneck if every request depends on it.</li>
+        <li>Retry storms can happen when many clients receive errors and retry at the same time.</li>
+        <li>Clock drift can affect window-based algorithms across distributed systems.</li>
+        <li>Bad limits can block real users during traffic spikes or incidents.</li>
+      </ul>
+
+      <h2>Performance and cost</h2>
+      <p>
+        Rate limiting improves system stability by reducing overload before expensive
+        work starts. It can lower database load, queue backlog, storage writes, and
+        third-party service bills. The cost is extra infrastructure, storage lookups,
+        operational tuning, and occasional customer support when legitimate users hit
+        limits.
+      </p>
+
+      <h2>Key trade-offs</h2>
+      <ul>
+        <li><strong>Protection vs usability:</strong> strict limits protect the system but can block legitimate bursts.</li>
+        <li><strong>Simplicity vs fairness:</strong> IP-based limits are simple but unfair for shared networks and weak against distributed clients.</li>
+        <li><strong>Central accuracy vs latency:</strong> a shared limiter is more consistent but adds a network dependency.</li>
+        <li><strong>Fail-open vs fail-closed:</strong> fail-open preserves availability, while fail-closed protects resources during limiter failures.</li>
+      </ul>
+
+      <h2>Common mistakes and edge cases</h2>
+      <ul>
+        <li>Using one global request limit for both cheap and expensive endpoints.</li>
+        <li>Forgetting tenant-level limits in a multi-tenant system.</li>
+        <li>Letting retries bypass limits and amplify an outage.</li>
+        <li>Applying limits after the expensive database query has already run.</li>
+        <li>Not telling clients when to retry, causing aggressive retry loops.</li>
+        <li>Blocking all users behind a shared NAT or corporate proxy.</li>
+        <li>Not monitoring near-limit traffic before users start failing.</li>
+      </ul>
+
+      <h2>Connection to previous lessons</h2>
+      <p>
+        <a href="0010-api-pagination.html">API pagination</a> bounds response size;
+        rate limiting bounds request frequency and expensive actions. <a href="0011-observability.html">Observability</a>
+        shows whether limits are protecting the system or hurting real users.
+        <a href="0005-message-queues.html">Message queues</a> need job creation limits
+        so producers do not overwhelm workers. <a href="0004-load-balancing.html">Load balancing</a>
+        spreads traffic, but rate limiting decides whether traffic should be accepted
+        at all. <a href="0007-database-indexes.html">Database indexes</a> make queries
+        faster, but limits prevent expensive query abuse.
+      </p>
+
+      <h2>Design exercise</h2>
+      <p class="prompt">
+        You run a public API with login, search, file upload, and report export
+        endpoints. Design a rate-limit plan: what identity keys would you use, which
+        endpoints need separate limits, what happens when Redis is down, what response
+        do clients receive, and which metrics prove the limits are working?
+      </p>
+
+      <h2>Primary source</h2>
+      <p>
+        Read:
+        <a href="https://owasp.org/API-Security/editions/2023/en/0xa4-unrestricted-resource-consumption/">
+          OWASP API Security: Unrestricted Resource Consumption
+        </a>.
+      </p>
+
+      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
+    </main>
+  </body>
+</html>
