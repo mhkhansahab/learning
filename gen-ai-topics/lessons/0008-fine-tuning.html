@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fine-Tuning</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-8"><h1><span class="chapter-number">Lesson 08</span> Fine-Tuning</h1><div class="meta"><time datetime="2026-07-02">2026-07-02</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-8-section-1">1. What It Means</a></li><li><a href="#lesson-8-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-8-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-8-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-8-section-5">5. Real-World Example 1: Support Ticket Classification</a></li><li><a href="#lesson-8-section-6">6. Real-World Example 2: Brand-Consistent Email Drafting</a></li><li><a href="#lesson-8-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-8-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-8-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Fine-Tuning workflow"><ol class="flow"><li><strong>Examples</strong><span>Collect reviewed training data</span></li><li><strong>Train</strong><span>Adapt the base model</span></li><li><strong>Evaluate</strong><span>Test on held-out cases</span></li><li><strong>Monitor</strong><span>Check production quality</span></li></ol><figcaption>Figure 8. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-8-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Fine-Tuning</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="fine-tuning">Fine-Tuning</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-support-ticket-classification">5. Real-World Example 1: Support Ticket Classification</a></li><li><a href="#6-real-world-example-2-brand-consistent-email-drafting">6. Real-World Example 2: Brand-Consistent Email Drafting</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-02 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0008-fine-tuning.svg" alt="Examples: Collect reviewed training data → Train: Adapt the base model → Evaluate: Test on held-out cases → Monitor: Check production quality"></p>
+<p>Figure 8. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-8-section-1"></a>1. What It Means</h2>
 <p><strong>Fine-tuning</strong> means training an existing AI model further using your own examples.</p>
 <p>You are not building a model from zero.</p>
 <p>You start with a base model that already understands language, then teach it a specific pattern.</p>
@@ -31,7 +35,7 @@ Output: Correct support classification
 </ol>
 <p>OpenAI’s model optimization docs describe fine-tuning as part of a wider loop with evals and prompting, not as a standalone magic fix: <a href="https://platform.openai.com/docs/guides/fine-tuning">https://platform.openai.com/docs/guides/fine-tuning</a></p>
 <hr>
-<h2 id="lesson-8-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-8-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>Fine-tuning matters when a production AI system needs consistent behavior at scale.</p>
 <p>For example:</p>
 <ul>
@@ -62,7 +66,7 @@ Output: Correct support classification
 </ul>
 <p>Fine-tuning is production work, not just a model setting.</p>
 <hr>
-<h2 id="lesson-8-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-8-section-3"></a>3. How It Works Step By Step</h2>
 <p>A simple fine-tuning process looks like this:</p>
 <ol>
 <li><p><strong>Choose a narrow task</strong></p>
@@ -74,8 +78,8 @@ Output: Correct support classification
 <li><p><strong>Collect examples</strong></p>
 <p>Example training row:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;I was charged twice this month.&quot;,
-  &quot;output&quot;: &quot;billing&quot;
+  "input": "I was charged twice this month.",
+  "output": "billing"
 }
 </code></pre>
 </li>
@@ -83,8 +87,8 @@ Output: Correct support classification
 <p>Remove bad examples.</p>
 <p>Fix inconsistent labels.</p>
 <p>Example problem:</p>
-<pre><code class="language-text">One person labels refund issues as &quot;billing&quot;.
-Another person labels them as &quot;payment&quot;.
+<pre><code class="language-text">One person labels refund issues as "billing".
+Another person labels them as "payment".
 </code></pre>
 <p>That will confuse the model.</p>
 </li>
@@ -125,7 +129,7 @@ Another person labels them as &quot;payment&quot;.
 </li>
 </ol>
 <hr>
-<h2 id="lesson-8-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-8-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Use this decision path.</p>
 <p>First ask:</p>
 <pre><code class="language-text">Is the problem caused by missing knowledge?
@@ -164,7 +168,7 @@ Another person labels them as &quot;payment&quot;.
 </ol>
 <p>Success should be measured, not guessed.</p>
 <hr>
-<h2 id="lesson-8-section-5">5. Real-World Example 1: Support Ticket Classification</h2>
+<h2 id="5-real-world-example-1-support-ticket-classification"><a id="lesson-8-section-5"></a>5. Real-World Example 1: Support Ticket Classification</h2>
 <p><strong>Use case:</strong> A SaaS company receives thousands of support tickets.</p>
 <p>They need each ticket classified into:</p>
 <pre><code class="language-text">billing
@@ -180,41 +184,41 @@ security
 </blockquote>
 <p><strong>Expected output:</strong></p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;login_issue&quot;,
-  &quot;priority&quot;: &quot;medium&quot;
+  "category": "login_issue",
+  "priority": "medium"
 }
 </code></pre>
 <p><strong>Prompt-only problem:</strong></p>
 <p>The model sometimes outputs:</p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;security&quot;,
-  &quot;priority&quot;: &quot;high&quot;
+  "category": "security",
+  "priority": "high"
 }
 </code></pre>
 <p>That may be understandable, but it does not match the company’s routing rules.</p>
 <p><strong>Fine-tuning dataset:</strong></p>
 <p>The team prepares examples:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;I cannot access my account after enabling two-factor authentication.&quot;,
-  &quot;output&quot;: {
-    &quot;category&quot;: &quot;login_issue&quot;,
-    &quot;priority&quot;: &quot;medium&quot;
+  "input": "I cannot access my account after enabling two-factor authentication.",
+  "output": {
+    "category": "login_issue",
+    "priority": "medium"
   }
 }
 </code></pre>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;My invoice shows two charges for June.&quot;,
-  &quot;output&quot;: {
-    &quot;category&quot;: &quot;billing&quot;,
-    &quot;priority&quot;: &quot;medium&quot;
+  "input": "My invoice shows two charges for June.",
+  "output": {
+    "category": "billing",
+    "priority": "medium"
   }
 }
 </code></pre>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;I found a way to see another user&#39;s data.&quot;,
-  &quot;output&quot;: {
-    &quot;category&quot;: &quot;security&quot;,
-    &quot;priority&quot;: &quot;critical&quot;
+  "input": "I found a way to see another user's data.",
+  "output": {
+    "category": "security",
+    "priority": "critical"
   }
 }
 </code></pre>
@@ -224,7 +228,7 @@ security
 <p><strong>Important guardrail:</strong></p>
 <p>Security-related tickets should still be escalated by backend rules. Do not depend only on model classification.</p>
 <hr>
-<h2 id="lesson-8-section-6">6. Real-World Example 2: Brand-Consistent Email Drafting</h2>
+<h2 id="6-real-world-example-2-brand-consistent-email-drafting"><a id="lesson-8-section-6"></a>6. Real-World Example 2: Brand-Consistent Email Drafting</h2>
 <p><strong>Use case:</strong> A company wants sales emails in a specific voice.</p>
 <p>Their approved style:</p>
 <ul>
@@ -273,7 +277,7 @@ Ali
 <p>Fine-tuning should not teach current customer facts. Those should come from CRM or retrieval.</p>
 <p>Fine-tuning teaches style and structure. It should not replace live data.</p>
 <hr>
-<h2 id="lesson-8-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-8-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Fine-tuning to add knowledge</strong></p>
 <p>Bad use:</p>
 <blockquote>
@@ -307,7 +311,7 @@ Ali
 <p>But it creates a new asset to maintain.</p>
 <p>When rules change, you may need new data and a new fine-tune.</p>
 <hr>
-<h2 id="lesson-8-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-8-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Start with prompting and evals</strong></p>
 <p>Do not fine-tune before you know the baseline.</p>
@@ -360,7 +364,7 @@ Ali
 </li>
 </ol>
 <hr>
-<h2 id="lesson-8-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-8-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI assistant for a real estate company.</p>
 <p>The assistant must classify incoming leads into:</p>
 <pre><code class="language-text">buyer
@@ -389,4 +393,4 @@ not_relevant
 <li>Measure classification accuracy on real leads.</li>
 <li>Use fine-tuning for classification, but use RAG/tools for current market pricing.</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0008-fine-tuning.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

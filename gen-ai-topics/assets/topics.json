@@ -1,0 +1,93 @@
+[
+  {
+    "stem": "0001-retrieval-augmented-generation-rag",
+    "title": "Retrieval-Augmented Generation (RAG)",
+    "number": "0001",
+    "tags": [],
+    "diagram": "assets/diagrams/0001-retrieval-augmented-generation-rag.svg"
+  },
+  {
+    "stem": "0002-tool-use-in-ai-agents",
+    "title": "Tool Use in AI Agents",
+    "number": "0002",
+    "tags": [],
+    "diagram": "assets/diagrams/0002-tool-use-in-ai-agents.svg"
+  },
+  {
+    "stem": "0003-guardrails-for-ai-systems",
+    "title": "Guardrails for AI Systems",
+    "number": "0003",
+    "tags": [],
+    "diagram": "assets/diagrams/0003-guardrails-for-ai-systems.svg"
+  },
+  {
+    "stem": "0004-observability-for-ai-systems",
+    "title": "Observability for AI Systems",
+    "number": "0004",
+    "tags": [],
+    "diagram": "assets/diagrams/0004-observability-for-ai-systems.svg"
+  },
+  {
+    "stem": "0005-agent-skills",
+    "title": "Agent Skills",
+    "number": "0005",
+    "tags": [],
+    "diagram": "assets/diagrams/0005-agent-skills.svg"
+  },
+  {
+    "stem": "0006-loop-engineering",
+    "title": "Loop Engineering",
+    "number": "0006",
+    "tags": [],
+    "diagram": "assets/diagrams/0006-loop-engineering.svg"
+  },
+  {
+    "stem": "0007-memory-in-ai-agents",
+    "title": "Memory In AI Agents",
+    "number": "0007",
+    "tags": [],
+    "diagram": "assets/diagrams/0007-memory-in-ai-agents.svg"
+  },
+  {
+    "stem": "0008-fine-tuning",
+    "title": "Fine-Tuning",
+    "number": "0008",
+    "tags": [],
+    "diagram": "assets/diagrams/0008-fine-tuning.svg"
+  },
+  {
+    "stem": "0009-prompt-design-for-production-systems",
+    "title": "Prompt Design For Production Systems",
+    "number": "0009",
+    "tags": [],
+    "diagram": "assets/diagrams/0009-prompt-design-for-production-systems.svg"
+  },
+  {
+    "stem": "0010-retrieval-quality",
+    "title": "Retrieval Quality",
+    "number": "0010",
+    "tags": [],
+    "diagram": "assets/diagrams/0010-retrieval-quality.svg"
+  },
+  {
+    "stem": "0011-production-agent-architecture",
+    "title": "Production Agent Architecture",
+    "number": "0011",
+    "tags": [],
+    "diagram": "assets/diagrams/0011-production-agent-architecture.svg"
+  },
+  {
+    "stem": "0012-skill-optimization",
+    "title": "Skill Optimization",
+    "number": "0012",
+    "tags": [],
+    "diagram": "assets/diagrams/0012-skill-optimization.svg"
+  },
+  {
+    "stem": "0013-structured-outputs",
+    "title": "Structured outputs",
+    "number": "0013",
+    "tags": [],
+    "diagram": "assets/diagrams/0013-structured-outputs.svg"
+  }
+]

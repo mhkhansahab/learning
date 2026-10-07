@@ -1,68 +1,36 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Cache-Aside: Faster Reads Without Losing the Database</title>
-    <link rel="stylesheet" href="../assets/course.css">
-  </head>
-  <body>
-    <main>
-      <p class="eyebrow">Lesson 0001 · Caching</p>
-      <h1>Cache-Aside</h1>
-      <p class="muted">Reduce repeated database work while keeping the database as the source of truth.</p>
-
-      <h2>The concept</h2>
-      <p>
-        The application checks a cache before reading the database. On a cache miss,
-        it reads the database and stores the result in the cache for later requests.
-      </p>
-      <p class="flow">request → cache → miss → database → update cache → response</p>
-
-      <h2>When to use it</h2>
-      <ul>
-        <li>Many requests repeatedly read the same data.</li>
-        <li>Database reads are slow or expensive.</li>
-        <li>Slightly stale data is acceptable for a limited time.</li>
-      </ul>
-
-      <h2>Real-world example</h2>
-      <p>
-        An online store caches product details for five minutes. Popular products are
-        served from Redis, reducing database load. The database remains authoritative.
-      </p>
-
-      <h2>Trade-offs</h2>
-      <ul>
-        <li><strong>Benefit:</strong> lower latency and database load.</li>
-        <li><strong>Cost:</strong> more infrastructure and invalidation logic.</li>
-        <li><strong>Risk:</strong> users may briefly receive stale data.</li>
-        <li><strong>Failure mode:</strong> a cache outage can suddenly overload the database.</li>
-      </ul>
-
-      <h2>Common mistakes</h2>
-      <ul>
-        <li>Caching sensitive data without proper isolation or encryption.</li>
-        <li>Using one expiration time for data with different freshness needs.</li>
-        <li>Not preventing a cache stampede when a popular key expires.</li>
-        <li>Treating the cache as durable storage.</li>
-      </ul>
-
-      <h2>Think today</h2>
-      <p class="prompt">
-        Your product page gets 10,000 reads per minute but changes twice per day.
-        What would you cache, for how long, and how would you invalidate it after an update?
-      </p>
-
-      <h2>Primary source</h2>
-      <p>
-        Read:
-        <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside">
-          Microsoft Azure Architecture Center: Cache-Aside Pattern
-        </a>.
-      </p>
-
-      <p class="muted">Ask a follow-up question if any part of the pattern is unclear.</p>
-    </main>
-  </body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Cache-Aside</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><p>Lesson 0001 · Caching</p>
+<h1 id="cache-aside">Cache-Aside</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#the-concept">The concept</a></li><li><a href="#when-to-use-it">When to use it</a></li><li><a href="#real-world-example">Real-world example</a></li><li><a href="#trade-offs">Trade-offs</a></li><li><a href="#common-mistakes">Common mistakes</a></li><li><a href="#think-today">Think today</a></li><li><a href="#primary-source">Primary source</a></li></ul></details>
+<p><img src="../assets/diagrams/0001-cache-aside.svg" alt="Application: Read product 42 → Cache lookup: Hit: return cached data; Cache miss: No stored value → Database: Read authoritative value → Cache + response: Store with TTL; return value"></p>
+<p>Two read paths. A hit avoids a database read; a miss reads the database and fills the cache. Updates need an invalidation or freshness policy.</p>
+<p>Reduce repeated database work while keeping the database as the source of truth.</p>
+<h2 id="the-concept">The concept</h2>
+<p>The application checks a cache before reading the database. On a cache miss, it reads the database and stores the result in the cache for later requests.</p>
+<p>request → cache → miss → database → update cache → response</p>
+<h2 id="when-to-use-it">When to use it</h2>
+<ul>
+<li>Many requests repeatedly read the same data.</li>
+<li>Database reads are slow or expensive.</li>
+<li>Slightly stale data is acceptable for a limited time.</li>
+</ul>
+<h2 id="real-world-example">Real-world example</h2>
+<p>An online store caches product details for five minutes. Popular products are served from Redis, reducing database load. The database remains authoritative.</p>
+<h2 id="trade-offs">Trade-offs</h2>
+<ul>
+<li><strong>Benefit:</strong> lower latency and database load.</li>
+<li><strong>Cost:</strong> more infrastructure and invalidation logic.</li>
+<li><strong>Risk:</strong> users may briefly receive stale data.</li>
+<li><strong>Failure mode:</strong> a cache outage can suddenly overload the database.</li>
+</ul>
+<h2 id="common-mistakes">Common mistakes</h2>
+<ul>
+<li>Caching sensitive data without proper isolation or encryption.</li>
+<li>Using one expiration time for data with different freshness needs.</li>
+<li>Not preventing a cache stampede when a popular key expires.</li>
+<li>Treating the cache as durable storage.</li>
+</ul>
+<h2 id="think-today">Think today</h2>
+<p>Your product page gets 10,000 reads per minute but changes twice per day. What would you cache, for how long, and how would you invalidate it after an update?</p>
+<h2 id="primary-source">Primary source</h2>
+<p>Read: <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/cache-aside">Microsoft Azure Architecture Center: Cache-Aside Pattern</a> .</p>
+<p>Ask a follow-up question if any part of the pattern is unclear.</p>
+<p><a href="0001-cache-aside.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

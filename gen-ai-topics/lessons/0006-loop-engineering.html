@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Loop Engineering</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-6"><h1><span class="chapter-number">Lesson 06</span> Loop Engineering</h1><div class="meta"><time datetime="2026-06-30">2026-06-30</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-6-section-1">1. What It Means</a></li><li><a href="#lesson-6-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-6-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-6-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-6-section-5">5. Real-World Example 1: Coding Agent Debug Loop</a></li><li><a href="#lesson-6-section-6">6. Real-World Example 2: Research Assistant Loop</a></li><li><a href="#lesson-6-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-6-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-6-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Loop Engineering workflow"><ol class="flow"><li><strong>Plan</strong><span>Choose the next action</span></li><li><strong>Act</strong><span>Perform a bounded step</span></li><li><strong>Observe</strong><span>Read the actual result</span></li><li><strong>Stop or repeat</strong><span>Check success and limits</span></li></ol><figcaption>Figure 6. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-6-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Loop Engineering</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="loop-engineering">Loop Engineering</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-coding-agent-debug-loop">5. Real-World Example 1: Coding Agent Debug Loop</a></li><li><a href="#6-real-world-example-2-research-assistant-loop">6. Real-World Example 2: Research Assistant Loop</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-30 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0006-loop-engineering.svg" alt="Plan: Choose the next action → Act: Perform a bounded step → Observe: Read the actual result → Stop or repeat: Check success and limits"></p>
+<p>Figure 6. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-6-section-1"></a>1. What It Means</h2>
 <p><strong>Loop engineering</strong> means designing the repeated steps an AI agent follows to complete a task.</p>
 <p>A simple chatbot usually works like this:</p>
 <pre><code class="language-text">User asks -&gt; Model answers
@@ -24,7 +28,7 @@
 </blockquote>
 <p>This idea is related to agent research like ReAct, where language models combine reasoning and actions in an interleaved way. Source: <a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a></p>
 <hr>
-<h2 id="lesson-6-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-6-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>Many AI failures happen because the loop is poorly designed.</p>
 <p>Bad loop behavior can cause:</p>
 <ul>
@@ -54,7 +58,7 @@
 <p>Do not let the model “just keep going.” Design the loop like real software.</p>
 </blockquote>
 <hr>
-<h2 id="lesson-6-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-6-section-3"></a>3. How It Works Step By Step</h2>
 <p>Example user request:</p>
 <blockquote>
 <p>“Find why checkout is failing and suggest a fix.”</p>
@@ -76,9 +80,9 @@
 <li><p><strong>Take action</strong></p>
 <p>The agent calls a tool:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;search_logs&quot;,
-  &quot;input&quot;: {
-    &quot;query&quot;: &quot;checkout error&quot;
+  "tool": "search_logs",
+  "input": {
+    "query": "checkout error"
   }
 }
 </code></pre>
@@ -117,7 +121,7 @@ Verification: add a regression test for payment payload creation.
 </code></pre>
 <p>A loop is not just repeated model calls. It is controlled progress.</p>
 <hr>
-<h2 id="lesson-6-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-6-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start by designing the loop before writing prompts.</p>
 <p>A practical loop design:</p>
 <pre><code class="language-text">1. Understand request
@@ -156,15 +160,15 @@ Verification: add a regression test for payment payload creation.
 <p>This protects the business.</p>
 <p>A useful loop config might look like this:</p>
 <pre><code class="language-json">{
-  &quot;max_steps&quot;: 5,
-  &quot;allowed_tools&quot;: [&quot;search_logs&quot;, &quot;read_file&quot;, &quot;run_tests&quot;],
-  &quot;stop_when&quot;: &quot;root cause has evidence and fix is identified&quot;,
-  &quot;ask_user_when&quot;: &quot;required input is missing or action is high risk&quot;,
-  &quot;forbidden_actions&quot;: [&quot;deploy_to_production&quot;, &quot;delete_customer_data&quot;]
+  "max_steps": 5,
+  "allowed_tools": ["search_logs", "read_file", "run_tests"],
+  "stop_when": "root cause has evidence and fix is identified",
+  "ask_user_when": "required input is missing or action is high risk",
+  "forbidden_actions": ["deploy_to_production", "delete_customer_data"]
 }
 </code></pre>
 <hr>
-<h2 id="lesson-6-section-5">5. Real-World Example 1: Coding Agent Debug Loop</h2>
+<h2 id="5-real-world-example-1-coding-agent-debug-loop"><a id="lesson-6-section-5"></a>5. Real-World Example 1: Coding Agent Debug Loop</h2>
 <p><strong>Use case:</strong> A developer asks an AI coding agent to fix a failing test.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -204,7 +208,7 @@ Received undefined.
 </blockquote>
 <p>The loop made the fix evidence-based.</p>
 <hr>
-<h2 id="lesson-6-section-6">6. Real-World Example 2: Research Assistant Loop</h2>
+<h2 id="6-real-world-example-2-research-assistant-loop"><a id="lesson-6-section-6"></a>6. Real-World Example 2: Research Assistant Loop</h2>
 <p><strong>Use case:</strong> A business user asks an AI assistant to compare three CRM tools.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -230,17 +234,17 @@ Received undefined.
 </ol>
 <p><strong>Example tool observations:</strong></p>
 <pre><code class="language-json">{
-  &quot;HubSpot&quot;: {
-    &quot;strength&quot;: &quot;easy setup and marketing integration&quot;,
-    &quot;risk&quot;: &quot;cost can rise with contacts and advanced features&quot;
+  "HubSpot": {
+    "strength": "easy setup and marketing integration",
+    "risk": "cost can rise with contacts and advanced features"
   },
-  &quot;Salesforce&quot;: {
-    &quot;strength&quot;: &quot;high customization&quot;,
-    &quot;risk&quot;: &quot;heavier admin and implementation effort&quot;
+  "Salesforce": {
+    "strength": "high customization",
+    "risk": "heavier admin and implementation effort"
   },
-  &quot;Pipedrive&quot;: {
-    &quot;strength&quot;: &quot;simple sales pipeline management&quot;,
-    &quot;risk&quot;: &quot;less enterprise customization&quot;
+  "Pipedrive": {
+    "strength": "simple sales pipeline management",
+    "risk": "less enterprise customization"
   }
 }
 </code></pre>
@@ -248,7 +252,7 @@ Received undefined.
 <p>The final answer is grounded in current sources and practical trade-offs.</p>
 <p>The loop prevents a confident but stale answer.</p>
 <hr>
-<h2 id="lesson-6-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-6-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: No max step limit</strong></p>
 <p>The agent keeps trying.</p>
 <p>This increases cost and latency.</p>
@@ -291,7 +295,7 @@ Received undefined.
 </ul>
 <p>Production systems should use the smallest loop that solves the task reliably.</p>
 <hr>
-<h2 id="lesson-6-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-6-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Design the loop before the prompt</strong></p>
 <p>Decide the workflow first. Then write prompts that support it.</p>
@@ -354,7 +358,7 @@ Received undefined.
 </li>
 </ol>
 <hr>
-<h2 id="lesson-6-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-6-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI agent that helps investigate failed deployments.</p>
 <p>A user asks:</p>
 <blockquote>
@@ -379,4 +383,4 @@ Received undefined.
 <li>Stop after a small number of evidence-gathering steps</li>
 <li>Escalate if credentials, production access, or missing logs block diagnosis</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0006-loop-engineering.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

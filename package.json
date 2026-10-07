@@ -1,0 +1,15 @@
+{
+  "name": "learning-docs",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build-topics.mjs",
+    "test": "node --test scripts/build-topics.test.mjs && node scripts/check-topics.mjs"
+  },
+  "devDependencies": {
+    "@mixmark-io/domino": "^2.2.0",
+    "marked": "^17.0.0",
+    "turndown": "^7.2.0",
+    "turndown-plugin-gfm": "^1.0.2"
+  }
+}

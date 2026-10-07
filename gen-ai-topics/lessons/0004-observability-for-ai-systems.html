@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Observability for AI Systems</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-4"><h1><span class="chapter-number">Lesson 04</span> Observability for AI Systems</h1><div class="meta"><time datetime="2026-06-28">2026-06-28</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-4-section-1">1. What It Means</a></li><li><a href="#lesson-4-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-4-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-4-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-4-section-5">5. Real-World Example 1: Customer Support Chatbot</a></li><li><a href="#lesson-4-section-6">6. Real-World Example 2: Sales Email Agent</a></li><li><a href="#lesson-4-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-4-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-4-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Observability for AI Systems workflow"><ol class="flow"><li><strong>Request</strong><span>Attach a trace ID</span></li><li><strong>Trace</strong><span>Record model and tool steps</span></li><li><strong>Metrics</strong><span>Track quality, time and cost</span></li><li><strong>Diagnose</strong><span>Inspect failed requests</span></li></ol><figcaption>Figure 4. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-4-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Observability for AI Systems</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="observability-for-ai-systems">Observability for AI Systems</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-customer-support-chatbot">5. Real-World Example 1: Customer Support Chatbot</a></li><li><a href="#6-real-world-example-2-sales-email-agent">6. Real-World Example 2: Sales Email Agent</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-28 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0004-observability-for-ai-systems.svg" alt="Request: Attach a trace ID → Trace: Record model and tool steps → Metrics: Track quality, time and cost → Diagnose: Inspect failed requests"></p>
+<p>Figure 4. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-4-section-1"></a>1. What It Means</h2>
 <p><strong>Observability</strong> means you can understand what your AI system is doing in production by looking at its records.</p>
 <p>In normal software, observability usually means collecting:</p>
 <ul>
@@ -29,7 +33,7 @@
 <p>Observability helps you answer: “What happened, why did it happen, and how do we fix it?”</p>
 </blockquote>
 <hr>
-<h2 id="lesson-4-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-4-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>AI systems fail differently from normal software.</p>
 <p>A normal API may fail with a clear error:</p>
 <blockquote>
@@ -58,7 +62,7 @@
 </ul>
 <p>Observability is how you debug, improve, and control an AI product after real users start using it.</p>
 <hr>
-<h2 id="lesson-4-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-4-section-3"></a>3. How It Works Step By Step</h2>
 <p>Imagine a user asks:</p>
 <blockquote>
 <p>“Can I get a refund for my damaged item?”</p>
@@ -69,9 +73,9 @@
 <p>The system creates a unique <code>request_id</code>.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;request_id&quot;: &quot;req_9241&quot;,
-  &quot;user_id&quot;: &quot;user_77&quot;,
-  &quot;feature&quot;: &quot;support_assistant&quot;
+  "request_id": "req_9241",
+  "user_id": "user_77",
+  "feature": "support_assistant"
 }
 </code></pre>
 </li>
@@ -80,29 +84,29 @@
 <p>Sensitive data should be masked.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;Can I get a refund for my damaged item?&quot;,
-  &quot;contains_sensitive_data&quot;: false
+  "input": "Can I get a refund for my damaged item?",
+  "contains_sensitive_data": false
 }
 </code></pre>
 </li>
 <li><p><strong>Prompt version is recorded</strong></p>
 <p>You track which prompt was used.</p>
 <pre><code class="language-json">{
-  &quot;prompt_version&quot;: &quot;refund-support-v3&quot;
+  "prompt_version": "refund-support-v3"
 }
 </code></pre>
 </li>
 <li><p><strong>Retrieval is recorded</strong></p>
 <p>If the system uses RAG, log what documents were retrieved.</p>
 <pre><code class="language-json">{
-  &quot;retrieved_docs&quot;: [
+  "retrieved_docs": [
     {
-      &quot;doc_id&quot;: &quot;refund_policy_2026&quot;,
-      &quot;score&quot;: 0.91
+      "doc_id": "refund_policy_2026",
+      "score": 0.91
     },
     {
-      &quot;doc_id&quot;: &quot;damaged_items_policy&quot;,
-      &quot;score&quot;: 0.87
+      "doc_id": "damaged_items_policy",
+      "score": 0.87
     }
   ]
 }
@@ -111,11 +115,11 @@
 <li><p><strong>Tool calls are recorded</strong></p>
 <p>If the AI checks order history, log that.</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_order_status&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;masked&quot;
+  "tool": "get_order_status",
+  "input": {
+    "order_id": "masked"
   },
-  &quot;status&quot;: &quot;success&quot;
+  "status": "success"
 }
 </code></pre>
 </li>
@@ -139,7 +143,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-4-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-4-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start with a simple observability plan.</p>
 <p>Do not try to track everything on day one. Track the things needed to debug real problems.</p>
 <p>A practical setup:</p>
@@ -218,7 +222,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-4-section-5">5. Real-World Example 1: Customer Support Chatbot</h2>
+<h2 id="5-real-world-example-1-customer-support-chatbot"><a id="lesson-4-section-5"></a>5. Real-World Example 1: Customer Support Chatbot</h2>
 <p><strong>Use case:</strong> An ecommerce company has an AI chatbot that answers refund questions.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -240,14 +244,14 @@
 <p>Without observability, you only see bad final answers.</p>
 <p>With observability, you inspect failed requests and find:</p>
 <pre><code class="language-json">{
-  &quot;retrieved_docs&quot;: [
+  "retrieved_docs": [
     {
-      &quot;doc_id&quot;: &quot;standard_return_policy&quot;,
-      &quot;score&quot;: 0.89
+      "doc_id": "standard_return_policy",
+      "score": 0.89
     }
   ],
-  &quot;missing_doc&quot;: &quot;damaged_items_policy&quot;,
-  &quot;final_answer&quot;: &quot;This item is not eligible after opening.&quot;
+  "missing_doc": "damaged_items_policy",
+  "final_answer": "This item is not eligible after opening."
 }
 </code></pre>
 <p><strong>What you learn:</strong></p>
@@ -262,7 +266,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The answer improves because you found the real failure layer: retrieval, not the model.</p>
 <hr>
-<h2 id="lesson-4-section-6">6. Real-World Example 2: Sales Email Agent</h2>
+<h2 id="6-real-world-example-2-sales-email-agent"><a id="lesson-4-section-6"></a>6. Real-World Example 2: Sales Email Agent</h2>
 <p><strong>Use case:</strong> A sales team uses an AI agent to draft follow-up emails after calls.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -283,22 +287,22 @@
 <p>With observability, you compare metrics.</p>
 <p>Before prompt change:</p>
 <pre><code class="language-json">{
-  &quot;avg_tokens&quot;: 1800,
-  &quot;avg_cost&quot;: 0.02,
-  &quot;avg_latency_seconds&quot;: 3.1
+  "avg_tokens": 1800,
+  "avg_cost": 0.02,
+  "avg_latency_seconds": 3.1
 }
 </code></pre>
 <p>After prompt change:</p>
 <pre><code class="language-json">{
-  &quot;avg_tokens&quot;: 6200,
-  &quot;avg_cost&quot;: 0.07,
-  &quot;avg_latency_seconds&quot;: 7.8
+  "avg_tokens": 6200,
+  "avg_cost": 0.07,
+  "avg_latency_seconds": 7.8
 }
 </code></pre>
 <p>Then you inspect traces and find:</p>
 <pre><code class="language-json">{
-  &quot;retrieved_crm_notes&quot;: 25,
-  &quot;used_notes_in_answer&quot;: 4
+  "retrieved_crm_notes": 25,
+  "used_notes_in_answer": 4
 }
 </code></pre>
 <p><strong>What you learn:</strong></p>
@@ -313,7 +317,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The agent keeps email quality but reduces cost and latency.</p>
 <hr>
-<h2 id="lesson-4-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-4-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Only logging final answers</strong></p>
 <p>Final answers do not explain why something happened.</p>
 <p>You also need intermediate steps:</p>
@@ -363,7 +367,7 @@
 <p>Less logging protects privacy and reduces cost.</p>
 <p>Production systems need a careful balance.</p>
 <hr>
-<h2 id="lesson-4-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-4-section-8"></a>8. Practical Best Practices</h2>
 <p>Use these rules:</p>
 <ol>
 <li><p><strong>Track one request across the full journey</strong></p>
@@ -415,7 +419,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-4-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-4-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI assistant that helps users understand invoices.</p>
 <p>A user asks:</p>
 <blockquote>
@@ -444,4 +448,4 @@
 <li>Masked payment or personal data</li>
 <li>Alert for high tool failures or sudden cost increase</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0004-observability-for-ai-systems.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

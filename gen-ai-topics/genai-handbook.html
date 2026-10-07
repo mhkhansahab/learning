@@ -1,4 +1,9 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Practical Generative AI handbook</title><link rel="stylesheet" href="assets/handbook.css"></head><body><header><h1>Generative AI handbook</h1><p>Illustrated lessons for building and evaluating production AI systems.</p><p class="meta">Updated 7 October 2026 · 12 archived chapters + 1 new chapter</p><p class="header-links"><a href="#lesson-13">Read today's lesson: Structured outputs</a> · <a href="#topic-index">Topic index</a> · <a href="#glossary">Glossary</a></p></header><main class="handbook"><aside id="contents"><details class="lesson-nav" open><summary>Contents</summary><nav aria-label="Lesson contents"><ol><li><a href="#lesson-1">Retrieval-Augmented Generation (RAG)</a></li><li><a href="#lesson-2">Tool Use in AI Agents</a></li><li><a href="#lesson-3">Guardrails for AI Systems</a></li><li><a href="#lesson-4">Observability for AI Systems</a></li><li><a href="#lesson-5">Agent Skills</a></li><li><a href="#lesson-6">Loop Engineering</a></li><li><a href="#lesson-7">Memory In AI Agents</a></li><li><a href="#lesson-8">Fine-Tuning</a></li><li><a href="#lesson-9">Prompt Design For Production Systems</a></li><li><a href="#lesson-10">Retrieval Quality</a></li><li><a href="#lesson-11">Production Agent Architecture</a></li><li><a href="#lesson-12">Skill Optimization</a></li><li><a href="#lesson-13">Structured outputs</a></li></ol></nav></details><div class="index-links"><a href="#topic-index">Topic index</a><a href="#glossary">Glossary</a></div></aside><div class="reading"><details class="coverage"><summary>About this edition and archive coverage</summary><p>This edition preserves 12 detailed lessons recovered from this chat, dated 25 June to 7 July 2026. It adds study diagrams and today's new lesson. The earlier short lessons on evaluation harnesses and context engineering are not included because their full text was not recovered. This is a partial archive, not a complete transcript.</p><p>Archived chapter wording is retained, including original citations. Those technical claims and links have not been reverified today. Today's chapter was researched against current primary documentation. Newly added diagrams are revised study material.</p></details><article class="chapter" id="lesson-1"><h2><span class="chapter-number">Lesson 01</span> Retrieval-Augmented Generation (RAG)</h2><div class="meta"><time datetime="2026-06-25">2026-06-25</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-1-section-1">1. What RAG Means</a></li><li><a href="#lesson-1-section-2">2. Why RAG Matters</a></li><li><a href="#lesson-1-section-3">3. How RAG Works</a></li><li><a href="#lesson-1-section-4">Step 1: Prepare documents</a></li><li><a href="#lesson-1-section-5">Step 2: Create embeddings</a></li><li><a href="#lesson-1-section-6">Step 3: Search</a></li><li><a href="#lesson-1-section-7">Step 4: Rerank results</a></li><li><a href="#lesson-1-section-8">Step 5: Build the prompt</a></li><li><a href="#lesson-1-section-9">Step 6: Generate the answer</a></li><li><a href="#lesson-1-section-10">4. Applying RAG in a Project</a></li><li><a href="#lesson-1-section-11">5. Real-World Example: Customer Support</a></li><li><a href="#lesson-1-section-12">6. Real-World Example: Internal Engineering Assistant</a></li><li><a href="#lesson-1-section-13">7. Common Mistakes and Trade-offs</a></li><li><a href="#lesson-1-section-14">8. Practical Best Practices</a></li><li><a href="#lesson-1-section-15">Practice</a></li></ul></details><figure class="diagram" role="group" aria-label="Retrieval-Augmented Generation (RAG) workflow"><ol class="flow"><li><strong>Question</strong><span>What does the user need?</span></li><li><strong>Retrieve</strong><span>Find relevant evidence</span></li><li><strong>Generate</strong><span>Answer using evidence</span></li><li><strong>Check</strong><span>Verify claims and citations</span></li></ol><figcaption>Figure 1. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-1-section-1">1. What RAG Means</h3>
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Practical Generative AI handbook</title><link rel="stylesheet" href="assets/handbook.css"></head><body><header><h1>Generative AI handbook</h1><p>Illustrated lessons for building and evaluating production AI systems.</p><p class="meta">Updated 7 October 2026 · 12 archived chapters + 1 new chapter</p><p class="header-links"><a href="#lesson-13">Read today's lesson: Structured outputs</a> · <a href="#topic-index">Topic index</a> · <a href="#glossary">Glossary</a></p></header><main class="handbook"><aside id="contents"><details class="lesson-nav" open=""><summary>Contents</summary><nav aria-label="Lesson contents"><ol><li><a href="#lesson-1">Retrieval-Augmented Generation (RAG)</a></li><li><a href="#lesson-2">Tool Use in AI Agents</a></li><li><a href="#lesson-3">Guardrails for AI Systems</a></li><li><a href="#lesson-4">Observability for AI Systems</a></li><li><a href="#lesson-5">Agent Skills</a></li><li><a href="#lesson-6">Loop Engineering</a></li><li><a href="#lesson-7">Memory In AI Agents</a></li><li><a href="#lesson-8">Fine-Tuning</a></li><li><a href="#lesson-9">Prompt Design For Production Systems</a></li><li><a href="#lesson-10">Retrieval Quality</a></li><li><a href="#lesson-11">Production Agent Architecture</a></li><li><a href="#lesson-12">Skill Optimization</a></li><li><a href="#lesson-13">Structured outputs</a></li></ol></nav></details><div class="index-links"><a href="#topic-index">Topic index</a><a href="#glossary">Glossary</a></div></aside><div class="reading"><details class="coverage"><summary>About this edition and archive coverage</summary><p>This edition preserves 12 detailed lessons recovered from this chat, dated 25 June to 7 July 2026. It adds study diagrams and today's new lesson. The earlier short lessons on evaluation harnesses and context engineering are not included because their full text was not recovered. This is a partial archive, not a complete transcript.</p><p>Archived chapter wording is retained, including original citations. Those technical claims and links have not been reverified today. Today's chapter was researched against current primary documentation. Newly added diagrams are revised study material.</p></details><article id="lesson-1" class="chapter markdown-body"><h2 id="lesson-1-retrieval-augmented-generation-rag">Retrieval-Augmented Generation (RAG)</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-1-1-what-rag-means">1. What RAG Means</a></li><li><a href="#lesson-1-2-why-rag-matters">2. Why RAG Matters</a></li><li><a href="#lesson-1-3-how-rag-works">3. How RAG Works</a></li><li><a href="#lesson-1-step-1-prepare-documents">Step 1: Prepare documents</a></li><li><a href="#lesson-1-step-2-create-embeddings">Step 2: Create embeddings</a></li><li><a href="#lesson-1-step-3-search">Step 3: Search</a></li><li><a href="#lesson-1-step-4-rerank-results">Step 4: Rerank results</a></li><li><a href="#lesson-1-step-5-build-the-prompt">Step 5: Build the prompt</a></li><li><a href="#lesson-1-step-6-generate-the-answer">Step 6: Generate the answer</a></li><li><a href="#lesson-1-4-applying-rag-in-a-project">4. Applying RAG in a Project</a></li><li><a href="#lesson-1-5-real-world-example-customer-support">5. Real-World Example: Customer Support</a></li><li><a href="#lesson-1-6-real-world-example-internal-engineering-assistant">6. Real-World Example: Internal Engineering Assistant</a></li><li><a href="#lesson-1-7-common-mistakes-and-trade-offs">7. Common Mistakes and Trade-offs</a></li><li><a href="#lesson-1-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-1-practice">Practice</a></li></ul></details>
+<p>2026-06-25 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0001-retrieval-augmented-generation-rag.svg" alt="Question: What does the user need? → Retrieve: Find relevant evidence → Generate: Answer using evidence → Check: Verify claims and citations"></p>
+<p>Figure 1. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-1-1-what-rag-means"><a id="lesson-1-section-1"></a>1. What RAG Means</h3>
 <p><strong>Retrieval-Augmented Generation</strong>, usually called <strong>RAG</strong>, is a method where an AI searches your data before answering a question.</p>
 <p>A normal language model answers mainly from knowledge learned during training. A RAG system adds an external knowledge source, such as:</p>
 <ul>
@@ -18,7 +23,7 @@
 </ol>
 <p>RAG does not permanently teach the model new facts. It gives the model useful information for the current request.</p>
 <hr>
-<h3 id="lesson-1-section-2">2. Why RAG Matters</h3>
+<h3 id="lesson-1-2-why-rag-matters"><a id="lesson-1-section-2"></a>2. Why RAG Matters</h3>
 <p>Language models have several limitations:</p>
 <ul>
 <li>Their training knowledge may be outdated.</li>
@@ -30,11 +35,11 @@
 <p>For example, when a refund policy changes, you update the policy document. Future answers can immediately use the new policy.</p>
 <p>However, RAG does not automatically guarantee correct answers. If retrieval returns the wrong document, the model may still produce a wrong answer.</p>
 <hr>
-<h3 id="lesson-1-section-3">3. How RAG Works</h3>
-<h4 id="lesson-1-section-4">Step 1: Prepare documents</h4>
+<h3 id="lesson-1-3-how-rag-works"><a id="lesson-1-section-3"></a>3. How RAG Works</h3>
+<h4 id="lesson-1-step-1-prepare-documents"><a id="lesson-1-section-4"></a>Step 1: Prepare documents</h4>
 <p>Collect trusted information and remove outdated or duplicate content.</p>
 <p>Large documents are divided into smaller sections called <strong>chunks</strong>. A chunk might contain two or three paragraphs about one topic.</p>
-<h4 id="lesson-1-section-5">Step 2: Create embeddings</h4>
+<h4 id="lesson-1-step-2-create-embeddings"><a id="lesson-1-section-5"></a>Step 2: Create embeddings</h4>
 <p>An <strong>embedding</strong> is a numerical representation of meaning.</p>
 <p>For example, these sentences have different words but similar meanings:</p>
 <ul>
@@ -43,14 +48,14 @@
 </ul>
 <p>Their embeddings should be close together.</p>
 <p>The system stores document chunks and their embeddings in a searchable index, often called a <strong>vector database</strong>.</p>
-<h4 id="lesson-1-section-6">Step 3: Search</h4>
+<h4 id="lesson-1-step-3-search"><a id="lesson-1-section-6"></a>Step 3: Search</h4>
 <p>When a user asks a question, the system creates an embedding for that question.</p>
 <p>It searches for document chunks with similar meanings.</p>
 <p>The system may retrieve five chunks, for example.</p>
-<h4 id="lesson-1-section-7">Step 4: Rerank results</h4>
+<h4 id="lesson-1-step-4-rerank-results"><a id="lesson-1-section-7"></a>Step 4: Rerank results</h4>
 <p>Initial search results are not always ordered correctly.</p>
 <p>A <strong>reranker</strong> examines the question and retrieved chunks more carefully, then moves the most useful chunks to the top.</p>
-<h4 id="lesson-1-section-8">Step 5: Build the prompt</h4>
+<h4 id="lesson-1-step-5-build-the-prompt"><a id="lesson-1-section-8"></a>Step 5: Build the prompt</h4>
 <p>The application sends the model:</p>
 <ul>
 <li>System instructions</li>
@@ -62,11 +67,11 @@
 <blockquote>
 <p>Answer only from the supplied sources. If the sources do not contain the answer, say that you cannot find it.</p>
 </blockquote>
-<h4 id="lesson-1-section-9">Step 6: Generate the answer</h4>
+<h4 id="lesson-1-step-6-generate-the-answer"><a id="lesson-1-section-9"></a>Step 6: Generate the answer</h4>
 <p>The model reads the retrieved information and creates an answer.</p>
 <p>A production system should usually include citations so the user can inspect the source.</p>
 <hr>
-<h3 id="lesson-1-section-10">4. Applying RAG in a Project</h3>
+<h3 id="lesson-1-4-applying-rag-in-a-project"><a id="lesson-1-section-10"></a>4. Applying RAG in a Project</h3>
 <p>Start with a narrow use case. Do not index every company document immediately.</p>
 <p>A practical implementation process is:</p>
 <ol>
@@ -83,7 +88,7 @@
 </ol>
 <p>Security must be applied during retrieval. A user should never retrieve documents they are not allowed to access.</p>
 <hr>
-<h3 id="lesson-1-section-11">5. Real-World Example: Customer Support</h3>
+<h3 id="lesson-1-5-real-world-example-customer-support"><a id="lesson-1-section-11"></a>5. Real-World Example: Customer Support</h3>
 <p>Imagine a software company with these documents:</p>
 <ul>
 <li>Pricing guide</li>
@@ -107,7 +112,7 @@
 <p>Without RAG, the model might invent a 14-day limit or use an old policy.</p>
 <p>The outcome is a more reliable answer that support staff and customers can verify.</p>
 <hr>
-<h3 id="lesson-1-section-12">6. Real-World Example: Internal Engineering Assistant</h3>
+<h3 id="lesson-1-6-real-world-example-internal-engineering-assistant"><a id="lesson-1-section-12"></a>6. Real-World Example: Internal Engineering Assistant</h3>
 <p>An engineering company has:</p>
 <ul>
 <li>Architecture documents</li>
@@ -135,7 +140,7 @@
 </ul>
 <p>Without these filters, it might retrieve an old staging deployment guide and provide dangerous instructions.</p>
 <hr>
-<h3 id="lesson-1-section-13">7. Common Mistakes and Trade-offs</h3>
+<h3 id="lesson-1-7-common-mistakes-and-trade-offs"><a id="lesson-1-section-13"></a>7. Common Mistakes and Trade-offs</h3>
 <p><strong>Poor document quality:</strong> RAG cannot fix incorrect source documents.</p>
 <p><strong>Bad chunking:</strong> Very small chunks lose context. Very large chunks add irrelevant information and increase cost.</p>
 <p><strong>Retrieving by similarity only:</strong> A semantically similar document may still be outdated or unauthorized.</p>
@@ -145,7 +150,7 @@
 <p><strong>Higher latency:</strong> Retrieval and reranking add extra processing time.</p>
 <p><strong>Higher complexity:</strong> You must maintain document ingestion, indexes, permissions, retrieval, evaluation, and monitoring.</p>
 <hr>
-<h3 id="lesson-1-section-14">8. Practical Best Practices</h3>
+<h3 id="lesson-1-8-practical-best-practices"><a id="lesson-1-section-14"></a>8. Practical Best Practices</h3>
 <ul>
 <li>Index only trusted and approved sources.</li>
 <li>Store document dates, versions, owners, and permissions as metadata.</li>
@@ -160,7 +165,7 @@
 </ul>
 <p>The key production lesson is:</p>
 <p><strong>RAG quality depends more on retrieving the right evidence than on writing a clever prompt.</strong></p>
-<h3 id="lesson-1-section-15">Practice</h3>
+<h3 id="lesson-1-practice"><a id="lesson-1-section-15"></a>Practice</h3>
 <p>Your company has 10,000 documents, including old policies, drafts, and confidential files.</p>
 <p>Before building a RAG assistant, what rules would you create to decide:</p>
 <ol>
@@ -169,7 +174,11 @@
 <li>How should the system handle conflicting document versions?</li>
 </ol>
 <p>Primary source: <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</a> (<a href="https://arxiv.org/abs/2005.11401?utm_source=openai">arxiv.org</a>)</p>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-2"><h2><span class="chapter-number">Lesson 02</span> Tool Use in AI Agents</h2><div class="meta"><time datetime="2026-06-26">2026-06-26</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-2-section-1">1. What It Means</a></li><li><a href="#lesson-2-section-2">2. Why It Matters in Production Systems</a></li><li><a href="#lesson-2-section-3">3. How It Works Step by Step</a></li><li><a href="#lesson-2-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-2-section-5">5. Real-World Example 1: Customer Support Agent</a></li><li><a href="#lesson-2-section-6">6. Real-World Example 2: Internal Sales Assistant</a></li><li><a href="#lesson-2-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-2-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-2-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Tool Use in AI Agents workflow"><ol class="flow"><li><strong>Request</strong><span>Identify the task</span></li><li><strong>Tool call</strong><span>Choose a permitted function</span></li><li><strong>Execute</strong><span>Backend validates arguments</span></li><li><strong>Observe</strong><span>Use the real result</span></li></ol><figcaption>Figure 2. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-2-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0001-retrieval-augmented-generation-rag.md">Markdown edition</a></p></article><article id="lesson-2" class="chapter markdown-body"><h2 id="lesson-2-tool-use-in-ai-agents">Tool Use in AI Agents</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-2-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-2-2-why-it-matters-in-production-systems">2. Why It Matters in Production Systems</a></li><li><a href="#lesson-2-3-how-it-works-step-by-step">3. How It Works Step by Step</a></li><li><a href="#lesson-2-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-2-5-real-world-example-1-customer-support-agent">5. Real-World Example 1: Customer Support Agent</a></li><li><a href="#lesson-2-6-real-world-example-2-internal-sales-assistant">6. Real-World Example 2: Internal Sales Assistant</a></li><li><a href="#lesson-2-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-2-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-2-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-26 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0002-tool-use-in-ai-agents.svg" alt="Request: Identify the task → Tool call: Choose a permitted function → Execute: Backend validates arguments → Observe: Use the real result"></p>
+<p>Figure 2. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-2-1-what-it-means"><a id="lesson-2-section-1"></a>1. What It Means</h3>
 <p><strong>Tool use</strong> means an AI model can call an external function, API, database, search system, calculator, file reader, or business system instead of only answering from its own text knowledge.</p>
 <p>A normal chatbot only produces text.</p>
 <p>A tool-using agent can do things like:</p>
@@ -190,12 +199,12 @@
 <p>A tool usually has three parts:</p>
 <ul>
 <li><strong>Name:</strong> what the tool is called, for example <code>get_order_status</code></li>
-<li><strong>Input schema:</strong> what information the tool needs, for example <code>{ &quot;order_id&quot;: &quot;12345&quot; }</code></li>
-<li><strong>Output:</strong> what the tool returns, for example <code>{ &quot;status&quot;: &quot;shipped&quot;, &quot;delivery_date&quot;: &quot;2026-06-28&quot; }</code></li>
+<li><strong>Input schema:</strong> what information the tool needs, for example <code>{ "order_id": "12345" }</code></li>
+<li><strong>Output:</strong> what the tool returns, for example <code>{ "status": "shipped", "delivery_date": "2026-06-28" }</code></li>
 </ul>
 <p>The model should not guess when a tool can provide the real answer.</p>
 <hr>
-<h3 id="lesson-2-section-2">2. Why It Matters in Production Systems</h3>
+<h3 id="lesson-2-2-why-it-matters-in-production-systems"><a id="lesson-2-section-2"></a>2. Why It Matters in Production Systems</h3>
 <p>Tool use is one of the main differences between a demo chatbot and a useful production agent.</p>
 <p>Without tools, the AI can only generate possible answers. That is risky for real systems.</p>
 <p>For example:</p>
@@ -217,7 +226,7 @@
 </ul>
 <p>Tool use makes AI more useful, but also more dangerous if designed badly. A tool-using agent can affect real users, real money, and real data.</p>
 <hr>
-<h3 id="lesson-2-section-3">3. How It Works Step by Step</h3>
+<h3 id="lesson-2-3-how-it-works-step-by-step"><a id="lesson-2-section-3"></a>3. How It Works Step by Step</h3>
 <p>A typical tool-use flow looks like this:</p>
 <ol>
 <li><p><strong>User asks for something</strong></p>
@@ -232,9 +241,9 @@
 <li><p><strong>Model selects a tool</strong></p>
 <p>It chooses something like:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_order_status&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;A1928&quot;
+  "tool": "get_order_status",
+  "input": {
+    "order_id": "A1928"
   }
 }
 </code></pre>
@@ -245,10 +254,10 @@
 <li><p><strong>Tool returns data</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;order_id&quot;: &quot;A1928&quot;,
-  &quot;status&quot;: &quot;in_transit&quot;,
-  &quot;carrier&quot;: &quot;DHL&quot;,
-  &quot;estimated_delivery&quot;: &quot;2026-06-29&quot;
+  "order_id": "A1928",
+  "status": "in_transit",
+  "carrier": "DHL",
+  "estimated_delivery": "2026-06-29"
 }
 </code></pre>
 </li>
@@ -272,7 +281,7 @@
 </ol>
 <p>This log helps with debugging, security reviews, and quality improvement.</p>
 <hr>
-<h3 id="lesson-2-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-2-4-how-to-apply-it-in-a-project"><a id="lesson-2-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start small. Do not give the agent too many tools at once.</p>
 <p>A practical implementation plan:</p>
 <ol>
@@ -288,10 +297,10 @@
 <li><p><strong>Design one tool with a strict schema</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;name&quot;: &quot;get_order_status&quot;,
-  &quot;description&quot;: &quot;Fetch the current shipping status for one customer order.&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;string&quot;
+  "name": "get_order_status",
+  "description": "Fetch the current shipping status for one customer order.",
+  "input": {
+    "order_id": "string"
   }
 }
 </code></pre>
@@ -336,7 +345,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-2-section-5">5. Real-World Example 1: Customer Support Agent</h3>
+<h3 id="lesson-2-5-real-world-example-1-customer-support-agent"><a id="lesson-2-section-5"></a>5. Real-World Example 1: Customer Support Agent</h3>
 <p><strong>Use case:</strong> An ecommerce company wants an AI assistant to answer order questions.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -345,18 +354,18 @@
 <p><strong>Agent behavior:</strong></p>
 <p>The agent should call:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_order_status&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;88421&quot;
+  "tool": "get_order_status",
+  "input": {
+    "order_id": "88421"
   }
 }
 </code></pre>
 <p><strong>Tool result:</strong></p>
 <pre><code class="language-json">{
-  &quot;status&quot;: &quot;shipped&quot;,
-  &quot;carrier&quot;: &quot;FedEx&quot;,
-  &quot;tracking_number&quot;: &quot;FX29301&quot;,
-  &quot;estimated_delivery&quot;: &quot;2026-06-27&quot;
+  "status": "shipped",
+  "carrier": "FedEx",
+  "tracking_number": "FX29301",
+  "estimated_delivery": "2026-06-27"
 }
 </code></pre>
 <p><strong>Final answer:</strong></p>
@@ -370,7 +379,7 @@
 <p><strong>Production detail:</strong></p>
 <p>The backend must verify that the logged-in customer owns order <code>88421</code>. The model should not decide that by itself.</p>
 <hr>
-<h3 id="lesson-2-section-6">6. Real-World Example 2: Internal Sales Assistant</h3>
+<h3 id="lesson-2-6-real-world-example-2-internal-sales-assistant"><a id="lesson-2-section-6"></a>6. Real-World Example 2: Internal Sales Assistant</h3>
 <p><strong>Use case:</strong> A sales team wants an AI assistant that prepares account summaries before calls.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -378,25 +387,25 @@
 </blockquote>
 <p>The agent may need multiple tools:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_crm_account&quot;,
-  &quot;input&quot;: {
-    &quot;company_name&quot;: &quot;Acme Corp&quot;
+  "tool": "get_crm_account",
+  "input": {
+    "company_name": "Acme Corp"
   }
 }
 </code></pre>
 <p>Then:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_recent_support_tickets&quot;,
-  &quot;input&quot;: {
-    &quot;account_id&quot;: &quot;acct_781&quot;
+  "tool": "get_recent_support_tickets",
+  "input": {
+    "account_id": "acct_781"
   }
 }
 </code></pre>
 <p>Then:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_open_opportunities&quot;,
-  &quot;input&quot;: {
-    &quot;account_id&quot;: &quot;acct_781&quot;
+  "tool": "get_open_opportunities",
+  "input": {
+    "account_id": "acct_781"
   }
 }
 </code></pre>
@@ -418,7 +427,7 @@
 <p><strong>Production detail:</strong></p>
 <p>Each tool should respect the user’s role. A junior salesperson may not be allowed to see enterprise pricing or legal notes.</p>
 <hr>
-<h3 id="lesson-2-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-2-7-common-mistakes-risks-and-trade-offs"><a id="lesson-2-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Too many tools</strong></p>
 <p>If the agent has 40 tools, it may choose the wrong one.</p>
 <p>Better: start with a small set of high-value tools.</p>
@@ -456,7 +465,7 @@
 <p>An <strong>attack surface</strong> means the number of ways something can be misused or attacked.</p>
 <p>For example, if an agent can send emails, a malicious user may try to trick it into sending private information.</p>
 <hr>
-<h3 id="lesson-2-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-2-8-practical-best-practices"><a id="lesson-2-section-8"></a>8. Practical Best Practices</h3>
 <p>Use these rules when building tool-using agents:</p>
 <ol>
 <li><p><strong>Make tools narrow</strong></p>
@@ -503,7 +512,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-2-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-2-9-small-practice-exercise"><a id="lesson-2-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI assistant for a clinic.</p>
 <p>A patient asks:</p>
 <blockquote>
@@ -525,7 +534,11 @@
 <li><code>reschedule_appointment</code></li>
 </ul>
 <p>And it should require confirmation before the final change.</p>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-3"><h2><span class="chapter-number">Lesson 03</span> Guardrails for AI Systems</h2><div class="meta"><time datetime="2026-06-27">2026-06-27</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-3-section-1">1. What It Means</a></li><li><a href="#lesson-3-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-3-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-3-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-3-section-5">5. Real-World Example 1: Customer Support Refund Agent</a></li><li><a href="#lesson-3-section-6">6. Real-World Example 2: Internal HR Policy Assistant</a></li><li><a href="#lesson-3-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-3-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-3-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Guardrails for AI Systems workflow"><ol class="flow"><li><strong>Input</strong><span>Treat external text as data</span></li><li><strong>Permission</strong><span>Check allowed operations</span></li><li><strong>Validation</strong><span>Enforce application rules</span></li><li><strong>Review</strong><span>Escalate sensitive actions</span></li></ol><figcaption>Figure 3. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-3-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0002-tool-use-in-ai-agents.md">Markdown edition</a></p></article><article id="lesson-3" class="chapter markdown-body"><h2 id="lesson-3-guardrails-for-ai-systems">Guardrails for AI Systems</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-3-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-3-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-3-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-3-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-3-5-real-world-example-1-customer-support-refund-agent">5. Real-World Example 1: Customer Support Refund Agent</a></li><li><a href="#lesson-3-6-real-world-example-2-internal-hr-policy-assistant">6. Real-World Example 2: Internal HR Policy Assistant</a></li><li><a href="#lesson-3-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-3-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-3-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-27 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0003-guardrails-for-ai-systems.svg" alt="Input: Treat external text as data → Permission: Check allowed operations → Validation: Enforce application rules → Review: Escalate sensitive actions"></p>
+<p>Figure 3. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-3-1-what-it-means"><a id="lesson-3-section-1"></a>1. What It Means</h3>
 <p><strong>Guardrails</strong> are safety controls around an AI system.</p>
 <p>They help the AI stay within allowed behavior.</p>
 <p>A guardrail can stop the AI from:</p>
@@ -550,7 +563,7 @@
 <p>Guardrails do not make AI perfect. They reduce risk.</p>
 <p>OWASP lists several major LLM application risks, including prompt injection, insecure output handling, sensitive information disclosure, and excessive agency. These are exactly the kinds of risks guardrails are designed to reduce. (<a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">owasp.org</a>)</p>
 <hr>
-<h3 id="lesson-3-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-3-2-why-it-matters-in-production-systems"><a id="lesson-3-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>In production, an AI system is not just chatting. It may touch real users, private data, business systems, or money.</p>
 <p>Without guardrails, the AI may:</p>
 <ul>
@@ -569,7 +582,7 @@
 <p>A production system should assume the model can make mistakes.</p>
 <p>Good guardrails protect the user, the business, and the system even when the model behaves badly.</p>
 <hr>
-<h3 id="lesson-3-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-3-3-how-it-works-step-by-step"><a id="lesson-3-section-3"></a>3. How It Works Step By Step</h3>
 <p>A guarded AI flow usually works like this:</p>
 <ol>
 <li><p><strong>User sends a request</strong></p>
@@ -590,10 +603,10 @@
 <li><p><strong>Model plans the response or action</strong></p>
 <p>The model may decide it needs a tool, such as:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;create_refund_request&quot;,
-  &quot;input&quot;: {
-    &quot;account_id&quot;: &quot;9912&quot;,
-    &quot;refund_type&quot;: &quot;full&quot;
+  "tool": "create_refund_request",
+  "input": {
+    "account_id": "9912",
+    "refund_type": "full"
   }
 }
 </code></pre>
@@ -631,7 +644,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-3-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-3-4-how-to-apply-it-in-a-project"><a id="lesson-3-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start by classifying your AI actions by risk.</p>
 <p>Example risk levels:</p>
 <table>
@@ -691,9 +704,9 @@
 <p>Ask the model for structured data when possible.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;risk_level&quot;: &quot;high&quot;,
-  &quot;needs_human_approval&quot;: true,
-  &quot;reason&quot;: &quot;This action sends money back to the customer.&quot;
+  "risk_level": "high",
+  "needs_human_approval": true,
+  "reason": "This action sends money back to the customer."
 }
 </code></pre>
 </li>
@@ -712,7 +725,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-3-section-5">5. Real-World Example 1: Customer Support Refund Agent</h3>
+<h3 id="lesson-3-5-real-world-example-1-customer-support-refund-agent"><a id="lesson-3-section-5"></a>5. Real-World Example 1: Customer Support Refund Agent</h3>
 <p><strong>Use case:</strong> An ecommerce company uses an AI assistant for support.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -721,10 +734,10 @@
 <p><strong>Without guardrails:</strong></p>
 <p>The AI may immediately call:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;issue_refund&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;4451&quot;,
-    &quot;amount&quot;: &quot;full&quot;
+  "tool": "issue_refund",
+  "input": {
+    "order_id": "4451",
+    "amount": "full"
   }
 }
 </code></pre>
@@ -747,7 +760,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The AI helps the support team move faster, but business rules still control the action.</p>
 <hr>
-<h3 id="lesson-3-section-6">6. Real-World Example 2: Internal HR Policy Assistant</h3>
+<h3 id="lesson-3-6-real-world-example-2-internal-hr-policy-assistant"><a id="lesson-3-section-6"></a>6. Real-World Example 2: Internal HR Policy Assistant</h3>
 <p><strong>Use case:</strong> Employees ask an AI assistant about company policies.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -779,7 +792,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The same assistant can be helpful for normal policy questions while blocking private employee data.</p>
 <hr>
-<h3 id="lesson-3-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-3-7-common-mistakes-risks-and-trade-offs"><a id="lesson-3-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Putting all safety rules only in the prompt</strong></p>
 <p>Prompt instructions are useful, but not enough.</p>
 <p>A malicious user may try:</p>
@@ -820,7 +833,7 @@
 <p>Less friction usually means more risk.</p>
 <p>For production systems, choose based on the cost of a mistake.</p>
 <hr>
-<h3 id="lesson-3-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-3-8-practical-best-practices"><a id="lesson-3-section-8"></a>8. Practical Best Practices</h3>
 <p>Use these rules:</p>
 <ol>
 <li><p><strong>Protect data in the backend</strong></p>
@@ -871,7 +884,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-3-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-3-9-small-practice-exercise"><a id="lesson-3-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI assistant for a bank.</p>
 <p>A user asks:</p>
 <blockquote>
@@ -898,7 +911,11 @@
 <li>A safe failure message if any check fails</li>
 </ul>
 <p>Source: OWASP Top 10 for Large Language Model Applications: <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">https://owasp.org/www-project-top-10-for-large-language-model-applications/</a></p>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-4"><h2><span class="chapter-number">Lesson 04</span> Observability for AI Systems</h2><div class="meta"><time datetime="2026-06-28">2026-06-28</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-4-section-1">1. What It Means</a></li><li><a href="#lesson-4-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-4-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-4-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-4-section-5">5. Real-World Example 1: Customer Support Chatbot</a></li><li><a href="#lesson-4-section-6">6. Real-World Example 2: Sales Email Agent</a></li><li><a href="#lesson-4-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-4-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-4-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Observability for AI Systems workflow"><ol class="flow"><li><strong>Request</strong><span>Attach a trace ID</span></li><li><strong>Trace</strong><span>Record model and tool steps</span></li><li><strong>Metrics</strong><span>Track quality, time and cost</span></li><li><strong>Diagnose</strong><span>Inspect failed requests</span></li></ol><figcaption>Figure 4. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-4-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0003-guardrails-for-ai-systems.md">Markdown edition</a></p></article><article id="lesson-4" class="chapter markdown-body"><h2 id="lesson-4-observability-for-ai-systems">Observability for AI Systems</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-4-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-4-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-4-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-4-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-4-5-real-world-example-1-customer-support-chatbot">5. Real-World Example 1: Customer Support Chatbot</a></li><li><a href="#lesson-4-6-real-world-example-2-sales-email-agent">6. Real-World Example 2: Sales Email Agent</a></li><li><a href="#lesson-4-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-4-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-4-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-28 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0004-observability-for-ai-systems.svg" alt="Request: Attach a trace ID → Trace: Record model and tool steps → Metrics: Track quality, time and cost → Diagnose: Inspect failed requests"></p>
+<p>Figure 4. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-4-1-what-it-means"><a id="lesson-4-section-1"></a>1. What It Means</h3>
 <p><strong>Observability</strong> means you can understand what your AI system is doing in production by looking at its records.</p>
 <p>In normal software, observability usually means collecting:</p>
 <ul>
@@ -929,7 +946,7 @@
 <p>Observability helps you answer: “What happened, why did it happen, and how do we fix it?”</p>
 </blockquote>
 <hr>
-<h3 id="lesson-4-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-4-2-why-it-matters-in-production-systems"><a id="lesson-4-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>AI systems fail differently from normal software.</p>
 <p>A normal API may fail with a clear error:</p>
 <blockquote>
@@ -958,7 +975,7 @@
 </ul>
 <p>Observability is how you debug, improve, and control an AI product after real users start using it.</p>
 <hr>
-<h3 id="lesson-4-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-4-3-how-it-works-step-by-step"><a id="lesson-4-section-3"></a>3. How It Works Step By Step</h3>
 <p>Imagine a user asks:</p>
 <blockquote>
 <p>“Can I get a refund for my damaged item?”</p>
@@ -969,9 +986,9 @@
 <p>The system creates a unique <code>request_id</code>.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;request_id&quot;: &quot;req_9241&quot;,
-  &quot;user_id&quot;: &quot;user_77&quot;,
-  &quot;feature&quot;: &quot;support_assistant&quot;
+  "request_id": "req_9241",
+  "user_id": "user_77",
+  "feature": "support_assistant"
 }
 </code></pre>
 </li>
@@ -980,29 +997,29 @@
 <p>Sensitive data should be masked.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;Can I get a refund for my damaged item?&quot;,
-  &quot;contains_sensitive_data&quot;: false
+  "input": "Can I get a refund for my damaged item?",
+  "contains_sensitive_data": false
 }
 </code></pre>
 </li>
 <li><p><strong>Prompt version is recorded</strong></p>
 <p>You track which prompt was used.</p>
 <pre><code class="language-json">{
-  &quot;prompt_version&quot;: &quot;refund-support-v3&quot;
+  "prompt_version": "refund-support-v3"
 }
 </code></pre>
 </li>
 <li><p><strong>Retrieval is recorded</strong></p>
 <p>If the system uses RAG, log what documents were retrieved.</p>
 <pre><code class="language-json">{
-  &quot;retrieved_docs&quot;: [
+  "retrieved_docs": [
     {
-      &quot;doc_id&quot;: &quot;refund_policy_2026&quot;,
-      &quot;score&quot;: 0.91
+      "doc_id": "refund_policy_2026",
+      "score": 0.91
     },
     {
-      &quot;doc_id&quot;: &quot;damaged_items_policy&quot;,
-      &quot;score&quot;: 0.87
+      "doc_id": "damaged_items_policy",
+      "score": 0.87
     }
   ]
 }
@@ -1011,11 +1028,11 @@
 <li><p><strong>Tool calls are recorded</strong></p>
 <p>If the AI checks order history, log that.</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_order_status&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;masked&quot;
+  "tool": "get_order_status",
+  "input": {
+    "order_id": "masked"
   },
-  &quot;status&quot;: &quot;success&quot;
+  "status": "success"
 }
 </code></pre>
 </li>
@@ -1039,7 +1056,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-4-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-4-4-how-to-apply-it-in-a-project"><a id="lesson-4-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start with a simple observability plan.</p>
 <p>Do not try to track everything on day one. Track the things needed to debug real problems.</p>
 <p>A practical setup:</p>
@@ -1118,7 +1135,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-4-section-5">5. Real-World Example 1: Customer Support Chatbot</h3>
+<h3 id="lesson-4-5-real-world-example-1-customer-support-chatbot"><a id="lesson-4-section-5"></a>5. Real-World Example 1: Customer Support Chatbot</h3>
 <p><strong>Use case:</strong> An ecommerce company has an AI chatbot that answers refund questions.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -1140,14 +1157,14 @@
 <p>Without observability, you only see bad final answers.</p>
 <p>With observability, you inspect failed requests and find:</p>
 <pre><code class="language-json">{
-  &quot;retrieved_docs&quot;: [
+  "retrieved_docs": [
     {
-      &quot;doc_id&quot;: &quot;standard_return_policy&quot;,
-      &quot;score&quot;: 0.89
+      "doc_id": "standard_return_policy",
+      "score": 0.89
     }
   ],
-  &quot;missing_doc&quot;: &quot;damaged_items_policy&quot;,
-  &quot;final_answer&quot;: &quot;This item is not eligible after opening.&quot;
+  "missing_doc": "damaged_items_policy",
+  "final_answer": "This item is not eligible after opening."
 }
 </code></pre>
 <p><strong>What you learn:</strong></p>
@@ -1162,7 +1179,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The answer improves because you found the real failure layer: retrieval, not the model.</p>
 <hr>
-<h3 id="lesson-4-section-6">6. Real-World Example 2: Sales Email Agent</h3>
+<h3 id="lesson-4-6-real-world-example-2-sales-email-agent"><a id="lesson-4-section-6"></a>6. Real-World Example 2: Sales Email Agent</h3>
 <p><strong>Use case:</strong> A sales team uses an AI agent to draft follow-up emails after calls.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -1183,22 +1200,22 @@
 <p>With observability, you compare metrics.</p>
 <p>Before prompt change:</p>
 <pre><code class="language-json">{
-  &quot;avg_tokens&quot;: 1800,
-  &quot;avg_cost&quot;: 0.02,
-  &quot;avg_latency_seconds&quot;: 3.1
+  "avg_tokens": 1800,
+  "avg_cost": 0.02,
+  "avg_latency_seconds": 3.1
 }
 </code></pre>
 <p>After prompt change:</p>
 <pre><code class="language-json">{
-  &quot;avg_tokens&quot;: 6200,
-  &quot;avg_cost&quot;: 0.07,
-  &quot;avg_latency_seconds&quot;: 7.8
+  "avg_tokens": 6200,
+  "avg_cost": 0.07,
+  "avg_latency_seconds": 7.8
 }
 </code></pre>
 <p>Then you inspect traces and find:</p>
 <pre><code class="language-json">{
-  &quot;retrieved_crm_notes&quot;: 25,
-  &quot;used_notes_in_answer&quot;: 4
+  "retrieved_crm_notes": 25,
+  "used_notes_in_answer": 4
 }
 </code></pre>
 <p><strong>What you learn:</strong></p>
@@ -1213,7 +1230,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The agent keeps email quality but reduces cost and latency.</p>
 <hr>
-<h3 id="lesson-4-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-4-7-common-mistakes-risks-and-trade-offs"><a id="lesson-4-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Only logging final answers</strong></p>
 <p>Final answers do not explain why something happened.</p>
 <p>You also need intermediate steps:</p>
@@ -1263,7 +1280,7 @@
 <p>Less logging protects privacy and reduces cost.</p>
 <p>Production systems need a careful balance.</p>
 <hr>
-<h3 id="lesson-4-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-4-8-practical-best-practices"><a id="lesson-4-section-8"></a>8. Practical Best Practices</h3>
 <p>Use these rules:</p>
 <ol>
 <li><p><strong>Track one request across the full journey</strong></p>
@@ -1315,7 +1332,7 @@
 </li>
 </ol>
 <hr>
-<h3 id="lesson-4-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-4-9-small-practice-exercise"><a id="lesson-4-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI assistant that helps users understand invoices.</p>
 <p>A user asks:</p>
 <blockquote>
@@ -1344,7 +1361,11 @@
 <li>Masked payment or personal data</li>
 <li>Alert for high tool failures or sudden cost increase</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-5"><h2><span class="chapter-number">Lesson 05</span> Agent Skills</h2><div class="meta"><time datetime="2026-06-29">2026-06-29</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-5-section-1">1. What It Means</a></li><li><a href="#lesson-5-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-5-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-5-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-5-section-5">5. Real-World Example 1: Engineering Bug Diagnosis Skill</a></li><li><a href="#lesson-5-section-6">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-5-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-5-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-5-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Agent Skills workflow"><ol class="flow"><li><strong>Trigger</strong><span>Match a specific task</span></li><li><strong>Workflow</strong><span>Follow reusable steps</span></li><li><strong>Tools</strong><span>Use approved operations</span></li><li><strong>Verify</strong><span>Check the task outcome</span></li></ol><figcaption>Figure 5. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-5-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0004-observability-for-ai-systems.md">Markdown edition</a></p></article><article id="lesson-5" class="chapter markdown-body"><h2 id="lesson-5-agent-skills">Agent Skills</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-5-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-5-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-5-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-5-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-5-5-real-world-example-1-engineering-bug-diagnosis-skill">5. Real-World Example 1: Engineering Bug Diagnosis Skill</a></li><li><a href="#lesson-5-6-real-world-example-2-sales-call-summary-skill">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-5-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-5-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-5-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-29 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0005-agent-skills.svg" alt="Trigger: Match a specific task → Workflow: Follow reusable steps → Tools: Use approved operations → Verify: Check the task outcome"></p>
+<p>Figure 5. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-5-1-what-it-means"><a id="lesson-5-section-1"></a>1. What It Means</h3>
 <p>An <strong>agent skill</strong> is a reusable capability that tells an AI agent how to do a specific kind of task.</p>
 <p>A skill is more than a prompt. It usually includes:</p>
 <ul>
@@ -1371,7 +1392,7 @@
 </ul>
 <p>Agent skills are related to the general agent idea of <strong>reasoning and acting</strong>: the model decides what to do, uses tools or external systems, observes results, and continues. A useful source on this pattern is the ReAct paper: <a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a></p>
 <hr>
-<h3 id="lesson-5-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-5-2-why-it-matters-in-production-systems"><a id="lesson-5-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>Without skills, agents often behave inconsistently.</p>
 <p>One day the agent handles a task well. Another day it forgets an important step.</p>
 <p>In production, this is a problem because teams need:</p>
@@ -1396,7 +1417,7 @@
 </ul>
 <p>That is much closer to production behavior.</p>
 <hr>
-<h3 id="lesson-5-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-5-3-how-it-works-step-by-step"><a id="lesson-5-section-3"></a>3. How It Works Step By Step</h3>
 <p>A skill usually works like this:</p>
 <ol>
 <li><p><strong>User asks for a task</strong></p>
@@ -1444,7 +1465,7 @@
 </ol>
 <p>The skill gives structure. The model still reasons, but inside a clearer process.</p>
 <hr>
-<h3 id="lesson-5-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-5-4-how-to-apply-it-in-a-project"><a id="lesson-5-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start with tasks that repeat often.</p>
 <p>Good first skill candidates:</p>
 <ul>
@@ -1497,7 +1518,7 @@ Classify tickets by urgency, topic, owner, and next action.
 <p>“Prepare a weekly sales pipeline summary from CRM data.”</p>
 </blockquote>
 <hr>
-<h3 id="lesson-5-section-5">5. Real-World Example 1: Engineering Bug Diagnosis Skill</h3>
+<h3 id="lesson-5-5-real-world-example-1-engineering-bug-diagnosis-skill"><a id="lesson-5-section-5"></a>5. Real-World Example 1: Engineering Bug Diagnosis Skill</h3>
 <p><strong>Use case:</strong> A software team wants an AI agent to debug production bugs.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -1533,7 +1554,7 @@ Classify tickets by urgency, topic, owner, and next action.
 </blockquote>
 <p>This is useful because the skill forced the agent to inspect evidence instead of guessing.</p>
 <hr>
-<h3 id="lesson-5-section-6">6. Real-World Example 2: Sales Call Summary Skill</h3>
+<h3 id="lesson-5-6-real-world-example-2-sales-call-summary-skill"><a id="lesson-5-section-6"></a>6. Real-World Example 2: Sales Call Summary Skill</h3>
 <p><strong>Use case:</strong> A sales team wants consistent summaries after customer calls.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -1571,7 +1592,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <p>The CRM data becomes structured and consistent across reps.</p>
 <p>This helps managers search, report, and forecast better.</p>
 <hr>
-<h3 id="lesson-5-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-5-7-common-mistakes-risks-and-trade-offs"><a id="lesson-5-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Making skills too broad</strong></p>
 <p>A broad skill becomes vague.</p>
 <p>Bad:</p>
@@ -1616,7 +1637,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <p>But if a skill is too rigid, the agent may handle unusual cases poorly.</p>
 <p>Good skills define the important process but still allow judgment.</p>
 <hr>
-<h3 id="lesson-5-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-5-8-practical-best-practices"><a id="lesson-5-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Name skills by job, not by technology</strong></p>
 <p>Good:</p>
@@ -1665,7 +1686,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 </li>
 </ol>
 <hr>
-<h3 id="lesson-5-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-5-9-small-practice-exercise"><a id="lesson-5-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you want an AI agent to help with customer refund requests.</p>
 <p>Design a skill called:</p>
 <pre><code class="language-text">refund-request-review
@@ -1688,7 +1709,11 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <li>Create a refund request if approval is needed</li>
 <li>Explain the decision in customer-safe language</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-6"><h2><span class="chapter-number">Lesson 06</span> Loop Engineering</h2><div class="meta"><time datetime="2026-06-30">2026-06-30</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-6-section-1">1. What It Means</a></li><li><a href="#lesson-6-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-6-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-6-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-6-section-5">5. Real-World Example 1: Coding Agent Debug Loop</a></li><li><a href="#lesson-6-section-6">6. Real-World Example 2: Research Assistant Loop</a></li><li><a href="#lesson-6-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-6-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-6-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Loop Engineering workflow"><ol class="flow"><li><strong>Plan</strong><span>Choose the next action</span></li><li><strong>Act</strong><span>Perform a bounded step</span></li><li><strong>Observe</strong><span>Read the actual result</span></li><li><strong>Stop or repeat</strong><span>Check success and limits</span></li></ol><figcaption>Figure 6. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-6-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0005-agent-skills.md">Markdown edition</a></p></article><article id="lesson-6" class="chapter markdown-body"><h2 id="lesson-6-loop-engineering">Loop Engineering</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-6-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-6-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-6-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-6-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-6-5-real-world-example-1-coding-agent-debug-loop">5. Real-World Example 1: Coding Agent Debug Loop</a></li><li><a href="#lesson-6-6-real-world-example-2-research-assistant-loop">6. Real-World Example 2: Research Assistant Loop</a></li><li><a href="#lesson-6-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-6-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-6-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-30 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0006-loop-engineering.svg" alt="Plan: Choose the next action → Act: Perform a bounded step → Observe: Read the actual result → Stop or repeat: Check success and limits"></p>
+<p>Figure 6. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-6-1-what-it-means"><a id="lesson-6-section-1"></a>1. What It Means</h3>
 <p><strong>Loop engineering</strong> means designing the repeated steps an AI agent follows to complete a task.</p>
 <p>A simple chatbot usually works like this:</p>
 <pre><code class="language-text">User asks -&gt; Model answers
@@ -1714,7 +1739,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 </blockquote>
 <p>This idea is related to agent research like ReAct, where language models combine reasoning and actions in an interleaved way. Source: <a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a></p>
 <hr>
-<h3 id="lesson-6-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-6-2-why-it-matters-in-production-systems"><a id="lesson-6-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>Many AI failures happen because the loop is poorly designed.</p>
 <p>Bad loop behavior can cause:</p>
 <ul>
@@ -1744,7 +1769,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <p>Do not let the model “just keep going.” Design the loop like real software.</p>
 </blockquote>
 <hr>
-<h3 id="lesson-6-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-6-3-how-it-works-step-by-step"><a id="lesson-6-section-3"></a>3. How It Works Step By Step</h3>
 <p>Example user request:</p>
 <blockquote>
 <p>“Find why checkout is failing and suggest a fix.”</p>
@@ -1766,9 +1791,9 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <li><p><strong>Take action</strong></p>
 <p>The agent calls a tool:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;search_logs&quot;,
-  &quot;input&quot;: {
-    &quot;query&quot;: &quot;checkout error&quot;
+  "tool": "search_logs",
+  "input": {
+    "query": "checkout error"
   }
 }
 </code></pre>
@@ -1807,7 +1832,7 @@ Verification: add a regression test for payment payload creation.
 </code></pre>
 <p>A loop is not just repeated model calls. It is controlled progress.</p>
 <hr>
-<h3 id="lesson-6-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-6-4-how-to-apply-it-in-a-project"><a id="lesson-6-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start by designing the loop before writing prompts.</p>
 <p>A practical loop design:</p>
 <pre><code class="language-text">1. Understand request
@@ -1846,15 +1871,15 @@ Verification: add a regression test for payment payload creation.
 <p>This protects the business.</p>
 <p>A useful loop config might look like this:</p>
 <pre><code class="language-json">{
-  &quot;max_steps&quot;: 5,
-  &quot;allowed_tools&quot;: [&quot;search_logs&quot;, &quot;read_file&quot;, &quot;run_tests&quot;],
-  &quot;stop_when&quot;: &quot;root cause has evidence and fix is identified&quot;,
-  &quot;ask_user_when&quot;: &quot;required input is missing or action is high risk&quot;,
-  &quot;forbidden_actions&quot;: [&quot;deploy_to_production&quot;, &quot;delete_customer_data&quot;]
+  "max_steps": 5,
+  "allowed_tools": ["search_logs", "read_file", "run_tests"],
+  "stop_when": "root cause has evidence and fix is identified",
+  "ask_user_when": "required input is missing or action is high risk",
+  "forbidden_actions": ["deploy_to_production", "delete_customer_data"]
 }
 </code></pre>
 <hr>
-<h3 id="lesson-6-section-5">5. Real-World Example 1: Coding Agent Debug Loop</h3>
+<h3 id="lesson-6-5-real-world-example-1-coding-agent-debug-loop"><a id="lesson-6-section-5"></a>5. Real-World Example 1: Coding Agent Debug Loop</h3>
 <p><strong>Use case:</strong> A developer asks an AI coding agent to fix a failing test.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -1894,7 +1919,7 @@ Received undefined.
 </blockquote>
 <p>The loop made the fix evidence-based.</p>
 <hr>
-<h3 id="lesson-6-section-6">6. Real-World Example 2: Research Assistant Loop</h3>
+<h3 id="lesson-6-6-real-world-example-2-research-assistant-loop"><a id="lesson-6-section-6"></a>6. Real-World Example 2: Research Assistant Loop</h3>
 <p><strong>Use case:</strong> A business user asks an AI assistant to compare three CRM tools.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -1920,17 +1945,17 @@ Received undefined.
 </ol>
 <p><strong>Example tool observations:</strong></p>
 <pre><code class="language-json">{
-  &quot;HubSpot&quot;: {
-    &quot;strength&quot;: &quot;easy setup and marketing integration&quot;,
-    &quot;risk&quot;: &quot;cost can rise with contacts and advanced features&quot;
+  "HubSpot": {
+    "strength": "easy setup and marketing integration",
+    "risk": "cost can rise with contacts and advanced features"
   },
-  &quot;Salesforce&quot;: {
-    &quot;strength&quot;: &quot;high customization&quot;,
-    &quot;risk&quot;: &quot;heavier admin and implementation effort&quot;
+  "Salesforce": {
+    "strength": "high customization",
+    "risk": "heavier admin and implementation effort"
   },
-  &quot;Pipedrive&quot;: {
-    &quot;strength&quot;: &quot;simple sales pipeline management&quot;,
-    &quot;risk&quot;: &quot;less enterprise customization&quot;
+  "Pipedrive": {
+    "strength": "simple sales pipeline management",
+    "risk": "less enterprise customization"
   }
 }
 </code></pre>
@@ -1938,7 +1963,7 @@ Received undefined.
 <p>The final answer is grounded in current sources and practical trade-offs.</p>
 <p>The loop prevents a confident but stale answer.</p>
 <hr>
-<h3 id="lesson-6-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-6-7-common-mistakes-risks-and-trade-offs"><a id="lesson-6-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: No max step limit</strong></p>
 <p>The agent keeps trying.</p>
 <p>This increases cost and latency.</p>
@@ -1981,7 +2006,7 @@ Received undefined.
 </ul>
 <p>Production systems should use the smallest loop that solves the task reliably.</p>
 <hr>
-<h3 id="lesson-6-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-6-8-practical-best-practices"><a id="lesson-6-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Design the loop before the prompt</strong></p>
 <p>Decide the workflow first. Then write prompts that support it.</p>
@@ -2044,7 +2069,7 @@ Received undefined.
 </li>
 </ol>
 <hr>
-<h3 id="lesson-6-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-6-9-small-practice-exercise"><a id="lesson-6-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI agent that helps investigate failed deployments.</p>
 <p>A user asks:</p>
 <blockquote>
@@ -2069,7 +2094,11 @@ Received undefined.
 <li>Stop after a small number of evidence-gathering steps</li>
 <li>Escalate if credentials, production access, or missing logs block diagnosis</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-7"><h2><span class="chapter-number">Lesson 07</span> Memory In AI Agents</h2><div class="meta"><time datetime="2026-07-01">2026-07-01</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-7-section-1">1. What It Means</a></li><li><a href="#lesson-7-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-7-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-7-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-7-section-5">5. Real-World Example 1: Coding Agent Memory</a></li><li><a href="#lesson-7-section-6">6. Real-World Example 2: Customer Support Agent Memory</a></li><li><a href="#lesson-7-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-7-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-7-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Memory In AI Agents workflow"><ol class="flow"><li><strong>Select</strong><span>Choose what to retain</span></li><li><strong>Store</strong><span>Record scope and provenance</span></li><li><strong>Retrieve</strong><span>Find relevant memories</span></li><li><strong>Refresh</strong><span>Correct or expire old facts</span></li></ol><figcaption>Figure 7. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-7-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0006-loop-engineering.md">Markdown edition</a></p></article><article id="lesson-7" class="chapter markdown-body"><h2 id="lesson-7-memory-in-ai-agents">Memory In AI Agents</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-7-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-7-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-7-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-7-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-7-5-real-world-example-1-coding-agent-memory">5. Real-World Example 1: Coding Agent Memory</a></li><li><a href="#lesson-7-6-real-world-example-2-customer-support-agent-memory">6. Real-World Example 2: Customer Support Agent Memory</a></li><li><a href="#lesson-7-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-7-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-7-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-01 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0007-memory-in-ai-agents.svg" alt="Select: Choose what to retain → Store: Record scope and provenance → Retrieve: Find relevant memories → Refresh: Correct or expire old facts"></p>
+<p>Figure 7. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-7-1-what-it-means"><a id="lesson-7-section-1"></a>1. What It Means</h3>
 <p><strong>Memory</strong> in an AI agent means the system can keep useful information beyond one single message.</p>
 <p>A normal chat model only sees what is inside its current context window.</p>
 <p>A <strong>context window</strong> is the amount of text the model can read at one time.</p>
@@ -2119,7 +2148,7 @@ The frontend service runs on port 3002.
 </code></pre>
 <p>Memory is an active research area. A useful primary source is the MemGPT paper, which discusses managing memory beyond a model’s limited context window: <a href="https://arxiv.org/abs/2310.08560">https://arxiv.org/abs/2310.08560</a></p>
 <hr>
-<h3 id="lesson-7-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-7-2-why-it-matters-in-production-systems"><a id="lesson-7-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>Without memory, an AI agent can feel forgetful.</p>
 <p>The user must repeat the same information again and again.</p>
 <p>That creates problems:</p>
@@ -2148,7 +2177,7 @@ The frontend service runs on port 3002.
 </blockquote>
 <p>Do not treat memory as magic. Treat it like a database that needs rules.</p>
 <hr>
-<h3 id="lesson-7-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-7-3-how-it-works-step-by-step"><a id="lesson-7-section-3"></a>3. How It Works Step By Step</h3>
 <p>A typical memory system works like this:</p>
 <ol>
 <li><p><strong>User interacts with the agent</strong></p>
@@ -2169,10 +2198,10 @@ The frontend service runs on port 3002.
 <li><p><strong>Memory is written</strong></p>
 <p>Example memory:</p>
 <pre><code class="language-json">{
-  &quot;type&quot;: &quot;user_preference&quot;,
-  &quot;content&quot;: &quot;User prefers detailed lessons with real-world examples.&quot;,
-  &quot;created_at&quot;: &quot;2026-07-01&quot;,
-  &quot;source&quot;: &quot;user_instruction&quot;
+  "type": "user_preference",
+  "content": "User prefers detailed lessons with real-world examples.",
+  "created_at": "2026-07-01",
+  "source": "user_instruction"
 }
 </code></pre>
 </li>
@@ -2200,7 +2229,7 @@ Use simple English.
 </li>
 </ol>
 <hr>
-<h3 id="lesson-7-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-7-4-how-to-apply-it-in-a-project"><a id="lesson-7-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start small. Do not store everything.</p>
 <p>A practical memory design:</p>
 <p><strong>Step 1: Decide what memory is allowed</strong></p>
@@ -2224,12 +2253,12 @@ Use simple English.
 <p><strong>Step 2: Define memory types</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;types&quot;: [
-    &quot;user_preference&quot;,
-    &quot;project_fact&quot;,
-    &quot;workflow_rule&quot;,
-    &quot;decision&quot;,
-    &quot;task_state&quot;
+  "types": [
+    "user_preference",
+    "project_fact",
+    "workflow_rule",
+    "decision",
+    "task_state"
   ]
 }
 </code></pre>
@@ -2237,9 +2266,9 @@ Use simple English.
 <p>Every memory should say where it came from.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;content&quot;: &quot;Use npm run test:authorization for auth verification.&quot;,
-  &quot;source&quot;: &quot;deployment-debug-session&quot;,
-  &quot;created_at&quot;: &quot;2026-06-20&quot;
+  "content": "Use npm run test:authorization for auth verification.",
+  "source": "deployment-debug-session",
+  "created_at": "2026-06-20"
 }
 </code></pre>
 <p><strong>Step 4: Retrieve only relevant memory</strong></p>
@@ -2256,29 +2285,24 @@ User writing preference can remain until changed.
 <p><strong>Step 6: Let users correct memory</strong></p>
 <p>Users should be able to say:</p>
 <blockquote>
-<p>“Forget that.”
-“Update this preference.”
-“That is no longer true.”</p>
+<p>“Forget that.” “Update this preference.” “That is no longer true.”</p>
 </blockquote>
 <hr>
-<h3 id="lesson-7-section-5">5. Real-World Example 1: Coding Agent Memory</h3>
+<h3 id="lesson-7-5-real-world-example-1-coding-agent-memory"><a id="lesson-7-section-5"></a>5. Real-World Example 1: Coding Agent Memory</h3>
 <p><strong>Use case:</strong> A developer uses an AI coding agent across many sessions.</p>
 <p><strong>Without memory:</strong></p>
 <p>The user repeatedly says:</p>
 <blockquote>
-<p>“Use the existing test command.”
-“Do not change unrelated files.”
-“The frontend API routes are in this folder.”
-“The deploy script is the source of truth.”</p>
+<p>“Use the existing test command.” “Do not change unrelated files.” “The frontend API routes are in this folder.” “The deploy script is the source of truth.”</p>
 </blockquote>
 <p>The agent wastes time rediscovering the same facts.</p>
 <p><strong>With memory:</strong></p>
 <p>The system stores:</p>
 <pre><code class="language-json">{
-  &quot;type&quot;: &quot;project_fact&quot;,
-  &quot;content&quot;: &quot;For this repo, deployment logic is controlled by scripts/deploy-main.sh.&quot;,
-  &quot;source&quot;: &quot;previous deployment debugging session&quot;,
-  &quot;created_at&quot;: &quot;2026-06-18&quot;
+  "type": "project_fact",
+  "content": "For this repo, deployment logic is controlled by scripts/deploy-main.sh.",
+  "source": "previous deployment debugging session",
+  "created_at": "2026-06-18"
 }
 </code></pre>
 <p>Later, the user asks:</p>
@@ -2303,7 +2327,7 @@ User writing preference can remain until changed.
 <p><strong>Production fix:</strong></p>
 <p>Mark memory as “possibly stale” and verify important facts before acting.</p>
 <hr>
-<h3 id="lesson-7-section-6">6. Real-World Example 2: Customer Support Agent Memory</h3>
+<h3 id="lesson-7-6-real-world-example-2-customer-support-agent-memory"><a id="lesson-7-section-6"></a>6. Real-World Example 2: Customer Support Agent Memory</h3>
 <p><strong>Use case:</strong> A SaaS company has an AI assistant for customer success.</p>
 <p><strong>Customer history:</strong></p>
 <ul>
@@ -2324,11 +2348,11 @@ User writing preference can remain until changed.
 <p><strong>With memory:</strong></p>
 <p>The agent retrieves:</p>
 <pre><code class="language-json">{
-  &quot;customer&quot;: &quot;Acme&quot;,
-  &quot;plan&quot;: &quot;enterprise&quot;,
-  &quot;preferred_contact&quot;: &quot;email&quot;,
-  &quot;recent_issue&quot;: &quot;onboarding delay&quot;,
-  &quot;renewal_month&quot;: &quot;August&quot;
+  "customer": "Acme",
+  "plan": "enterprise",
+  "preferred_contact": "email",
+  "recent_issue": "onboarding delay",
+  "renewal_month": "August"
 }
 </code></pre>
 <p><strong>Better output:</strong></p>
@@ -2342,7 +2366,7 @@ User writing preference can remain until changed.
 <p><strong>Production fix:</strong></p>
 <p>Use access control. Only authorized employees should access account memory.</p>
 <hr>
-<h3 id="lesson-7-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-7-7-common-mistakes-risks-and-trade-offs"><a id="lesson-7-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Saving everything</strong></p>
 <p>More memory is not always better.</p>
 <p>Too much memory creates noise.</p>
@@ -2378,7 +2402,7 @@ User writing preference can remain until changed.
 <p>But it also increases privacy and security risk.</p>
 <p>Production systems must choose carefully what to store.</p>
 <hr>
-<h3 id="lesson-7-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-7-8-practical-best-practices"><a id="lesson-7-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Store only useful, stable information</strong></p>
 <p>Ask:</p>
@@ -2426,7 +2450,7 @@ User writing preference can remain until changed.
 </li>
 </ol>
 <hr>
-<h3 id="lesson-7-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-7-9-small-practice-exercise"><a id="lesson-7-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI project assistant for a software team.</p>
 <p>The user says:</p>
 <blockquote>
@@ -2449,7 +2473,11 @@ User writing preference can remain until changed.
 <li>Verify if package scripts changed or the memory is old</li>
 <li>Do not apply it to unrelated repos</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-8"><h2><span class="chapter-number">Lesson 08</span> Fine-Tuning</h2><div class="meta"><time datetime="2026-07-02">2026-07-02</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-8-section-1">1. What It Means</a></li><li><a href="#lesson-8-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-8-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-8-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-8-section-5">5. Real-World Example 1: Support Ticket Classification</a></li><li><a href="#lesson-8-section-6">6. Real-World Example 2: Brand-Consistent Email Drafting</a></li><li><a href="#lesson-8-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-8-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-8-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Fine-Tuning workflow"><ol class="flow"><li><strong>Examples</strong><span>Collect reviewed training data</span></li><li><strong>Train</strong><span>Adapt the base model</span></li><li><strong>Evaluate</strong><span>Test on held-out cases</span></li><li><strong>Monitor</strong><span>Check production quality</span></li></ol><figcaption>Figure 8. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-8-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0007-memory-in-ai-agents.md">Markdown edition</a></p></article><article id="lesson-8" class="chapter markdown-body"><h2 id="lesson-8-fine-tuning">Fine-Tuning</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-8-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-8-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-8-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-8-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-8-5-real-world-example-1-support-ticket-classification">5. Real-World Example 1: Support Ticket Classification</a></li><li><a href="#lesson-8-6-real-world-example-2-brand-consistent-email-drafting">6. Real-World Example 2: Brand-Consistent Email Drafting</a></li><li><a href="#lesson-8-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-8-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-8-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-02 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0008-fine-tuning.svg" alt="Examples: Collect reviewed training data → Train: Adapt the base model → Evaluate: Test on held-out cases → Monitor: Check production quality"></p>
+<p>Figure 8. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-8-1-what-it-means"><a id="lesson-8-section-1"></a>1. What It Means</h3>
 <p><strong>Fine-tuning</strong> means training an existing AI model further using your own examples.</p>
 <p>You are not building a model from zero.</p>
 <p>You start with a base model that already understands language, then teach it a specific pattern.</p>
@@ -2482,7 +2510,7 @@ Output: Correct support classification
 </ol>
 <p>OpenAI’s model optimization docs describe fine-tuning as part of a wider loop with evals and prompting, not as a standalone magic fix: <a href="https://platform.openai.com/docs/guides/fine-tuning">https://platform.openai.com/docs/guides/fine-tuning</a></p>
 <hr>
-<h3 id="lesson-8-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-8-2-why-it-matters-in-production-systems"><a id="lesson-8-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>Fine-tuning matters when a production AI system needs consistent behavior at scale.</p>
 <p>For example:</p>
 <ul>
@@ -2513,7 +2541,7 @@ Output: Correct support classification
 </ul>
 <p>Fine-tuning is production work, not just a model setting.</p>
 <hr>
-<h3 id="lesson-8-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-8-3-how-it-works-step-by-step"><a id="lesson-8-section-3"></a>3. How It Works Step By Step</h3>
 <p>A simple fine-tuning process looks like this:</p>
 <ol>
 <li><p><strong>Choose a narrow task</strong></p>
@@ -2525,8 +2553,8 @@ Output: Correct support classification
 <li><p><strong>Collect examples</strong></p>
 <p>Example training row:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;I was charged twice this month.&quot;,
-  &quot;output&quot;: &quot;billing&quot;
+  "input": "I was charged twice this month.",
+  "output": "billing"
 }
 </code></pre>
 </li>
@@ -2534,8 +2562,8 @@ Output: Correct support classification
 <p>Remove bad examples.</p>
 <p>Fix inconsistent labels.</p>
 <p>Example problem:</p>
-<pre><code class="language-text">One person labels refund issues as &quot;billing&quot;.
-Another person labels them as &quot;payment&quot;.
+<pre><code class="language-text">One person labels refund issues as "billing".
+Another person labels them as "payment".
 </code></pre>
 <p>That will confuse the model.</p>
 </li>
@@ -2576,7 +2604,7 @@ Another person labels them as &quot;payment&quot;.
 </li>
 </ol>
 <hr>
-<h3 id="lesson-8-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-8-4-how-to-apply-it-in-a-project"><a id="lesson-8-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Use this decision path.</p>
 <p>First ask:</p>
 <pre><code class="language-text">Is the problem caused by missing knowledge?
@@ -2615,7 +2643,7 @@ Another person labels them as &quot;payment&quot;.
 </ol>
 <p>Success should be measured, not guessed.</p>
 <hr>
-<h3 id="lesson-8-section-5">5. Real-World Example 1: Support Ticket Classification</h3>
+<h3 id="lesson-8-5-real-world-example-1-support-ticket-classification"><a id="lesson-8-section-5"></a>5. Real-World Example 1: Support Ticket Classification</h3>
 <p><strong>Use case:</strong> A SaaS company receives thousands of support tickets.</p>
 <p>They need each ticket classified into:</p>
 <pre><code class="language-text">billing
@@ -2631,41 +2659,41 @@ security
 </blockquote>
 <p><strong>Expected output:</strong></p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;login_issue&quot;,
-  &quot;priority&quot;: &quot;medium&quot;
+  "category": "login_issue",
+  "priority": "medium"
 }
 </code></pre>
 <p><strong>Prompt-only problem:</strong></p>
 <p>The model sometimes outputs:</p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;security&quot;,
-  &quot;priority&quot;: &quot;high&quot;
+  "category": "security",
+  "priority": "high"
 }
 </code></pre>
 <p>That may be understandable, but it does not match the company’s routing rules.</p>
 <p><strong>Fine-tuning dataset:</strong></p>
 <p>The team prepares examples:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;I cannot access my account after enabling two-factor authentication.&quot;,
-  &quot;output&quot;: {
-    &quot;category&quot;: &quot;login_issue&quot;,
-    &quot;priority&quot;: &quot;medium&quot;
+  "input": "I cannot access my account after enabling two-factor authentication.",
+  "output": {
+    "category": "login_issue",
+    "priority": "medium"
   }
 }
 </code></pre>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;My invoice shows two charges for June.&quot;,
-  &quot;output&quot;: {
-    &quot;category&quot;: &quot;billing&quot;,
-    &quot;priority&quot;: &quot;medium&quot;
+  "input": "My invoice shows two charges for June.",
+  "output": {
+    "category": "billing",
+    "priority": "medium"
   }
 }
 </code></pre>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;I found a way to see another user&#39;s data.&quot;,
-  &quot;output&quot;: {
-    &quot;category&quot;: &quot;security&quot;,
-    &quot;priority&quot;: &quot;critical&quot;
+  "input": "I found a way to see another user's data.",
+  "output": {
+    "category": "security",
+    "priority": "critical"
   }
 }
 </code></pre>
@@ -2675,7 +2703,7 @@ security
 <p><strong>Important guardrail:</strong></p>
 <p>Security-related tickets should still be escalated by backend rules. Do not depend only on model classification.</p>
 <hr>
-<h3 id="lesson-8-section-6">6. Real-World Example 2: Brand-Consistent Email Drafting</h3>
+<h3 id="lesson-8-6-real-world-example-2-brand-consistent-email-drafting"><a id="lesson-8-section-6"></a>6. Real-World Example 2: Brand-Consistent Email Drafting</h3>
 <p><strong>Use case:</strong> A company wants sales emails in a specific voice.</p>
 <p>Their approved style:</p>
 <ul>
@@ -2724,7 +2752,7 @@ Ali
 <p>Fine-tuning should not teach current customer facts. Those should come from CRM or retrieval.</p>
 <p>Fine-tuning teaches style and structure. It should not replace live data.</p>
 <hr>
-<h3 id="lesson-8-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-8-7-common-mistakes-risks-and-trade-offs"><a id="lesson-8-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Fine-tuning to add knowledge</strong></p>
 <p>Bad use:</p>
 <blockquote>
@@ -2758,7 +2786,7 @@ Ali
 <p>But it creates a new asset to maintain.</p>
 <p>When rules change, you may need new data and a new fine-tune.</p>
 <hr>
-<h3 id="lesson-8-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-8-8-practical-best-practices"><a id="lesson-8-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Start with prompting and evals</strong></p>
 <p>Do not fine-tune before you know the baseline.</p>
@@ -2811,7 +2839,7 @@ Ali
 </li>
 </ol>
 <hr>
-<h3 id="lesson-8-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-8-9-small-practice-exercise"><a id="lesson-8-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI assistant for a real estate company.</p>
 <p>The assistant must classify incoming leads into:</p>
 <pre><code class="language-text">buyer
@@ -2840,7 +2868,11 @@ not_relevant
 <li>Measure classification accuracy on real leads.</li>
 <li>Use fine-tuning for classification, but use RAG/tools for current market pricing.</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-9"><h2><span class="chapter-number">Lesson 09</span> Prompt Design For Production Systems</h2><div class="meta"><time datetime="2026-07-04">2026-07-04</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-9-section-1">1. What It Means</a></li><li><a href="#lesson-9-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-9-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-9-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-9-section-5">5. Real-World Example 1: Customer Support Reply Assistant</a></li><li><a href="#lesson-9-section-6">6. Real-World Example 2: Invoice Explanation Assistant</a></li><li><a href="#lesson-9-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-9-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-9-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Prompt Design For Production Systems workflow"><ol class="flow"><li><strong>Task</strong><span>State the intended result</span></li><li><strong>Context</strong><span>Supply relevant inputs</span></li><li><strong>Contract</strong><span>Define output and rules</span></li><li><strong>Evaluate</strong><span>Test realistic cases</span></li></ol><figcaption>Figure 9. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-9-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0008-fine-tuning.md">Markdown edition</a></p></article><article id="lesson-9" class="chapter markdown-body"><h2 id="lesson-9-prompt-design-for-production-systems">Prompt Design For Production Systems</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-9-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-9-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-9-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-9-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-9-5-real-world-example-1-customer-support-reply-assistant">5. Real-World Example 1: Customer Support Reply Assistant</a></li><li><a href="#lesson-9-6-real-world-example-2-invoice-explanation-assistant">6. Real-World Example 2: Invoice Explanation Assistant</a></li><li><a href="#lesson-9-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-9-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-9-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-04 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0009-prompt-design-for-production-systems.svg" alt="Task: State the intended result → Context: Supply relevant inputs → Contract: Define output and rules → Evaluate: Test realistic cases"></p>
+<p>Figure 9. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-9-1-what-it-means"><a id="lesson-9-section-1"></a>1. What It Means</h3>
 <p><strong>Prompt design</strong> means writing instructions for an AI model so it performs a task reliably.</p>
 <p>A prompt is not just a question.</p>
 <p>In production, a prompt is closer to a small task specification.</p>
@@ -2864,12 +2896,12 @@ not_relevant
 <p>Better prompt:</p>
 <pre><code class="language-text">Summarize the customer complaint in 5 bullet points.
 Include: issue, customer impact, urgency, requested action, and missing information.
-If the complaint does not mention urgency, write &quot;Urgency: unknown&quot;.
+If the complaint does not mention urgency, write "Urgency: unknown".
 </code></pre>
 <p>The second prompt is easier to test and safer to use in production.</p>
 <p>OpenAI’s prompt engineering guidance also emphasizes clear instructions, splitting complex tasks, giving references, and testing changes systematically: <a href="https://platform.openai.com/docs/guides/prompt-engineering">https://platform.openai.com/docs/guides/prompt-engineering</a></p>
 <hr>
-<h3 id="lesson-9-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-9-2-why-it-matters-in-production-systems"><a id="lesson-9-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>In demos, a loose prompt may look fine.</p>
 <p>In production, loose prompts create problems:</p>
 <ul>
@@ -2885,7 +2917,7 @@ If the complaint does not mention urgency, write &quot;Urgency: unknown&quot;.
 <p>For example, if an AI assistant classifies support tickets, you do not want it to invent categories.</p>
 <p>Bad output:</p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;payment_problem&quot;
+  "category": "payment_problem"
 }
 </code></pre>
 <p>If your system only supports:</p>
@@ -2903,7 +2935,7 @@ Do not create new categories.
 </code></pre>
 <p>Prompt design matters because it connects AI behavior to real product requirements.</p>
 <hr>
-<h3 id="lesson-9-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-9-3-how-it-works-step-by-step"><a id="lesson-9-section-3"></a>3. How It Works Step By Step</h3>
 <p>A practical prompt design process looks like this.</p>
 <ol>
 <li><p><strong>Define the task</strong></p>
@@ -2925,9 +2957,9 @@ It may include angry language, missing details, or multiple issues.
 <li><p><strong>Define output format</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;billing | login_issue | bug_report | feature_request | security&quot;,
-  &quot;priority&quot;: &quot;low | medium | high | critical&quot;,
-  &quot;reason&quot;: &quot;short explanation&quot;
+  "category": "billing | login_issue | bug_report | feature_request | security",
+  "priority": "low | medium | high | critical",
+  "reason": "short explanation"
 }
 </code></pre>
 </li>
@@ -2940,13 +2972,13 @@ Do not create new categories.
 </li>
 <li><p><strong>Add examples</strong></p>
 <p>Example:</p>
-<pre><code class="language-text">Input: &quot;I was charged twice this month.&quot;
-Output: {&quot;category&quot;:&quot;billing&quot;,&quot;priority&quot;:&quot;medium&quot;,&quot;reason&quot;:&quot;Customer reports duplicate charge.&quot;}
+<pre><code class="language-text">Input: "I was charged twice this month."
+Output: {"category":"billing","priority":"medium","reason":"Customer reports duplicate charge."}
 </code></pre>
 </li>
 <li><p><strong>Add failure behavior</strong></p>
 <p>Example:</p>
-<pre><code class="language-text">If the input is empty, return category &quot;unknown&quot; and explain that no message was provided.
+<pre><code class="language-text">If the input is empty, return category "unknown" and explain that no message was provided.
 </code></pre>
 </li>
 <li><p><strong>Test with real cases</strong></p>
@@ -2960,9 +2992,9 @@ Output: {&quot;category&quot;:&quot;billing&quot;,&quot;priority&quot;:&quot;med
 <li><p><strong>Monitor after release</strong></p>
 </li>
 </ol>
-<p>   Track wrong classifications, invalid JSON, cost, latency, and user feedback.</p>
+<p>Track wrong classifications, invalid JSON, cost, latency, and user feedback.</p>
 <hr>
-<h3 id="lesson-9-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-9-4-how-to-apply-it-in-a-project"><a id="lesson-9-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Use this structure for production prompts:</p>
 <pre><code class="language-text">You are [role].
 
@@ -3005,19 +3037,19 @@ Rules:
 Output format:
 Return valid JSON only:
 {
-  &quot;category&quot;: &quot;...&quot;,
-  &quot;priority&quot;: &quot;...&quot;,
-  &quot;reason&quot;: &quot;...&quot;
+  "category": "...",
+  "priority": "...",
+  "reason": "..."
 }
 
 Failure behavior:
-If the message is empty or impossible to classify, use category &quot;unknown&quot; and priority &quot;low&quot;.
+If the message is empty or impossible to classify, use category "unknown" and priority "low".
 </code></pre>
 <p>This is much easier to test than:</p>
 <pre><code class="language-text">Classify this ticket.
 </code></pre>
 <hr>
-<h3 id="lesson-9-section-5">5. Real-World Example 1: Customer Support Reply Assistant</h3>
+<h3 id="lesson-9-5-real-world-example-1-customer-support-reply-assistant"><a id="lesson-9-section-5"></a>5. Real-World Example 1: Customer Support Reply Assistant</h3>
 <p><strong>Use case:</strong> A SaaS company wants AI to draft replies to support tickets.</p>
 <p><strong>User input:</strong></p>
 <pre><code class="language-text">I cannot log in. I reset my password twice but still get an error.
@@ -3056,15 +3088,15 @@ Our support team can then check the account status safely.
 <p><strong>Outcome:</strong></p>
 <p>The response is helpful, short, and safer.</p>
 <hr>
-<h3 id="lesson-9-section-6">6. Real-World Example 2: Invoice Explanation Assistant</h3>
+<h3 id="lesson-9-6-real-world-example-2-invoice-explanation-assistant"><a id="lesson-9-section-6"></a>6. Real-World Example 2: Invoice Explanation Assistant</h3>
 <p><strong>Use case:</strong> A billing product uses AI to explain why a customer’s invoice increased.</p>
 <p><strong>Input data:</strong></p>
 <pre><code class="language-json">{
-  &quot;current_invoice&quot;: 240,
-  &quot;previous_invoice&quot;: 180,
-  &quot;new_seats&quot;: 3,
-  &quot;plan_change&quot;: &quot;Pro to Business&quot;,
-  &quot;discount_expired&quot;: true
+  "current_invoice": 240,
+  "previous_invoice": 180,
+  "new_seats": 3,
+  "plan_change": "Pro to Business",
+  "discount_expired": true
 }
 </code></pre>
 <p><strong>Weak prompt:</strong></p>
@@ -3103,7 +3135,7 @@ If you want, the billing team can review whether all seats are still needed befo
 <p><strong>Outcome:</strong></p>
 <p>The assistant gives a useful answer without inventing hidden charges.</p>
 <hr>
-<h3 id="lesson-9-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-9-7-common-mistakes-risks-and-trade-offs"><a id="lesson-9-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Asking for too many things at once</strong></p>
 <p>Bad:</p>
 <pre><code class="language-text">Analyze the customer, write a reply, classify urgency, update CRM, and suggest pricing.
@@ -3137,7 +3169,7 @@ If you want, the billing team can review whether all seats are still needed befo
 </ul>
 <p>Use enough detail to control behavior, but avoid unnecessary text.</p>
 <hr>
-<h3 id="lesson-9-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-9-8-practical-best-practices"><a id="lesson-9-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Be specific</strong></p>
 <p>Replace:</p>
@@ -3190,20 +3222,20 @@ Do not create new categories.
 <li><p><strong>Keep prompts maintainable</strong></p>
 </li>
 </ol>
-<p>   If a prompt becomes huge, split the workflow into smaller steps or tools.</p>
+<p>If a prompt becomes huge, split the workflow into smaller steps or tools.</p>
 <hr>
-<h3 id="lesson-9-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-9-9-small-practice-exercise"><a id="lesson-9-section-9"></a>9. Small Practice Exercise</h3>
 <p>You are building an AI assistant that summarizes bug reports.</p>
 <p>Input:</p>
 <pre><code class="language-text">The app crashes when I upload a 20MB PDF. It works for small files. I am using Chrome on Windows.
 </code></pre>
 <p>Write a production prompt that returns:</p>
 <pre><code class="language-json">{
-  &quot;summary&quot;: &quot;...&quot;,
-  &quot;affected_area&quot;: &quot;...&quot;,
-  &quot;severity&quot;: &quot;...&quot;,
-  &quot;reproduction_clues&quot;: [&quot;...&quot;],
-  &quot;missing_information&quot;: [&quot;...&quot;]
+  "summary": "...",
+  "affected_area": "...",
+  "severity": "...",
+  "reproduction_clues": ["..."],
+  "missing_information": ["..."]
 }
 </code></pre>
 <p>Think about:</p>
@@ -3222,7 +3254,11 @@ Do not create new categories.
 <li>Use severity from a fixed list.</li>
 <li>Put unknown details in <code>missing_information</code>.</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-10"><h2><span class="chapter-number">Lesson 10</span> Retrieval Quality</h2><div class="meta"><time datetime="2026-07-05">2026-07-05</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-10-section-1">1. What It Means</a></li><li><a href="#lesson-10-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-10-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-10-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-10-section-5">5. Real-World Example 1: Customer Support Policy Assistant</a></li><li><a href="#lesson-10-section-6">6. Real-World Example 2: Developer Documentation Assistant</a></li><li><a href="#lesson-10-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-10-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-10-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Retrieval Quality workflow"><ol class="flow"><li><strong>Query</strong><span>Understand the information need</span></li><li><strong>Search</strong><span>Find candidate passages</span></li><li><strong>Rank</strong><span>Prioritize useful evidence</span></li><li><strong>Measure</strong><span>Check relevant coverage</span></li></ol><figcaption>Figure 10. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-10-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0009-prompt-design-for-production-systems.md">Markdown edition</a></p></article><article id="lesson-10" class="chapter markdown-body"><h2 id="lesson-10-retrieval-quality">Retrieval Quality</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-10-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-10-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-10-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-10-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-10-5-real-world-example-1-customer-support-policy-assistant">5. Real-World Example 1: Customer Support Policy Assistant</a></li><li><a href="#lesson-10-6-real-world-example-2-developer-documentation-assistant">6. Real-World Example 2: Developer Documentation Assistant</a></li><li><a href="#lesson-10-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-10-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-10-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-05 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0010-retrieval-quality.svg" alt="Query: Understand the information need → Search: Find candidate passages → Rank: Prioritize useful evidence → Measure: Check relevant coverage"></p>
+<p>Figure 10. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-10-1-what-it-means"><a id="lesson-10-section-1"></a>1. What It Means</h3>
 <p><strong>Retrieval quality</strong> means how well your AI system finds the right information before generating an answer.</p>
 <p>This matters most in RAG systems.</p>
 <p>RAG means <strong>Retrieval-Augmented Generation</strong>. The AI first retrieves documents, then uses them to answer.</p>
@@ -3248,7 +3284,7 @@ Do not create new categories.
 <p>Did we find the most useful, correct, current, and allowed information?</p>
 </blockquote>
 <hr>
-<h3 id="lesson-10-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-10-2-why-it-matters-in-production-systems"><a id="lesson-10-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>Many teams blame the model when the real problem is retrieval.</p>
 <p>Example:</p>
 <p>User asks:</p>
@@ -3283,7 +3319,7 @@ Do not create new categories.
 </ul>
 <p>RAG evaluation frameworks like RAGAS discuss retrieval-focused checks such as context relevance and answer grounding. Source: <a href="https://arxiv.org/abs/2309.15217">https://arxiv.org/abs/2309.15217</a></p>
 <hr>
-<h3 id="lesson-10-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-10-3-how-it-works-step-by-step"><a id="lesson-10-section-3"></a>3. How It Works Step By Step</h3>
 <p>Imagine a user asks:</p>
 <blockquote>
 <p>“What is the refund policy for damaged electronics?”</p>
@@ -3311,16 +3347,16 @@ Do not create new categories.
 <p>Example:</p>
 <pre><code class="language-json">[
   {
-    &quot;doc&quot;: &quot;damaged_items_policy&quot;,
-    &quot;score&quot;: 0.91
+    "doc": "damaged_items_policy",
+    "score": 0.91
   },
   {
-    &quot;doc&quot;: &quot;electronics_warranty_policy&quot;,
-    &quot;score&quot;: 0.86
+    "doc": "electronics_warranty_policy",
+    "score": 0.86
   },
   {
-    &quot;doc&quot;: &quot;general_refund_policy&quot;,
-    &quot;score&quot;: 0.79
+    "doc": "general_refund_policy",
+    "score": 0.79
   }
 ]
 </code></pre>
@@ -3355,7 +3391,7 @@ Do not create new categories.
 </li>
 </ol>
 <hr>
-<h3 id="lesson-10-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-10-4-how-to-apply-it-in-a-project"><a id="lesson-10-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start by treating retrieval as its own product feature.</p>
 <p>Do not only test the final answer.</p>
 <p>Test whether the system found the right evidence.</p>
@@ -3364,8 +3400,8 @@ Do not create new categories.
 <li><p><strong>Create a small test set</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;question&quot;: &quot;Can customers return damaged electronics?&quot;,
-  &quot;must_retrieve&quot;: [&quot;damaged_items_policy&quot;, &quot;electronics_return_policy&quot;]
+  "question": "Can customers return damaged electronics?",
+  "must_retrieve": ["damaged_items_policy", "electronics_return_policy"]
 }
 </code></pre>
 </li>
@@ -3428,7 +3464,7 @@ Do not create new categories.
 </li>
 </ol>
 <hr>
-<h3 id="lesson-10-section-5">5. Real-World Example 1: Customer Support Policy Assistant</h3>
+<h3 id="lesson-10-5-real-world-example-1-customer-support-policy-assistant"><a id="lesson-10-section-5"></a>5. Real-World Example 1: Customer Support Policy Assistant</h3>
 <p><strong>Use case:</strong> An ecommerce support chatbot answers refund questions.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -3436,9 +3472,9 @@ Do not create new categories.
 </blockquote>
 <p><strong>Bad retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;general_return_policy&quot;,
-  &quot;opened_items_policy&quot;,
-  &quot;refund_processing_time&quot;
+  "general_return_policy",
+  "opened_items_policy",
+  "refund_processing_time"
 ]
 </code></pre>
 <p><strong>Bad answer:</strong></p>
@@ -3448,9 +3484,9 @@ Do not create new categories.
 <p>This answer ignores damage.</p>
 <p><strong>Good retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;damaged_item_return_policy&quot;,
-  &quot;electronics_damage_exception&quot;,
-  &quot;refund_evidence_requirements&quot;
+  "damaged_item_return_policy",
+  "electronics_damage_exception",
+  "refund_evidence_requirements"
 ]
 </code></pre>
 <p><strong>Good answer:</strong></p>
@@ -3463,7 +3499,7 @@ Do not create new categories.
 <p>Policy exceptions are often more important than general rules.</p>
 <p>Your retrieval system must find them.</p>
 <hr>
-<h3 id="lesson-10-section-6">6. Real-World Example 2: Developer Documentation Assistant</h3>
+<h3 id="lesson-10-6-real-world-example-2-developer-documentation-assistant"><a id="lesson-10-section-6"></a>6. Real-World Example 2: Developer Documentation Assistant</h3>
 <p><strong>Use case:</strong> A developer asks an internal AI assistant about deployment.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -3471,9 +3507,9 @@ Do not create new categories.
 </blockquote>
 <p><strong>Bad retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;old_deployment_notes_2023&quot;,
-  &quot;backend_deploy_script&quot;,
-  &quot;local_setup_readme&quot;
+  "old_deployment_notes_2023",
+  "backend_deploy_script",
+  "local_setup_readme"
 ]
 </code></pre>
 <p><strong>Bad answer:</strong></p>
@@ -3483,9 +3519,9 @@ Do not create new categories.
 <p>This may break production.</p>
 <p><strong>Good retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;frontend_deployment_runbook_current&quot;,
-  &quot;ci_cd_pipeline_docs&quot;,
-  &quot;rollback_instructions&quot;
+  "frontend_deployment_runbook_current",
+  "ci_cd_pipeline_docs",
+  "rollback_instructions"
 ]
 </code></pre>
 <p><strong>Good answer:</strong></p>
@@ -3498,7 +3534,7 @@ Do not create new categories.
 <p>For engineering docs, retrieval must prefer current docs over stale notes.</p>
 <p>Metadata like <code>current: true</code>, <code>last_updated</code>, and <code>service: frontend</code> matters.</p>
 <hr>
-<h3 id="lesson-10-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-10-7-common-mistakes-risks-and-trade-offs"><a id="lesson-10-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Bad chunking</strong></p>
 <p>If chunks are too large, the model gets noise.</p>
 <p>If chunks are too small, key context is missing.</p>
@@ -3544,7 +3580,7 @@ Do not create new categories.
 <p>High precision can miss important exceptions.</p>
 <p>Good production systems balance both.</p>
 <hr>
-<h3 id="lesson-10-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-10-8-practical-best-practices"><a id="lesson-10-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Build a retrieval test set</strong></p>
 <p>For each question, define which documents should be retrieved.</p>
@@ -3590,7 +3626,7 @@ Do not create new categories.
 </li>
 </ol>
 <hr>
-<h3 id="lesson-10-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-10-9-small-practice-exercise"><a id="lesson-10-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI assistant for company HR policies.</p>
 <p>User asks:</p>
 <blockquote>
@@ -3615,7 +3651,11 @@ Do not create new categories.
 <li>Hybrid search because exact terms like country, visa, tax, and remote work matter</li>
 <li>If policies conflict, do not guess; say the policies conflict and escalate to HR</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-11"><h2><span class="chapter-number">Lesson 11</span> Production Agent Architecture</h2><div class="meta"><time datetime="2026-07-06">2026-07-06</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-11-section-1">1. What It Means</a></li><li><a href="#lesson-11-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-11-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-11-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-11-section-5">5. Real-World Example 1: Ecommerce Support Agent</a></li><li><a href="#lesson-11-section-6">6. Real-World Example 2: Internal Engineering Agent</a></li><li><a href="#lesson-11-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-11-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-11-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Production Agent Architecture workflow"><ol class="flow"><li><strong>Request</strong><span>Authenticate the user</span></li><li><strong>Orchestrate</strong><span>Manage model, context and tools</span></li><li><strong>Control</strong><span>Validate and limit actions</span></li><li><strong>Observe</strong><span>Evaluate and monitor outcomes</span></li></ol><figcaption>Figure 11. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-11-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0010-retrieval-quality.md">Markdown edition</a></p></article><article id="lesson-11" class="chapter markdown-body"><h2 id="lesson-11-production-agent-architecture">Production Agent Architecture</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-11-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-11-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-11-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-11-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-11-5-real-world-example-1-ecommerce-support-agent">5. Real-World Example 1: Ecommerce Support Agent</a></li><li><a href="#lesson-11-6-real-world-example-2-internal-engineering-agent">6. Real-World Example 2: Internal Engineering Agent</a></li><li><a href="#lesson-11-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-11-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-11-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-06 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0011-production-agent-architecture.svg" alt="Request: Authenticate the user → Orchestrate: Manage model, context and tools → Control: Validate and limit actions → Observe: Evaluate and monitor outcomes"></p>
+<p>Figure 11. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-11-1-what-it-means"><a id="lesson-11-section-1"></a>1. What It Means</h3>
 <p><strong>Production agent architecture</strong> means the full system design around an AI agent so it can run safely and reliably for real users.</p>
 <p>A production agent is not just:</p>
 <pre><code class="language-text">User -&gt; LLM -&gt; Answer
@@ -3654,7 +3694,7 @@ Do not create new categories.
 </ul>
 <p>The model is only one component. The architecture around it decides whether the product is safe and useful.</p>
 <hr>
-<h3 id="lesson-11-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-11-2-why-it-matters-in-production-systems"><a id="lesson-11-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>A demo can work with one prompt and one model call.</p>
 <p>A production system needs more control.</p>
 <p>Without proper architecture, the agent may:</p>
@@ -3683,7 +3723,7 @@ Do not create new categories.
 </ul>
 <p>Good architecture makes those answers clear.</p>
 <hr>
-<h3 id="lesson-11-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-11-3-how-it-works-step-by-step"><a id="lesson-11-section-3"></a>3. How It Works Step By Step</h3>
 <p>Imagine a user asks:</p>
 <blockquote>
 <p>“Cancel my subscription and refund my last payment.”</p>
@@ -3703,8 +3743,8 @@ Do not create new categories.
 <li><p><strong>Classify the intent</strong></p>
 <p>The agent identifies the task:</p>
 <pre><code class="language-json">{
-  &quot;intent&quot;: &quot;subscription_cancellation_and_refund&quot;,
-  &quot;risk_level&quot;: &quot;high&quot;
+  "intent": "subscription_cancellation_and_refund",
+  "risk_level": "high"
 }
 </code></pre>
 </li>
@@ -3719,9 +3759,9 @@ Do not create new categories.
 <li><p><strong>Call read-only tools first</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_subscription_status&quot;,
-  &quot;input&quot;: {
-    &quot;user_id&quot;: &quot;current_user&quot;
+  "tool": "get_subscription_status",
+  "input": {
+    "user_id": "current_user"
   }
 }
 </code></pre>
@@ -3745,10 +3785,10 @@ Do not create new categories.
 <p>Write tools change data.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;create_refund_request&quot;,
-  &quot;input&quot;: {
-    &quot;subscription_id&quot;: &quot;sub_123&quot;,
-    &quot;reason&quot;: &quot;customer_request&quot;
+  "tool": "create_refund_request",
+  "input": {
+    "subscription_id": "sub_123",
+    "reason": "customer_request"
   }
 }
 </code></pre>
@@ -3756,7 +3796,7 @@ Do not create new categories.
 <li><p><strong>Log everything</strong></p>
 </li>
 </ol>
-<p>   The system logs:</p>
+<p>The system logs:</p>
 <ul>
 <li>Request ID</li>
 <li>User ID</li>
@@ -3769,9 +3809,9 @@ Do not create new categories.
 <ol start="11">
 <li><strong>Return final response</strong></li>
 </ol>
-<p>   The user gets a clear answer based on real system state.</p>
+<p>The user gets a clear answer based on real system state.</p>
 <hr>
-<h3 id="lesson-11-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-11-4-how-to-apply-it-in-a-project"><a id="lesson-11-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Start with a simple architecture. Add complexity only where needed.</p>
 <p>A practical first version:</p>
 <pre><code class="language-text">Frontend
@@ -3837,11 +3877,11 @@ Cannot:
 <p><strong>Step 5: Add evaluations</strong></p>
 <p>Create test cases for common and risky workflows.</p>
 <p>Example:</p>
-<pre><code class="language-text">User asks for another customer&#39;s invoice.
+<pre><code class="language-text">User asks for another customer's invoice.
 Expected: refuse or block access.
 </code></pre>
 <hr>
-<h3 id="lesson-11-section-5">5. Real-World Example 1: Ecommerce Support Agent</h3>
+<h3 id="lesson-11-5-real-world-example-1-ecommerce-support-agent"><a id="lesson-11-section-5"></a>5. Real-World Example 1: Ecommerce Support Agent</h3>
 <p><strong>Use case:</strong> An online store wants an AI support agent.</p>
 <p>The agent can:</p>
 <ul>
@@ -3883,7 +3923,7 @@ Expected: refuse or block access.
 <p><strong>Production fix:</strong></p>
 <p>The tool itself must check ownership before creating the return.</p>
 <hr>
-<h3 id="lesson-11-section-6">6. Real-World Example 2: Internal Engineering Agent</h3>
+<h3 id="lesson-11-6-real-world-example-2-internal-engineering-agent"><a id="lesson-11-section-6"></a>6. Real-World Example 2: Internal Engineering Agent</h3>
 <p><strong>Use case:</strong> A company wants an AI agent to help engineers debug deployment failures.</p>
 <p>The agent can:</p>
 <ul>
@@ -3923,7 +3963,7 @@ Expected: refuse or block access.
 <p><strong>Production fix:</strong></p>
 <p>Use sandboxing, allowlisted commands, approval gates, and read-only cloud access by default.</p>
 <hr>
-<h3 id="lesson-11-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-11-7-common-mistakes-risks-and-trade-offs"><a id="lesson-11-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Treating the model as the whole system</strong></p>
 <p>The model is not enough.</p>
 <p>You also need tools, permissions, retrieval, logging, and tests.</p>
@@ -3960,7 +4000,7 @@ Expected: refuse or block access.
 <p>But more autonomy increases risk.</p>
 <p>Production systems should give autonomy gradually, starting with low-risk tasks.</p>
 <hr>
-<h3 id="lesson-11-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-11-8-practical-best-practices"><a id="lesson-11-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Use a clear agent boundary</strong></p>
 <p>Define exactly what the agent can do.</p>
@@ -3992,9 +4032,9 @@ Expected: refuse or block access.
 <li><p><strong>Review production traces</strong></p>
 </li>
 </ol>
-<p>   Real user behavior will show failure cases your test set missed.</p>
+<p>Real user behavior will show failure cases your test set missed.</p>
 <hr>
-<h3 id="lesson-11-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-11-9-small-practice-exercise"><a id="lesson-11-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you are building an AI agent for a SaaS billing team.</p>
 <p>The agent should help users understand invoices and request refunds.</p>
 <p>Design the architecture.</p>
@@ -4016,7 +4056,11 @@ Expected: refuse or block access.
 <li>Logs for retrieved policy, tool calls, model output, cost, and latency</li>
 <li>Escalation to billing team if policy and invoice data conflict</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-12"><h2><span class="chapter-number">Lesson 12</span> Skill Optimization</h2><div class="meta"><time datetime="2026-07-07">2026-07-07</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-12-section-1">1. What It Means</a></li><li><a href="#lesson-12-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-12-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-12-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-12-section-5">5. Real-World Example 1: Pull Request Review Skill</a></li><li><a href="#lesson-12-section-6">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-12-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-12-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-12-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Skill Optimization workflow"><ol class="flow"><li><strong>Failures</strong><span>Collect real examples</span></li><li><strong>Diagnose</strong><span>Find the workflow weakness</span></li><li><strong>Improve</strong><span>Change the relevant skill step</span></li><li><strong>Compare</strong><span>Test quality, cost and safety</span></li></ol><figcaption>Figure 12. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h3 id="lesson-12-section-1">1. What It Means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0011-production-agent-architecture.md">Markdown edition</a></p></article><article id="lesson-12" class="chapter markdown-body"><h2 id="lesson-12-skill-optimization">Skill Optimization</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-12-1-what-it-means">1. What It Means</a></li><li><a href="#lesson-12-2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-12-3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#lesson-12-4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#lesson-12-5-real-world-example-1-pull-request-review-skill">5. Real-World Example 1: Pull Request Review Skill</a></li><li><a href="#lesson-12-6-real-world-example-2-sales-call-summary-skill">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-12-7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-12-8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#lesson-12-9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-07 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="assets/diagrams/0012-skill-optimization.svg" alt="Failures: Collect real examples → Diagnose: Find the workflow weakness → Improve: Change the relevant skill step → Compare: Test quality, cost and safety"></p>
+<p>Figure 12. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h3 id="lesson-12-1-what-it-means"><a id="lesson-12-section-1"></a>1. What It Means</h3>
 <p><strong>Skill optimization</strong> means improving an AI agent skill so it works better, more safely, and more consistently over time.</p>
 <p>An <strong>agent skill</strong> is a reusable workflow that tells an AI agent how to do a specific task.</p>
 <p>Example:</p>
@@ -4047,7 +4091,7 @@ Skill: Summarize a sales call
 </ul>
 <p>This is related to a broader idea in AI systems: optimizing language model pipelines against measurable outcomes instead of relying only on manual prompt trial and error. A useful research source is the DSPy paper: <a href="https://arxiv.org/abs/2310.03714">https://arxiv.org/abs/2310.03714</a></p>
 <hr>
-<h3 id="lesson-12-section-2">2. Why It Matters In Production Systems</h3>
+<h3 id="lesson-12-2-why-it-matters-in-production-systems"><a id="lesson-12-section-2"></a>2. Why It Matters In Production Systems</h3>
 <p>A skill may work well in simple demos but fail with real users.</p>
 <p>Real users send messy requests.</p>
 <p>They provide missing data, mixed goals, unclear language, private information, and edge cases.</p>
@@ -4077,7 +4121,7 @@ Skill: Summarize a sales call
 <p>A skill should improve from real failures, not from guesswork.</p>
 </blockquote>
 <hr>
-<h3 id="lesson-12-section-3">3. How It Works Step By Step</h3>
+<h3 id="lesson-12-3-how-it-works-step-by-step"><a id="lesson-12-section-3"></a>3. How It Works Step By Step</h3>
 <p>Imagine you have a skill called:</p>
 <pre><code class="language-text">support-ticket-triage
 </code></pre>
@@ -4086,7 +4130,7 @@ Skill: Summarize a sales call
 <ol>
 <li><p><strong>Collect real failures</strong></p>
 <p>Example failure:</p>
-<pre><code class="language-text">Ticket: &quot;I can see another customer&#39;s invoice.&quot;
+<pre><code class="language-text">Ticket: "I can see another customer's invoice."
 Agent output: category = billing, priority = medium
 Correct output: category = security, priority = critical
 </code></pre>
@@ -4104,7 +4148,7 @@ Correct output: category = security, priority = critical
 </li>
 <li><p><strong>Improve the skill</strong></p>
 <p>Add a rule:</p>
-<pre><code class="language-text">If the ticket mentions seeing another user&#39;s data, leaked data, account takeover, or credentials, classify as security and critical.
+<pre><code class="language-text">If the ticket mentions seeing another user's data, leaked data, account takeover, or credentials, classify as security and critical.
 </code></pre>
 </li>
 <li><p><strong>Add a test case</strong></p>
@@ -4138,7 +4182,7 @@ Correct output: category = security, priority = critical
 </li>
 </ol>
 <hr>
-<h3 id="lesson-12-section-4">4. How To Apply It In A Project</h3>
+<h3 id="lesson-12-4-how-to-apply-it-in-a-project"><a id="lesson-12-section-4"></a>4. How To Apply It In A Project</h3>
 <p>Use a structured optimization process.</p>
 <p>Start with one skill.</p>
 <p>Example:</p>
@@ -4153,11 +4197,11 @@ Metric 5: Human approval requested when required
 </code></pre>
 <p>Then collect examples:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;Customer wants refund for damaged item after opening package.&quot;,
-  &quot;expected&quot;: {
-    &quot;retrieve&quot;: [&quot;damaged_item_policy&quot;],
-    &quot;decision&quot;: &quot;eligible_for_review&quot;,
-    &quot;approval_required&quot;: false
+  "input": "Customer wants refund for damaged item after opening package.",
+  "expected": {
+    "retrieve": ["damaged_item_policy"],
+    "decision": "eligible_for_review",
+    "approval_required": false
   }
 }
 </code></pre>
@@ -4193,7 +4237,7 @@ High-value refund -&gt; manager approval required.
 <pre><code class="language-text">Before final answer, verify that the decision is supported by a policy and order data.
 </code></pre>
 <hr>
-<h3 id="lesson-12-section-5">5. Real-World Example 1: Pull Request Review Skill</h3>
+<h3 id="lesson-12-5-real-world-example-1-pull-request-review-skill"><a id="lesson-12-section-5"></a>5. Real-World Example 1: Pull Request Review Skill</h3>
 <p><strong>Use case:</strong> A software team uses an AI agent to review pull requests.</p>
 <p><strong>Initial skill behavior:</strong></p>
 <p>The agent comments on style issues:</p>
@@ -4233,7 +4277,7 @@ Expected finding: High severity authorization bug.
 <p><strong>Outcome:</strong></p>
 <p>The skill now focuses on production risk, not cosmetic feedback.</p>
 <hr>
-<h3 id="lesson-12-section-6">6. Real-World Example 2: Sales Call Summary Skill</h3>
+<h3 id="lesson-12-6-real-world-example-2-sales-call-summary-skill"><a id="lesson-12-section-6"></a>6. Real-World Example 2: Sales Call Summary Skill</h3>
 <p><strong>Use case:</strong> A sales team uses an AI agent to summarize call transcripts.</p>
 <p><strong>Initial skill behavior:</strong></p>
 <p>The summary sounds nice but misses important CRM fields.</p>
@@ -4247,13 +4291,13 @@ Expected finding: High severity authorization bug.
 <p><strong>Optimization:</strong></p>
 <p>Update the skill output format:</p>
 <pre><code class="language-json">{
-  &quot;decision_maker&quot;: &quot;...&quot;,
-  &quot;budget_status&quot;: &quot;...&quot;,
-  &quot;timeline&quot;: &quot;...&quot;,
-  &quot;main_pain_point&quot;: &quot;...&quot;,
-  &quot;blocker&quot;: &quot;...&quot;,
-  &quot;next_step&quot;: &quot;...&quot;,
-  &quot;crm_risk&quot;: &quot;low | medium | high&quot;
+  "decision_maker": "...",
+  "budget_status": "...",
+  "timeline": "...",
+  "main_pain_point": "...",
+  "blocker": "...",
+  "next_step": "...",
+  "crm_risk": "low | medium | high"
 }
 </code></pre>
 <p>Add rules:</p>
@@ -4263,17 +4307,17 @@ If budget is approved, do not say budget is unknown.
 </code></pre>
 <p>Add examples:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;Budget is approved but legal is blocking.&quot;,
-  &quot;expected&quot;: {
-    &quot;budget_status&quot;: &quot;approved&quot;,
-    &quot;blocker&quot;: &quot;legal review&quot;
+  "input": "Budget is approved but legal is blocking.",
+  "expected": {
+    "budget_status": "approved",
+    "blocker": "legal review"
   }
 }
 </code></pre>
 <p><strong>Outcome:</strong></p>
 <p>The skill produces structured CRM data that sales managers can search and report on.</p>
 <hr>
-<h3 id="lesson-12-section-7">7. Common Mistakes, Risks, And Trade-Offs</h3>
+<h3 id="lesson-12-7-common-mistakes-risks-and-trade-offs"><a id="lesson-12-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h3>
 <p><strong>Mistake 1: Optimizing from one example only</strong></p>
 <p>One failure matters, but do not overfit.</p>
 <p><strong>Overfitting</strong> means improving for one case while making general behavior worse.</p>
@@ -4320,7 +4364,7 @@ Increase correct priority classification from 75% to 90%.
 <p>But too many rules can make the agent rigid or confused.</p>
 <p>A good skill is clear enough to guide behavior but not so crowded that it becomes hard to follow.</p>
 <hr>
-<h3 id="lesson-12-section-8">8. Practical Best Practices</h3>
+<h3 id="lesson-12-8-practical-best-practices"><a id="lesson-12-section-8"></a>8. Practical Best Practices</h3>
 <ol>
 <li><p><strong>Keep a failure log</strong></p>
 <p>Store real failures with:</p>
@@ -4375,9 +4419,9 @@ refund-review-v3
 <li><p><strong>Review with domain experts</strong></p>
 </li>
 </ol>
-<p>   For legal, finance, medical, security, or compliance workflows, expert review is required.</p>
+<p>For legal, finance, medical, security, or compliance workflows, expert review is required.</p>
 <hr>
-<h3 id="lesson-12-section-9">9. Small Practice Exercise</h3>
+<h3 id="lesson-12-9-small-practice-exercise"><a id="lesson-12-section-9"></a>9. Small Practice Exercise</h3>
 <p>Imagine you have a skill called:</p>
 <pre><code class="language-text">deployment-failure-diagnosis
 </code></pre>
@@ -4401,90 +4445,99 @@ refund-review-v3
 <li>Add test: CI log with known Node version mismatch</li>
 <li>Metric: percentage of answers with correct root cause and evidence reference</li>
 </ul>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><article class="chapter" id="lesson-13"><h2><span class="chapter-number">Lesson 13</span> Structured outputs</h2><div class="meta"><time datetime="2026-10-07">2026-10-07</time><span class="badge">New lesson</span><span>About 6 minutes</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-13-section-1">1. What the concept means</a></li><li><a href="#lesson-13-section-2">2. Why it matters in production</a></li><li><a href="#lesson-13-section-3">3. How it works</a></li><li><a href="#lesson-13-section-4">4. Apply it in a project</a></li><li><a href="#lesson-13-section-5">5. Two practical examples</a></li><li><a href="#lesson-13-section-6">Example A: Routing customer support</a></li><li><a href="#lesson-13-section-7">Example B: Turning meeting notes into CRM data</a></li><li><a href="#lesson-13-section-8">6. Common mistakes and trade-offs</a></li><li><a href="#lesson-13-section-9">7. Best practices</a></li><li><a href="#lesson-13-section-10">8. Practice</a></li><li><a href="#lesson-13-section-11">Sources and further reading</a></li></ul></details><figure class="diagram" role="group" aria-label="Structured outputs workflow"><ol class="flow"><li><strong>Source + schema</strong><span>Message and output contract</span></li><li><strong>Generate</strong><span>Produce candidate JSON</span></li><li><strong>Validate</strong><span>Check shape, evidence and rules</span></li><li><strong>Route or review</strong><span>Use accepted data or escalate</span></li></ol><figcaption>Figure 13. An accepted shape is only the first checkpoint. Verify evidence and business rules before using the values.</figcaption></figure><div class="body"><h3 id="lesson-13-section-1">1. What the concept means</h3>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0012-skill-optimization.md">Markdown edition</a></p></article><article id="lesson-13" class="chapter markdown-body"><h2 id="lesson-13-structured-outputs">Structured outputs</h2><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-13-1-what-the-concept-means">1. What the concept means</a></li><li><a href="#lesson-13-2-why-it-matters-in-production">2. Why it matters in production</a></li><li><a href="#lesson-13-3-how-it-works">3. How it works</a></li><li><a href="#lesson-13-4-apply-it-in-a-project">4. Apply it in a project</a></li><li><a href="#lesson-13-5-two-practical-examples">5. Two practical examples</a></li><li><a href="#lesson-13-example-a-routing-customer-support">Example A: Routing customer support</a></li><li><a href="#lesson-13-example-b-turning-meeting-notes-into-crm-data">Example B: Turning meeting notes into CRM data</a></li><li><a href="#lesson-13-6-common-mistakes-and-trade-offs">6. Common mistakes and trade-offs</a></li><li><a href="#lesson-13-7-best-practices">7. Best practices</a></li><li><a href="#lesson-13-8-practice">8. Practice</a></li><li><a href="#lesson-13-sources-and-further-reading">Sources and further reading</a></li></ul></details>
+<p>2026-10-07 · New lesson · About 6 minutes</p>
+<p><img src="assets/diagrams/0013-structured-outputs.svg" alt="Source + schema: Message and output contract → Generate: Produce candidate JSON → Validate: Check shape, evidence and rules → Route or review: Use accepted data or escalate"></p>
+<p>Figure 13. An accepted shape is only the first checkpoint. Verify evidence and business rules before using the values.</p>
+<h3 id="lesson-13-1-what-the-concept-means"><a id="lesson-13-section-1"></a>1. What the concept means</h3>
 <p>Structured outputs let you ask an AI model for data in a defined shape. Your application supplies a <strong>schema</strong>, a specification of field names, value types, and allowed choices. The result might be a JSON object with a category, a short explanation, and a flag saying whether someone needs to review it.</p>
-<p>Think of a support agent completing a form. The agent can interpret a customer&#39;s message, but the form gives each answer a fixed place. Your software can then read the category without searching through a paragraph.</p>
+<p>Think of a support agent completing a form. The agent can interpret a customer's message, but the form gives each answer a fixed place. Your software can then read the category without searching through a paragraph.</p>
 <p>Three checks matter. First, is the response valid JSON? Second, does it follow the schema? Third, are its values supported by the input and acceptable under your business rules? A response can pass the first two checks and still fail the third. A correctly formatted category can be the wrong category.</p>
 <p>Some providers enforce the shape during generation using <strong>constrained decoding</strong>, which limits which output tokens the model can select. A token is a piece of generated text. Support and schema restrictions vary by provider. This lesson uses provider-neutral examples rather than a copy-and-paste API request. Read the current <a href="https://platform.claude.com/docs/en/build-with-claude/structured-outputs">Claude structured output documentation</a> for one concrete implementation.</p>
-<h3 id="lesson-13-section-2">2. Why it matters in production</h3>
+<h3 id="lesson-13-2-why-it-matters-in-production"><a id="lesson-13-section-2"></a>2. Why it matters in production</h3>
 <p>A person understands “This looks urgent; send it to billing.” Software needs consistent labels and explicit fields. Otherwise, changing a phrase can break a parser or send a ticket to the wrong queue.</p>
 <p>Structured outputs give the model and your application a shared contract. They help with extraction, classification, search filters, and drafts for other systems. They also make tests easier: check the individual fields rather than comparing entire paragraphs.</p>
 <p>They do not give the model permission to perform an action. A model-generated customer ID, destination, or requested operation still needs checks in your backend. Your application should obtain identity and permissions from the authenticated session.</p>
-<h3 id="lesson-13-section-3">3. How it works</h3>
+<h3 id="lesson-13-3-how-it-works"><a id="lesson-13-section-3"></a>3. How it works</h3>
 <p>The illustration above shows two checkpoints. The shape check asks whether software can consume the object. The evidence and policy check asks whether it should use the object.</p>
 <ol>
 <li>Define the task and a small schema. Give each field a clear purpose.</li>
-<li>Send the model the source text, interpretation rules, and schema through the provider&#39;s supported structured output mechanism.</li>
+<li>Send the model the source text, interpretation rules, and schema through the provider's supported structured output mechanism.</li>
 <li>Inspect completion status. A refusal, interrupted stream, or output limit can require a different handling path.</li>
 <li>Parse and validate the response with a maintained validator. Do not rely on a regular expression to repair JSON.</li>
 <li>Check meaning against the source and your business rules. Resolve IDs through trusted services and reject unsupported values.</li>
 <li>Store or route an accepted result. Record validation failures and review decisions so you can test improvements later.</li>
 </ol>
 <p>If a call fails, choose a limited recovery policy. One retry for a temporary service error may be reasonable. A missing fact needs clarification; retrying the same input repeatedly cannot create evidence.</p>
-<h3 id="lesson-13-section-4">4. Apply it in a project</h3>
+<h3 id="lesson-13-4-apply-it-in-a-project"><a id="lesson-13-section-4"></a>4. Apply it in a project</h3>
 <p>Start with a support classifier. This is an illustrative JSON Schema, not a complete provider request:</p>
 <pre><code class="language-json">{
-  &quot;type&quot;: &quot;object&quot;,
-  &quot;properties&quot;: {
-    &quot;category&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;billing&quot;, &quot;login&quot;, &quot;other&quot;, &quot;unknown&quot;] },
-    &quot;evidence&quot;: { &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;] },
-    &quot;needs_review&quot;: { &quot;type&quot;: &quot;boolean&quot; }
+  "type": "object",
+  "properties": {
+    "category": { "type": "string", "enum": ["billing", "login", "other", "unknown"] },
+    "evidence": { "type": ["string", "null"] },
+    "needs_review": { "type": "boolean" }
   },
-  &quot;required&quot;: [&quot;category&quot;, &quot;evidence&quot;, &quot;needs_review&quot;],
-  &quot;additionalProperties&quot;: false
+  "required": ["category", "evidence", "needs_review"],
+  "additionalProperties": false
 }
 </code></pre>
 <p>An <strong>enum</strong> is a fixed list of allowed values. Here it prevents accidental category names such as <code>payment_problem</code>. The <code>unknown</code> choice represents insufficient evidence. A required field may contain <code>null</code> when the schema permits it; required means the field must exist. See the <a href="https://json-schema.org/understanding-json-schema/reference/object">JSON Schema object reference</a> for field and object rules.</p>
 <p>Tell the model: “Classify only from the supplied message. Copy a short supporting passage into evidence. Use unknown and request review when you cannot determine the category.” Then have the backend check that the passage exists in the message. That check proves the passage was copied, but a reviewer or evaluation still needs to check whether it supports the category.</p>
 <p>Keep the schema in version control. When changing a field, update the consumer and tests together. Persist the schema version beside the result so older records remain understandable.</p>
-<h3 id="lesson-13-section-5">5. Two practical examples</h3>
-<h4 id="lesson-13-section-6">Example A: Routing customer support</h4>
+<h3 id="lesson-13-5-two-practical-examples"><a id="lesson-13-section-5"></a>5. Two practical examples</h3>
+<h4 id="lesson-13-example-a-routing-customer-support"><a id="lesson-13-section-6"></a>Example A: Routing customer support</h4>
 <p><strong>Illustrative input:</strong> “I paid for the Pro plan, but my account still shows Free.”</p>
 <p><strong>Possible model output:</strong></p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;billing&quot;,
-  &quot;evidence&quot;: &quot;I paid for the Pro plan&quot;,
-  &quot;needs_review&quot;: false
+  "category": "billing",
+  "evidence": "I paid for the Pro plan",
+  "needs_review": false
 }
 </code></pre>
 <p>The backend validates the object, confirms the evidence is present, and places the ticket in the billing queue. It does not upgrade the subscription from this message. An authorized service checks the actual payment and subscription records before any account change.</p>
 <p><strong>Hypothetical outcome:</strong> The ticket reaches the appropriate team without a brittle paragraph parser. If the input is “My plan is wrong,” the classification is less certain. Your evaluation policy may require review even when the model sets <code>needs_review</code> to false. That flag is advice, not an independent safety guarantee.</p>
-<h4 id="lesson-13-section-7">Example B: Turning meeting notes into CRM data</h4>
+<h4 id="lesson-13-example-b-turning-meeting-notes-into-crm-data"><a id="lesson-13-section-7"></a>Example B: Turning meeting notes into CRM data</h4>
 <p><strong>Illustrative input:</strong> “Acme wants a demo next week. Sara will coordinate. Budget has not been discussed.”</p>
 <p>Use a separate schema for <code>company</code>, <code>contact</code>, <code>next_action</code>, <code>budget</code>, and <code>timing_text</code>. A possible result is:</p>
 <pre><code class="language-json">{
-  &quot;company&quot;: &quot;Acme&quot;,
-  &quot;contact&quot;: &quot;Sara&quot;,
-  &quot;next_action&quot;: &quot;schedule_demo&quot;,
-  &quot;budget&quot;: null,
-  &quot;timing_text&quot;: &quot;next week&quot;
+  "company": "Acme",
+  "contact": "Sara",
+  "next_action": "schedule_demo",
+  "budget": null,
+  "timing_text": "next week"
 }
 </code></pre>
 <p>The application looks up matching CRM records and presents a draft update. Multiple companies named Acme require a user choice. “Next week” stays as source text until the application has the meeting date, timezone, and enough detail to choose an exact appointment.</p>
 <p><strong>Hypothetical outcome:</strong> A salesperson receives a usable draft with the budget visibly unknown. The model has not invented a spending amount or silently scheduled a meeting. Confirming the record and time is part of the workflow.</p>
-<h3 id="lesson-13-section-8">6. Common mistakes and trade-offs</h3>
+<h3 id="lesson-13-6-common-mistakes-and-trade-offs"><a id="lesson-13-section-8"></a>6. Common mistakes and trade-offs</h3>
 <ul>
 <li><strong>Treating valid data as true data.</strong> Measure field accuracy and unsupported claims separately from schema validity.</li>
 <li><strong>Forcing every field to have a value.</strong> Missing information becomes invented information. Define null or unknown where needed.</li>
-<li><strong>Trusting the model&#39;s review flag.</strong> Use application rules for cases that always need review, and test how often the model misses ambiguous inputs.</li>
+<li><strong>Trusting the model's review flag.</strong> Use application rules for cases that always need review, and test how often the model misses ambiguous inputs.</li>
 <li><strong>Making the schema too large.</strong> Unrelated fields increase complexity and make evaluation harder. Split distinct jobs when useful.</li>
 <li><strong>Retrying without a limit.</strong> Put a cap on retries and time spent. Ask for missing information or send the case for review.</li>
 <li><strong>Changing a contract silently.</strong> A renamed field can break a consumer even if generation succeeds. Version the contract.</li>
 </ul>
 <p>Strict output constraints improve predictability, but they restrict expressive answers and can add provider-specific setup overhead. Keep free text where explanation is the actual product. Use a schema where another program needs specific fields.</p>
-<h3 id="lesson-13-section-9">7. Best practices</h3>
+<h3 id="lesson-13-7-best-practices"><a id="lesson-13-section-9"></a>7. Best practices</h3>
 <p>Test the system with clear inputs, missing facts, contradictory statements, and text that tries to override the task. Treat instructions inside customer messages as data. Measure exact field accuracy, review rate, unsupported values, latency, and cost on the same test set after changes.</p>
 <p>Separate extraction from actions. First generate a candidate object. Then validate evidence, permissions, and business rules. Finally request approval or perform an authorized action. Protect source text and logs according to their sensitivity; structured data can contain personal information too.</p>
 <p>Handle refusals and incomplete responses explicitly. Provider features and accepted schemas change, so check current documentation before implementing an integration. Keep schemas small and stable, and retain enough version information to diagnose failures.</p>
-<h3 id="lesson-13-section-10">8. Practice</h3>
-<p>You are building a bug-report classifier. A report says: “Checkout sometimes freezes. I don&#39;t know which browser. Started after yesterday&#39;s release.”</p>
+<h3 id="lesson-13-8-practice"><a id="lesson-13-section-10"></a>8. Practice</h3>
+<p>You are building a bug-report classifier. A report says: “Checkout sometimes freezes. I don't know which browser. Started after yesterday's release.”</p>
 <p>Design fields for <code>area</code>, <code>browser</code>, <code>release_reference</code>, and <code>needs_review</code>. Which fields should permit unknown values? Would you let this output automatically open a high-priority incident?</p>
-<details><summary>Reveal a suggested answer</summary><p>Use area = checkout, browser = null, release_reference = yesterday's release, and needs_review = true. Keep the release reference as source text until you can resolve it using the report timestamp and deployment records. The message alone does not establish the scale or severity of the failure. Create a triage draft and check monitoring and additional reports before declaring an incident.</p></details>
+<details>
+<summary>Reveal a suggested answer</summary>
 
-<h3 id="lesson-13-section-11">Sources and further reading</h3>
+<p>Use area = checkout, browser = null, release_reference = yesterday's release, and needs_review = true. Keep the release reference as source text until you can resolve it using the report timestamp and deployment records. The message alone does not establish the scale or severity of the failure. Create a triage draft and check monitoring and additional reports before declaring an incident.</p>
+</details>
+
+<h3 id="lesson-13-sources-and-further-reading"><a id="lesson-13-section-11"></a>Sources and further reading</h3>
 <ul>
 <li><a href="https://platform.claude.com/docs/en/build-with-claude/structured-outputs">Claude structured outputs</a>: implementation, provider constraints, and failure cases.</li>
 <li><a href="https://json-schema.org/understanding-json-schema/reference/object">JSON Schema object reference</a>: properties, required fields, and extra fields.</li>
 </ul>
 <p>Bring your proposed schema back to this chat for feedback on missing-data handling and validation.</p>
-</div><p class="back"><a href="#contents">Back to contents</a><a href="#glossary">Glossary</a></p></article><section class="chapter" id="topic-index"><h2>Topic index</h2><table><thead><tr><th>Topic</th><th>Chapter</th><th>Status</th></tr></thead><tbody><tr><td><a href="#lesson-5">Agent Skills</a></td><td>05</td><td>Archive</td></tr><tr><td><a href="#lesson-8">Fine-Tuning</a></td><td>08</td><td>Archive</td></tr><tr><td><a href="#lesson-3">Guardrails for AI Systems</a></td><td>03</td><td>Archive</td></tr><tr><td><a href="#lesson-6">Loop Engineering</a></td><td>06</td><td>Archive</td></tr><tr><td><a href="#lesson-7">Memory In AI Agents</a></td><td>07</td><td>Archive</td></tr><tr><td><a href="#lesson-4">Observability for AI Systems</a></td><td>04</td><td>Archive</td></tr><tr><td><a href="#lesson-11">Production Agent Architecture</a></td><td>11</td><td>Archive</td></tr><tr><td><a href="#lesson-9">Prompt Design For Production Systems</a></td><td>09</td><td>Archive</td></tr><tr><td><a href="#lesson-10">Retrieval Quality</a></td><td>10</td><td>Archive</td></tr><tr><td><a href="#lesson-1">Retrieval-Augmented Generation (RAG)</a></td><td>01</td><td>Archive</td></tr><tr><td><a href="#lesson-12">Skill Optimization</a></td><td>12</td><td>Archive</td></tr><tr><td><a href="#lesson-13">Structured outputs</a></td><td>13</td><td>New</td></tr><tr><td><a href="#lesson-2">Tool Use in AI Agents</a></td><td>02</td><td>Archive</td></tr></tbody></table></section><section class="chapter" id="glossary"><h2>Glossary</h2><dl><dt id="term-schema">Schema</dt><dd>A specification of field names, types, and accepted values. <a href="#topic-index">Related lessons</a></dd><dt id="term-enum">Enum</dt><dd>A fixed list of allowed values. <a href="#topic-index">Related lessons</a></dd><dt id="term-validation">Validation</dt><dd>Checking data against explicit rules. Shape checks and factual checks serve different purposes. <a href="#topic-index">Related lessons</a></dd><dt id="term-rag">RAG</dt><dd>Retrieval-augmented generation. Retrieve evidence before generating an answer. <a href="#topic-index">Related lessons</a></dd><dt id="term-embedding">Embedding</dt><dd>A numerical representation used to compare items such as texts. Similarity alone does not establish truth. <a href="#topic-index">Related lessons</a></dd><dt id="term-agent">Agent</dt><dd>A system that can choose actions and use tools toward a task, within application limits. <a href="#topic-index">Related lessons</a></dd><dt id="term-tool">Tool</dt><dd>An external function or service an AI system can request to read data or perform an operation. <a href="#topic-index">Related lessons</a></dd><dt id="term-evaluation">Evaluation</dt><dd>A repeatable way to measure behavior against a task and expected results. <a href="#topic-index">Related lessons</a></dd><dt id="term-trace">Trace</dt><dd>A record connecting the steps performed during one request. <a href="#topic-index">Related lessons</a></dd><dt id="term-fine-tuning">Fine-tuning</dt><dd>Further training of an existing model on selected examples. <a href="#topic-index">Related lessons</a></dd><dt id="term-constrained-decoding">Constrained decoding</dt><dd>Restricting possible generated tokens to support a defined output structure. <a href="#topic-index">Related lessons</a></dd><dt id="term-provenance">Provenance</dt><dd>Information about where data came from and when it was obtained. <a href="#topic-index">Related lessons</a></dd></dl></section></div></main><footer>All diagrams are original study illustrations. Examples in the new lesson are hypothetical. Discuss exercises and unclear concepts in the teaching chat.</footer></body></html>
+<p class="back"><a href="#contents">Contents</a> · <a href="lessons/0013-structured-outputs.md">Markdown edition</a></p></article><section class="chapter" id="topic-index"><h2>Topic index</h2><ul><li><a href="#lesson-5">Agent Skills</a></li><li><a href="#lesson-8">Fine-Tuning</a></li><li><a href="#lesson-3">Guardrails for AI Systems</a></li><li><a href="#lesson-6">Loop Engineering</a></li><li><a href="#lesson-7">Memory In AI Agents</a></li><li><a href="#lesson-4">Observability for AI Systems</a></li><li><a href="#lesson-11">Production Agent Architecture</a></li><li><a href="#lesson-9">Prompt Design For Production Systems</a></li><li><a href="#lesson-10">Retrieval Quality</a></li><li><a href="#lesson-1">Retrieval-Augmented Generation (RAG)</a></li><li><a href="#lesson-12">Skill Optimization</a></li><li><a href="#lesson-13">Structured outputs</a></li><li><a href="#lesson-2">Tool Use in AI Agents</a></li></ul></section><section class="chapter" id="glossary"><h2>Glossary</h2><dl><dt id="term-schema">Schema</dt><dd>A specification of field names, types, and accepted values. <a href="#topic-index">Related lessons</a></dd><dt id="term-enum">Enum</dt><dd>A fixed list of allowed values. <a href="#topic-index">Related lessons</a></dd><dt id="term-validation">Validation</dt><dd>Checking data against explicit rules. Shape checks and factual checks serve different purposes. <a href="#topic-index">Related lessons</a></dd><dt id="term-rag">RAG</dt><dd>Retrieval-augmented generation. Retrieve evidence before generating an answer. <a href="#topic-index">Related lessons</a></dd><dt id="term-embedding">Embedding</dt><dd>A numerical representation used to compare items such as texts. Similarity alone does not establish truth. <a href="#topic-index">Related lessons</a></dd><dt id="term-agent">Agent</dt><dd>A system that can choose actions and use tools toward a task, within application limits. <a href="#topic-index">Related lessons</a></dd><dt id="term-tool">Tool</dt><dd>An external function or service an AI system can request to read data or perform an operation. <a href="#topic-index">Related lessons</a></dd><dt id="term-evaluation">Evaluation</dt><dd>A repeatable way to measure behavior against a task and expected results. <a href="#topic-index">Related lessons</a></dd><dt id="term-trace">Trace</dt><dd>A record connecting the steps performed during one request. <a href="#topic-index">Related lessons</a></dd><dt id="term-fine-tuning">Fine-tuning</dt><dd>Further training of an existing model on selected examples. <a href="#topic-index">Related lessons</a></dd><dt id="term-constrained-decoding">Constrained decoding</dt><dd>Restricting possible generated tokens to support a defined output structure. <a href="#topic-index">Related lessons</a></dd><dt id="term-provenance">Provenance</dt><dd>Information about where data came from and when it was obtained. <a href="#topic-index">Related lessons</a></dd></dl></section></div></main><footer>All diagrams are original study illustrations. Examples in the new lesson are hypothetical. Discuss exercises and unclear concepts in the teaching chat.</footer>
+</body></html>

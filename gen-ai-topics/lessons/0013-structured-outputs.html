@@ -1,87 +1,95 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Structured outputs</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-13"><h1><span class="chapter-number">Lesson 13</span> Structured outputs</h1><div class="meta"><time datetime="2026-10-07">2026-10-07</time><span class="badge">New lesson</span><span>About 6 minutes</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-13-section-1">1. What the concept means</a></li><li><a href="#lesson-13-section-2">2. Why it matters in production</a></li><li><a href="#lesson-13-section-3">3. How it works</a></li><li><a href="#lesson-13-section-4">4. Apply it in a project</a></li><li><a href="#lesson-13-section-5">5. Two practical examples</a></li><li><a href="#lesson-13-section-6">Example A: Routing customer support</a></li><li><a href="#lesson-13-section-7">Example B: Turning meeting notes into CRM data</a></li><li><a href="#lesson-13-section-8">6. Common mistakes and trade-offs</a></li><li><a href="#lesson-13-section-9">7. Best practices</a></li><li><a href="#lesson-13-section-10">8. Practice</a></li><li><a href="#lesson-13-section-11">Sources and further reading</a></li></ul></details><figure class="diagram" role="group" aria-label="Structured outputs workflow"><ol class="flow"><li><strong>Source + schema</strong><span>Message and output contract</span></li><li><strong>Generate</strong><span>Produce candidate JSON</span></li><li><strong>Validate</strong><span>Check shape, evidence and rules</span></li><li><strong>Route or review</strong><span>Use accepted data or escalate</span></li></ol><figcaption>Figure 13. An accepted shape is only the first checkpoint. Verify evidence and business rules before using the values.</figcaption></figure><div class="body"><h2 id="lesson-13-section-1">1. What the concept means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Structured outputs</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="structured-outputs">Structured outputs</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-the-concept-means">1. What the concept means</a></li><li><a href="#2-why-it-matters-in-production">2. Why it matters in production</a></li><li><a href="#3-how-it-works">3. How it works</a></li><li><a href="#4-apply-it-in-a-project">4. Apply it in a project</a></li><li><a href="#5-two-practical-examples">5. Two practical examples</a></li><li><a href="#example-a-routing-customer-support">Example A: Routing customer support</a></li><li><a href="#example-b-turning-meeting-notes-into-crm-data">Example B: Turning meeting notes into CRM data</a></li><li><a href="#6-common-mistakes-and-trade-offs">6. Common mistakes and trade-offs</a></li><li><a href="#7-best-practices">7. Best practices</a></li><li><a href="#8-practice">8. Practice</a></li><li><a href="#sources-and-further-reading">Sources and further reading</a></li></ul></details>
+<p>2026-10-07 · New lesson · About 6 minutes</p>
+<p><img src="../assets/diagrams/0013-structured-outputs.svg" alt="Source + schema: Message and output contract → Generate: Produce candidate JSON → Validate: Check shape, evidence and rules → Route or review: Use accepted data or escalate"></p>
+<p>Figure 13. An accepted shape is only the first checkpoint. Verify evidence and business rules before using the values.</p>
+<h2 id="1-what-the-concept-means"><a id="lesson-13-section-1"></a>1. What the concept means</h2>
 <p>Structured outputs let you ask an AI model for data in a defined shape. Your application supplies a <strong>schema</strong>, a specification of field names, value types, and allowed choices. The result might be a JSON object with a category, a short explanation, and a flag saying whether someone needs to review it.</p>
-<p>Think of a support agent completing a form. The agent can interpret a customer&#39;s message, but the form gives each answer a fixed place. Your software can then read the category without searching through a paragraph.</p>
+<p>Think of a support agent completing a form. The agent can interpret a customer's message, but the form gives each answer a fixed place. Your software can then read the category without searching through a paragraph.</p>
 <p>Three checks matter. First, is the response valid JSON? Second, does it follow the schema? Third, are its values supported by the input and acceptable under your business rules? A response can pass the first two checks and still fail the third. A correctly formatted category can be the wrong category.</p>
 <p>Some providers enforce the shape during generation using <strong>constrained decoding</strong>, which limits which output tokens the model can select. A token is a piece of generated text. Support and schema restrictions vary by provider. This lesson uses provider-neutral examples rather than a copy-and-paste API request. Read the current <a href="https://platform.claude.com/docs/en/build-with-claude/structured-outputs">Claude structured output documentation</a> for one concrete implementation.</p>
-<h2 id="lesson-13-section-2">2. Why it matters in production</h2>
+<h2 id="2-why-it-matters-in-production"><a id="lesson-13-section-2"></a>2. Why it matters in production</h2>
 <p>A person understands “This looks urgent; send it to billing.” Software needs consistent labels and explicit fields. Otherwise, changing a phrase can break a parser or send a ticket to the wrong queue.</p>
 <p>Structured outputs give the model and your application a shared contract. They help with extraction, classification, search filters, and drafts for other systems. They also make tests easier: check the individual fields rather than comparing entire paragraphs.</p>
 <p>They do not give the model permission to perform an action. A model-generated customer ID, destination, or requested operation still needs checks in your backend. Your application should obtain identity and permissions from the authenticated session.</p>
-<h2 id="lesson-13-section-3">3. How it works</h2>
+<h2 id="3-how-it-works"><a id="lesson-13-section-3"></a>3. How it works</h2>
 <p>The illustration above shows two checkpoints. The shape check asks whether software can consume the object. The evidence and policy check asks whether it should use the object.</p>
 <ol>
 <li>Define the task and a small schema. Give each field a clear purpose.</li>
-<li>Send the model the source text, interpretation rules, and schema through the provider&#39;s supported structured output mechanism.</li>
+<li>Send the model the source text, interpretation rules, and schema through the provider's supported structured output mechanism.</li>
 <li>Inspect completion status. A refusal, interrupted stream, or output limit can require a different handling path.</li>
 <li>Parse and validate the response with a maintained validator. Do not rely on a regular expression to repair JSON.</li>
 <li>Check meaning against the source and your business rules. Resolve IDs through trusted services and reject unsupported values.</li>
 <li>Store or route an accepted result. Record validation failures and review decisions so you can test improvements later.</li>
 </ol>
 <p>If a call fails, choose a limited recovery policy. One retry for a temporary service error may be reasonable. A missing fact needs clarification; retrying the same input repeatedly cannot create evidence.</p>
-<h2 id="lesson-13-section-4">4. Apply it in a project</h2>
+<h2 id="4-apply-it-in-a-project"><a id="lesson-13-section-4"></a>4. Apply it in a project</h2>
 <p>Start with a support classifier. This is an illustrative JSON Schema, not a complete provider request:</p>
 <pre><code class="language-json">{
-  &quot;type&quot;: &quot;object&quot;,
-  &quot;properties&quot;: {
-    &quot;category&quot;: { &quot;type&quot;: &quot;string&quot;, &quot;enum&quot;: [&quot;billing&quot;, &quot;login&quot;, &quot;other&quot;, &quot;unknown&quot;] },
-    &quot;evidence&quot;: { &quot;type&quot;: [&quot;string&quot;, &quot;null&quot;] },
-    &quot;needs_review&quot;: { &quot;type&quot;: &quot;boolean&quot; }
+  "type": "object",
+  "properties": {
+    "category": { "type": "string", "enum": ["billing", "login", "other", "unknown"] },
+    "evidence": { "type": ["string", "null"] },
+    "needs_review": { "type": "boolean" }
   },
-  &quot;required&quot;: [&quot;category&quot;, &quot;evidence&quot;, &quot;needs_review&quot;],
-  &quot;additionalProperties&quot;: false
+  "required": ["category", "evidence", "needs_review"],
+  "additionalProperties": false
 }
 </code></pre>
 <p>An <strong>enum</strong> is a fixed list of allowed values. Here it prevents accidental category names such as <code>payment_problem</code>. The <code>unknown</code> choice represents insufficient evidence. A required field may contain <code>null</code> when the schema permits it; required means the field must exist. See the <a href="https://json-schema.org/understanding-json-schema/reference/object">JSON Schema object reference</a> for field and object rules.</p>
 <p>Tell the model: “Classify only from the supplied message. Copy a short supporting passage into evidence. Use unknown and request review when you cannot determine the category.” Then have the backend check that the passage exists in the message. That check proves the passage was copied, but a reviewer or evaluation still needs to check whether it supports the category.</p>
 <p>Keep the schema in version control. When changing a field, update the consumer and tests together. Persist the schema version beside the result so older records remain understandable.</p>
-<h2 id="lesson-13-section-5">5. Two practical examples</h2>
-<h3 id="lesson-13-section-6">Example A: Routing customer support</h3>
+<h2 id="5-two-practical-examples"><a id="lesson-13-section-5"></a>5. Two practical examples</h2>
+<h3 id="example-a-routing-customer-support"><a id="lesson-13-section-6"></a>Example A: Routing customer support</h3>
 <p><strong>Illustrative input:</strong> “I paid for the Pro plan, but my account still shows Free.”</p>
 <p><strong>Possible model output:</strong></p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;billing&quot;,
-  &quot;evidence&quot;: &quot;I paid for the Pro plan&quot;,
-  &quot;needs_review&quot;: false
+  "category": "billing",
+  "evidence": "I paid for the Pro plan",
+  "needs_review": false
 }
 </code></pre>
 <p>The backend validates the object, confirms the evidence is present, and places the ticket in the billing queue. It does not upgrade the subscription from this message. An authorized service checks the actual payment and subscription records before any account change.</p>
 <p><strong>Hypothetical outcome:</strong> The ticket reaches the appropriate team without a brittle paragraph parser. If the input is “My plan is wrong,” the classification is less certain. Your evaluation policy may require review even when the model sets <code>needs_review</code> to false. That flag is advice, not an independent safety guarantee.</p>
-<h3 id="lesson-13-section-7">Example B: Turning meeting notes into CRM data</h3>
+<h3 id="example-b-turning-meeting-notes-into-crm-data"><a id="lesson-13-section-7"></a>Example B: Turning meeting notes into CRM data</h3>
 <p><strong>Illustrative input:</strong> “Acme wants a demo next week. Sara will coordinate. Budget has not been discussed.”</p>
 <p>Use a separate schema for <code>company</code>, <code>contact</code>, <code>next_action</code>, <code>budget</code>, and <code>timing_text</code>. A possible result is:</p>
 <pre><code class="language-json">{
-  &quot;company&quot;: &quot;Acme&quot;,
-  &quot;contact&quot;: &quot;Sara&quot;,
-  &quot;next_action&quot;: &quot;schedule_demo&quot;,
-  &quot;budget&quot;: null,
-  &quot;timing_text&quot;: &quot;next week&quot;
+  "company": "Acme",
+  "contact": "Sara",
+  "next_action": "schedule_demo",
+  "budget": null,
+  "timing_text": "next week"
 }
 </code></pre>
 <p>The application looks up matching CRM records and presents a draft update. Multiple companies named Acme require a user choice. “Next week” stays as source text until the application has the meeting date, timezone, and enough detail to choose an exact appointment.</p>
 <p><strong>Hypothetical outcome:</strong> A salesperson receives a usable draft with the budget visibly unknown. The model has not invented a spending amount or silently scheduled a meeting. Confirming the record and time is part of the workflow.</p>
-<h2 id="lesson-13-section-8">6. Common mistakes and trade-offs</h2>
+<h2 id="6-common-mistakes-and-trade-offs"><a id="lesson-13-section-8"></a>6. Common mistakes and trade-offs</h2>
 <ul>
 <li><strong>Treating valid data as true data.</strong> Measure field accuracy and unsupported claims separately from schema validity.</li>
 <li><strong>Forcing every field to have a value.</strong> Missing information becomes invented information. Define null or unknown where needed.</li>
-<li><strong>Trusting the model&#39;s review flag.</strong> Use application rules for cases that always need review, and test how often the model misses ambiguous inputs.</li>
+<li><strong>Trusting the model's review flag.</strong> Use application rules for cases that always need review, and test how often the model misses ambiguous inputs.</li>
 <li><strong>Making the schema too large.</strong> Unrelated fields increase complexity and make evaluation harder. Split distinct jobs when useful.</li>
 <li><strong>Retrying without a limit.</strong> Put a cap on retries and time spent. Ask for missing information or send the case for review.</li>
 <li><strong>Changing a contract silently.</strong> A renamed field can break a consumer even if generation succeeds. Version the contract.</li>
 </ul>
 <p>Strict output constraints improve predictability, but they restrict expressive answers and can add provider-specific setup overhead. Keep free text where explanation is the actual product. Use a schema where another program needs specific fields.</p>
-<h2 id="lesson-13-section-9">7. Best practices</h2>
+<h2 id="7-best-practices"><a id="lesson-13-section-9"></a>7. Best practices</h2>
 <p>Test the system with clear inputs, missing facts, contradictory statements, and text that tries to override the task. Treat instructions inside customer messages as data. Measure exact field accuracy, review rate, unsupported values, latency, and cost on the same test set after changes.</p>
 <p>Separate extraction from actions. First generate a candidate object. Then validate evidence, permissions, and business rules. Finally request approval or perform an authorized action. Protect source text and logs according to their sensitivity; structured data can contain personal information too.</p>
 <p>Handle refusals and incomplete responses explicitly. Provider features and accepted schemas change, so check current documentation before implementing an integration. Keep schemas small and stable, and retain enough version information to diagnose failures.</p>
-<h2 id="lesson-13-section-10">8. Practice</h2>
-<p>You are building a bug-report classifier. A report says: “Checkout sometimes freezes. I don&#39;t know which browser. Started after yesterday&#39;s release.”</p>
+<h2 id="8-practice"><a id="lesson-13-section-10"></a>8. Practice</h2>
+<p>You are building a bug-report classifier. A report says: “Checkout sometimes freezes. I don't know which browser. Started after yesterday's release.”</p>
 <p>Design fields for <code>area</code>, <code>browser</code>, <code>release_reference</code>, and <code>needs_review</code>. Which fields should permit unknown values? Would you let this output automatically open a high-priority incident?</p>
-<details><summary>Reveal a suggested answer</summary><p>Use area = checkout, browser = null, release_reference = yesterday's release, and needs_review = true. Keep the release reference as source text until you can resolve it using the report timestamp and deployment records. The message alone does not establish the scale or severity of the failure. Create a triage draft and check monitoring and additional reports before declaring an incident.</p></details>
+<details>
+<summary>Reveal a suggested answer</summary>
 
-<h2 id="lesson-13-section-11">Sources and further reading</h2>
+<p>Use area = checkout, browser = null, release_reference = yesterday's release, and needs_review = true. Keep the release reference as source text until you can resolve it using the report timestamp and deployment records. The message alone does not establish the scale or severity of the failure. Create a triage draft and check monitoring and additional reports before declaring an incident.</p>
+</details>
+
+<h2 id="sources-and-further-reading"><a id="lesson-13-section-11"></a>Sources and further reading</h2>
 <ul>
 <li><a href="https://platform.claude.com/docs/en/build-with-claude/structured-outputs">Claude structured outputs</a>: implementation, provider constraints, and failure cases.</li>
 <li><a href="https://json-schema.org/understanding-json-schema/reference/object">JSON Schema object reference</a>: properties, required fields, and extra fields.</li>
 </ul>
 <p>Bring your proposed schema back to this chat for feedback on missing-data handling and validation.</p>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0013-structured-outputs.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

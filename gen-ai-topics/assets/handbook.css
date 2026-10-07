@@ -81,6 +81,8 @@ footer { color: var(--muted); font-size: 13px; border-top: 1px solid var(--line)
 .back { display: flex; gap: 18px; flex-wrap: wrap; font-size: 14px; padding-top: 18px; }
 hr { border: 0; border-top: 1px solid var(--line); margin: 32px 0; }
 .standalone { max-width: 880px; }
+.markdown-body { min-width: 0; }
+.markdown-body img { display: block; max-width: 100%; height: auto; margin: 24px 0 16px; }
 @media (max-width: 1000px) {
   .handbook { grid-template-columns: 200px minmax(0, 1fr); gap: 32px; }
   header, main, footer { padding-inline: 24px; }

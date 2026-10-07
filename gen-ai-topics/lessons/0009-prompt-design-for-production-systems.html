@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prompt Design For Production Systems</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-9"><h1><span class="chapter-number">Lesson 09</span> Prompt Design For Production Systems</h1><div class="meta"><time datetime="2026-07-04">2026-07-04</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-9-section-1">1. What It Means</a></li><li><a href="#lesson-9-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-9-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-9-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-9-section-5">5. Real-World Example 1: Customer Support Reply Assistant</a></li><li><a href="#lesson-9-section-6">6. Real-World Example 2: Invoice Explanation Assistant</a></li><li><a href="#lesson-9-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-9-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-9-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Prompt Design For Production Systems workflow"><ol class="flow"><li><strong>Task</strong><span>State the intended result</span></li><li><strong>Context</strong><span>Supply relevant inputs</span></li><li><strong>Contract</strong><span>Define output and rules</span></li><li><strong>Evaluate</strong><span>Test realistic cases</span></li></ol><figcaption>Figure 9. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-9-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Prompt Design For Production Systems</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="prompt-design-for-production-systems">Prompt Design For Production Systems</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-customer-support-reply-assistant">5. Real-World Example 1: Customer Support Reply Assistant</a></li><li><a href="#6-real-world-example-2-invoice-explanation-assistant">6. Real-World Example 2: Invoice Explanation Assistant</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-04 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0009-prompt-design-for-production-systems.svg" alt="Task: State the intended result → Context: Supply relevant inputs → Contract: Define output and rules → Evaluate: Test realistic cases"></p>
+<p>Figure 9. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-9-section-1"></a>1. What It Means</h2>
 <p><strong>Prompt design</strong> means writing instructions for an AI model so it performs a task reliably.</p>
 <p>A prompt is not just a question.</p>
 <p>In production, a prompt is closer to a small task specification.</p>
@@ -22,12 +26,12 @@
 <p>Better prompt:</p>
 <pre><code class="language-text">Summarize the customer complaint in 5 bullet points.
 Include: issue, customer impact, urgency, requested action, and missing information.
-If the complaint does not mention urgency, write &quot;Urgency: unknown&quot;.
+If the complaint does not mention urgency, write "Urgency: unknown".
 </code></pre>
 <p>The second prompt is easier to test and safer to use in production.</p>
 <p>OpenAI’s prompt engineering guidance also emphasizes clear instructions, splitting complex tasks, giving references, and testing changes systematically: <a href="https://platform.openai.com/docs/guides/prompt-engineering">https://platform.openai.com/docs/guides/prompt-engineering</a></p>
 <hr>
-<h2 id="lesson-9-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-9-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>In demos, a loose prompt may look fine.</p>
 <p>In production, loose prompts create problems:</p>
 <ul>
@@ -43,7 +47,7 @@ If the complaint does not mention urgency, write &quot;Urgency: unknown&quot;.
 <p>For example, if an AI assistant classifies support tickets, you do not want it to invent categories.</p>
 <p>Bad output:</p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;payment_problem&quot;
+  "category": "payment_problem"
 }
 </code></pre>
 <p>If your system only supports:</p>
@@ -61,7 +65,7 @@ Do not create new categories.
 </code></pre>
 <p>Prompt design matters because it connects AI behavior to real product requirements.</p>
 <hr>
-<h2 id="lesson-9-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-9-section-3"></a>3. How It Works Step By Step</h2>
 <p>A practical prompt design process looks like this.</p>
 <ol>
 <li><p><strong>Define the task</strong></p>
@@ -83,9 +87,9 @@ It may include angry language, missing details, or multiple issues.
 <li><p><strong>Define output format</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;category&quot;: &quot;billing | login_issue | bug_report | feature_request | security&quot;,
-  &quot;priority&quot;: &quot;low | medium | high | critical&quot;,
-  &quot;reason&quot;: &quot;short explanation&quot;
+  "category": "billing | login_issue | bug_report | feature_request | security",
+  "priority": "low | medium | high | critical",
+  "reason": "short explanation"
 }
 </code></pre>
 </li>
@@ -98,13 +102,13 @@ Do not create new categories.
 </li>
 <li><p><strong>Add examples</strong></p>
 <p>Example:</p>
-<pre><code class="language-text">Input: &quot;I was charged twice this month.&quot;
-Output: {&quot;category&quot;:&quot;billing&quot;,&quot;priority&quot;:&quot;medium&quot;,&quot;reason&quot;:&quot;Customer reports duplicate charge.&quot;}
+<pre><code class="language-text">Input: "I was charged twice this month."
+Output: {"category":"billing","priority":"medium","reason":"Customer reports duplicate charge."}
 </code></pre>
 </li>
 <li><p><strong>Add failure behavior</strong></p>
 <p>Example:</p>
-<pre><code class="language-text">If the input is empty, return category &quot;unknown&quot; and explain that no message was provided.
+<pre><code class="language-text">If the input is empty, return category "unknown" and explain that no message was provided.
 </code></pre>
 </li>
 <li><p><strong>Test with real cases</strong></p>
@@ -118,9 +122,9 @@ Output: {&quot;category&quot;:&quot;billing&quot;,&quot;priority&quot;:&quot;med
 <li><p><strong>Monitor after release</strong></p>
 </li>
 </ol>
-<p>   Track wrong classifications, invalid JSON, cost, latency, and user feedback.</p>
+<p>Track wrong classifications, invalid JSON, cost, latency, and user feedback.</p>
 <hr>
-<h2 id="lesson-9-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-9-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Use this structure for production prompts:</p>
 <pre><code class="language-text">You are [role].
 
@@ -163,19 +167,19 @@ Rules:
 Output format:
 Return valid JSON only:
 {
-  &quot;category&quot;: &quot;...&quot;,
-  &quot;priority&quot;: &quot;...&quot;,
-  &quot;reason&quot;: &quot;...&quot;
+  "category": "...",
+  "priority": "...",
+  "reason": "..."
 }
 
 Failure behavior:
-If the message is empty or impossible to classify, use category &quot;unknown&quot; and priority &quot;low&quot;.
+If the message is empty or impossible to classify, use category "unknown" and priority "low".
 </code></pre>
 <p>This is much easier to test than:</p>
 <pre><code class="language-text">Classify this ticket.
 </code></pre>
 <hr>
-<h2 id="lesson-9-section-5">5. Real-World Example 1: Customer Support Reply Assistant</h2>
+<h2 id="5-real-world-example-1-customer-support-reply-assistant"><a id="lesson-9-section-5"></a>5. Real-World Example 1: Customer Support Reply Assistant</h2>
 <p><strong>Use case:</strong> A SaaS company wants AI to draft replies to support tickets.</p>
 <p><strong>User input:</strong></p>
 <pre><code class="language-text">I cannot log in. I reset my password twice but still get an error.
@@ -214,15 +218,15 @@ Our support team can then check the account status safely.
 <p><strong>Outcome:</strong></p>
 <p>The response is helpful, short, and safer.</p>
 <hr>
-<h2 id="lesson-9-section-6">6. Real-World Example 2: Invoice Explanation Assistant</h2>
+<h2 id="6-real-world-example-2-invoice-explanation-assistant"><a id="lesson-9-section-6"></a>6. Real-World Example 2: Invoice Explanation Assistant</h2>
 <p><strong>Use case:</strong> A billing product uses AI to explain why a customer’s invoice increased.</p>
 <p><strong>Input data:</strong></p>
 <pre><code class="language-json">{
-  &quot;current_invoice&quot;: 240,
-  &quot;previous_invoice&quot;: 180,
-  &quot;new_seats&quot;: 3,
-  &quot;plan_change&quot;: &quot;Pro to Business&quot;,
-  &quot;discount_expired&quot;: true
+  "current_invoice": 240,
+  "previous_invoice": 180,
+  "new_seats": 3,
+  "plan_change": "Pro to Business",
+  "discount_expired": true
 }
 </code></pre>
 <p><strong>Weak prompt:</strong></p>
@@ -261,7 +265,7 @@ If you want, the billing team can review whether all seats are still needed befo
 <p><strong>Outcome:</strong></p>
 <p>The assistant gives a useful answer without inventing hidden charges.</p>
 <hr>
-<h2 id="lesson-9-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-9-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Asking for too many things at once</strong></p>
 <p>Bad:</p>
 <pre><code class="language-text">Analyze the customer, write a reply, classify urgency, update CRM, and suggest pricing.
@@ -295,7 +299,7 @@ If you want, the billing team can review whether all seats are still needed befo
 </ul>
 <p>Use enough detail to control behavior, but avoid unnecessary text.</p>
 <hr>
-<h2 id="lesson-9-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-9-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Be specific</strong></p>
 <p>Replace:</p>
@@ -348,20 +352,20 @@ Do not create new categories.
 <li><p><strong>Keep prompts maintainable</strong></p>
 </li>
 </ol>
-<p>   If a prompt becomes huge, split the workflow into smaller steps or tools.</p>
+<p>If a prompt becomes huge, split the workflow into smaller steps or tools.</p>
 <hr>
-<h2 id="lesson-9-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-9-section-9"></a>9. Small Practice Exercise</h2>
 <p>You are building an AI assistant that summarizes bug reports.</p>
 <p>Input:</p>
 <pre><code class="language-text">The app crashes when I upload a 20MB PDF. It works for small files. I am using Chrome on Windows.
 </code></pre>
 <p>Write a production prompt that returns:</p>
 <pre><code class="language-json">{
-  &quot;summary&quot;: &quot;...&quot;,
-  &quot;affected_area&quot;: &quot;...&quot;,
-  &quot;severity&quot;: &quot;...&quot;,
-  &quot;reproduction_clues&quot;: [&quot;...&quot;],
-  &quot;missing_information&quot;: [&quot;...&quot;]
+  "summary": "...",
+  "affected_area": "...",
+  "severity": "...",
+  "reproduction_clues": ["..."],
+  "missing_information": ["..."]
 }
 </code></pre>
 <p>Think about:</p>
@@ -380,4 +384,4 @@ Do not create new categories.
 <li>Use severity from a fixed list.</li>
 <li>Put unknown details in <code>missing_information</code>.</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0009-prompt-design-for-production-systems.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

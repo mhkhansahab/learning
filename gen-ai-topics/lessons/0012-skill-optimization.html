@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Skill Optimization</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-12"><h1><span class="chapter-number">Lesson 12</span> Skill Optimization</h1><div class="meta"><time datetime="2026-07-07">2026-07-07</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-12-section-1">1. What It Means</a></li><li><a href="#lesson-12-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-12-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-12-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-12-section-5">5. Real-World Example 1: Pull Request Review Skill</a></li><li><a href="#lesson-12-section-6">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-12-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-12-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-12-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Skill Optimization workflow"><ol class="flow"><li><strong>Failures</strong><span>Collect real examples</span></li><li><strong>Diagnose</strong><span>Find the workflow weakness</span></li><li><strong>Improve</strong><span>Change the relevant skill step</span></li><li><strong>Compare</strong><span>Test quality, cost and safety</span></li></ol><figcaption>Figure 12. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-12-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Skill Optimization</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="skill-optimization">Skill Optimization</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-pull-request-review-skill">5. Real-World Example 1: Pull Request Review Skill</a></li><li><a href="#6-real-world-example-2-sales-call-summary-skill">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-07 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0012-skill-optimization.svg" alt="Failures: Collect real examples → Diagnose: Find the workflow weakness → Improve: Change the relevant skill step → Compare: Test quality, cost and safety"></p>
+<p>Figure 12. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-12-section-1"></a>1. What It Means</h2>
 <p><strong>Skill optimization</strong> means improving an AI agent skill so it works better, more safely, and more consistently over time.</p>
 <p>An <strong>agent skill</strong> is a reusable workflow that tells an AI agent how to do a specific task.</p>
 <p>Example:</p>
@@ -29,7 +33,7 @@ Skill: Summarize a sales call
 </ul>
 <p>This is related to a broader idea in AI systems: optimizing language model pipelines against measurable outcomes instead of relying only on manual prompt trial and error. A useful research source is the DSPy paper: <a href="https://arxiv.org/abs/2310.03714">https://arxiv.org/abs/2310.03714</a></p>
 <hr>
-<h2 id="lesson-12-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-12-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>A skill may work well in simple demos but fail with real users.</p>
 <p>Real users send messy requests.</p>
 <p>They provide missing data, mixed goals, unclear language, private information, and edge cases.</p>
@@ -59,7 +63,7 @@ Skill: Summarize a sales call
 <p>A skill should improve from real failures, not from guesswork.</p>
 </blockquote>
 <hr>
-<h2 id="lesson-12-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-12-section-3"></a>3. How It Works Step By Step</h2>
 <p>Imagine you have a skill called:</p>
 <pre><code class="language-text">support-ticket-triage
 </code></pre>
@@ -68,7 +72,7 @@ Skill: Summarize a sales call
 <ol>
 <li><p><strong>Collect real failures</strong></p>
 <p>Example failure:</p>
-<pre><code class="language-text">Ticket: &quot;I can see another customer&#39;s invoice.&quot;
+<pre><code class="language-text">Ticket: "I can see another customer's invoice."
 Agent output: category = billing, priority = medium
 Correct output: category = security, priority = critical
 </code></pre>
@@ -86,7 +90,7 @@ Correct output: category = security, priority = critical
 </li>
 <li><p><strong>Improve the skill</strong></p>
 <p>Add a rule:</p>
-<pre><code class="language-text">If the ticket mentions seeing another user&#39;s data, leaked data, account takeover, or credentials, classify as security and critical.
+<pre><code class="language-text">If the ticket mentions seeing another user's data, leaked data, account takeover, or credentials, classify as security and critical.
 </code></pre>
 </li>
 <li><p><strong>Add a test case</strong></p>
@@ -120,7 +124,7 @@ Correct output: category = security, priority = critical
 </li>
 </ol>
 <hr>
-<h2 id="lesson-12-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-12-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Use a structured optimization process.</p>
 <p>Start with one skill.</p>
 <p>Example:</p>
@@ -135,11 +139,11 @@ Metric 5: Human approval requested when required
 </code></pre>
 <p>Then collect examples:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;Customer wants refund for damaged item after opening package.&quot;,
-  &quot;expected&quot;: {
-    &quot;retrieve&quot;: [&quot;damaged_item_policy&quot;],
-    &quot;decision&quot;: &quot;eligible_for_review&quot;,
-    &quot;approval_required&quot;: false
+  "input": "Customer wants refund for damaged item after opening package.",
+  "expected": {
+    "retrieve": ["damaged_item_policy"],
+    "decision": "eligible_for_review",
+    "approval_required": false
   }
 }
 </code></pre>
@@ -175,7 +179,7 @@ High-value refund -&gt; manager approval required.
 <pre><code class="language-text">Before final answer, verify that the decision is supported by a policy and order data.
 </code></pre>
 <hr>
-<h2 id="lesson-12-section-5">5. Real-World Example 1: Pull Request Review Skill</h2>
+<h2 id="5-real-world-example-1-pull-request-review-skill"><a id="lesson-12-section-5"></a>5. Real-World Example 1: Pull Request Review Skill</h2>
 <p><strong>Use case:</strong> A software team uses an AI agent to review pull requests.</p>
 <p><strong>Initial skill behavior:</strong></p>
 <p>The agent comments on style issues:</p>
@@ -215,7 +219,7 @@ Expected finding: High severity authorization bug.
 <p><strong>Outcome:</strong></p>
 <p>The skill now focuses on production risk, not cosmetic feedback.</p>
 <hr>
-<h2 id="lesson-12-section-6">6. Real-World Example 2: Sales Call Summary Skill</h2>
+<h2 id="6-real-world-example-2-sales-call-summary-skill"><a id="lesson-12-section-6"></a>6. Real-World Example 2: Sales Call Summary Skill</h2>
 <p><strong>Use case:</strong> A sales team uses an AI agent to summarize call transcripts.</p>
 <p><strong>Initial skill behavior:</strong></p>
 <p>The summary sounds nice but misses important CRM fields.</p>
@@ -229,13 +233,13 @@ Expected finding: High severity authorization bug.
 <p><strong>Optimization:</strong></p>
 <p>Update the skill output format:</p>
 <pre><code class="language-json">{
-  &quot;decision_maker&quot;: &quot;...&quot;,
-  &quot;budget_status&quot;: &quot;...&quot;,
-  &quot;timeline&quot;: &quot;...&quot;,
-  &quot;main_pain_point&quot;: &quot;...&quot;,
-  &quot;blocker&quot;: &quot;...&quot;,
-  &quot;next_step&quot;: &quot;...&quot;,
-  &quot;crm_risk&quot;: &quot;low | medium | high&quot;
+  "decision_maker": "...",
+  "budget_status": "...",
+  "timeline": "...",
+  "main_pain_point": "...",
+  "blocker": "...",
+  "next_step": "...",
+  "crm_risk": "low | medium | high"
 }
 </code></pre>
 <p>Add rules:</p>
@@ -245,17 +249,17 @@ If budget is approved, do not say budget is unknown.
 </code></pre>
 <p>Add examples:</p>
 <pre><code class="language-json">{
-  &quot;input&quot;: &quot;Budget is approved but legal is blocking.&quot;,
-  &quot;expected&quot;: {
-    &quot;budget_status&quot;: &quot;approved&quot;,
-    &quot;blocker&quot;: &quot;legal review&quot;
+  "input": "Budget is approved but legal is blocking.",
+  "expected": {
+    "budget_status": "approved",
+    "blocker": "legal review"
   }
 }
 </code></pre>
 <p><strong>Outcome:</strong></p>
 <p>The skill produces structured CRM data that sales managers can search and report on.</p>
 <hr>
-<h2 id="lesson-12-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-12-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Optimizing from one example only</strong></p>
 <p>One failure matters, but do not overfit.</p>
 <p><strong>Overfitting</strong> means improving for one case while making general behavior worse.</p>
@@ -302,7 +306,7 @@ Increase correct priority classification from 75% to 90%.
 <p>But too many rules can make the agent rigid or confused.</p>
 <p>A good skill is clear enough to guide behavior but not so crowded that it becomes hard to follow.</p>
 <hr>
-<h2 id="lesson-12-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-12-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Keep a failure log</strong></p>
 <p>Store real failures with:</p>
@@ -357,9 +361,9 @@ refund-review-v3
 <li><p><strong>Review with domain experts</strong></p>
 </li>
 </ol>
-<p>   For legal, finance, medical, security, or compliance workflows, expert review is required.</p>
+<p>For legal, finance, medical, security, or compliance workflows, expert review is required.</p>
 <hr>
-<h2 id="lesson-12-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-12-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you have a skill called:</p>
 <pre><code class="language-text">deployment-failure-diagnosis
 </code></pre>
@@ -383,4 +387,4 @@ refund-review-v3
 <li>Add test: CI log with known Node version mismatch</li>
 <li>Metric: percentage of answers with correct root cause and evidence reference</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0012-skill-optimization.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guardrails for AI Systems</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-3"><h1><span class="chapter-number">Lesson 03</span> Guardrails for AI Systems</h1><div class="meta"><time datetime="2026-06-27">2026-06-27</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-3-section-1">1. What It Means</a></li><li><a href="#lesson-3-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-3-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-3-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-3-section-5">5. Real-World Example 1: Customer Support Refund Agent</a></li><li><a href="#lesson-3-section-6">6. Real-World Example 2: Internal HR Policy Assistant</a></li><li><a href="#lesson-3-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-3-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-3-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Guardrails for AI Systems workflow"><ol class="flow"><li><strong>Input</strong><span>Treat external text as data</span></li><li><strong>Permission</strong><span>Check allowed operations</span></li><li><strong>Validation</strong><span>Enforce application rules</span></li><li><strong>Review</strong><span>Escalate sensitive actions</span></li></ol><figcaption>Figure 3. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-3-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guardrails for AI Systems</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="guardrails-for-ai-systems">Guardrails for AI Systems</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-customer-support-refund-agent">5. Real-World Example 1: Customer Support Refund Agent</a></li><li><a href="#6-real-world-example-2-internal-hr-policy-assistant">6. Real-World Example 2: Internal HR Policy Assistant</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-27 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0003-guardrails-for-ai-systems.svg" alt="Input: Treat external text as data → Permission: Check allowed operations → Validation: Enforce application rules → Review: Escalate sensitive actions"></p>
+<p>Figure 3. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-3-section-1"></a>1. What It Means</h2>
 <p><strong>Guardrails</strong> are safety controls around an AI system.</p>
 <p>They help the AI stay within allowed behavior.</p>
 <p>A guardrail can stop the AI from:</p>
@@ -23,7 +27,7 @@
 <p>Guardrails do not make AI perfect. They reduce risk.</p>
 <p>OWASP lists several major LLM application risks, including prompt injection, insecure output handling, sensitive information disclosure, and excessive agency. These are exactly the kinds of risks guardrails are designed to reduce. (<a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">owasp.org</a>)</p>
 <hr>
-<h2 id="lesson-3-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-3-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>In production, an AI system is not just chatting. It may touch real users, private data, business systems, or money.</p>
 <p>Without guardrails, the AI may:</p>
 <ul>
@@ -42,7 +46,7 @@
 <p>A production system should assume the model can make mistakes.</p>
 <p>Good guardrails protect the user, the business, and the system even when the model behaves badly.</p>
 <hr>
-<h2 id="lesson-3-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-3-section-3"></a>3. How It Works Step By Step</h2>
 <p>A guarded AI flow usually works like this:</p>
 <ol>
 <li><p><strong>User sends a request</strong></p>
@@ -63,10 +67,10 @@
 <li><p><strong>Model plans the response or action</strong></p>
 <p>The model may decide it needs a tool, such as:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;create_refund_request&quot;,
-  &quot;input&quot;: {
-    &quot;account_id&quot;: &quot;9912&quot;,
-    &quot;refund_type&quot;: &quot;full&quot;
+  "tool": "create_refund_request",
+  "input": {
+    "account_id": "9912",
+    "refund_type": "full"
   }
 }
 </code></pre>
@@ -104,7 +108,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-3-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-3-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start by classifying your AI actions by risk.</p>
 <p>Example risk levels:</p>
 <table>
@@ -164,9 +168,9 @@
 <p>Ask the model for structured data when possible.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;risk_level&quot;: &quot;high&quot;,
-  &quot;needs_human_approval&quot;: true,
-  &quot;reason&quot;: &quot;This action sends money back to the customer.&quot;
+  "risk_level": "high",
+  "needs_human_approval": true,
+  "reason": "This action sends money back to the customer."
 }
 </code></pre>
 </li>
@@ -185,7 +189,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-3-section-5">5. Real-World Example 1: Customer Support Refund Agent</h2>
+<h2 id="5-real-world-example-1-customer-support-refund-agent"><a id="lesson-3-section-5"></a>5. Real-World Example 1: Customer Support Refund Agent</h2>
 <p><strong>Use case:</strong> An ecommerce company uses an AI assistant for support.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -194,10 +198,10 @@
 <p><strong>Without guardrails:</strong></p>
 <p>The AI may immediately call:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;issue_refund&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;4451&quot;,
-    &quot;amount&quot;: &quot;full&quot;
+  "tool": "issue_refund",
+  "input": {
+    "order_id": "4451",
+    "amount": "full"
   }
 }
 </code></pre>
@@ -220,7 +224,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The AI helps the support team move faster, but business rules still control the action.</p>
 <hr>
-<h2 id="lesson-3-section-6">6. Real-World Example 2: Internal HR Policy Assistant</h2>
+<h2 id="6-real-world-example-2-internal-hr-policy-assistant"><a id="lesson-3-section-6"></a>6. Real-World Example 2: Internal HR Policy Assistant</h2>
 <p><strong>Use case:</strong> Employees ask an AI assistant about company policies.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -252,7 +256,7 @@
 <p><strong>Outcome:</strong></p>
 <p>The same assistant can be helpful for normal policy questions while blocking private employee data.</p>
 <hr>
-<h2 id="lesson-3-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-3-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Putting all safety rules only in the prompt</strong></p>
 <p>Prompt instructions are useful, but not enough.</p>
 <p>A malicious user may try:</p>
@@ -293,7 +297,7 @@
 <p>Less friction usually means more risk.</p>
 <p>For production systems, choose based on the cost of a mistake.</p>
 <hr>
-<h2 id="lesson-3-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-3-section-8"></a>8. Practical Best Practices</h2>
 <p>Use these rules:</p>
 <ol>
 <li><p><strong>Protect data in the backend</strong></p>
@@ -344,7 +348,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-3-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-3-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI assistant for a bank.</p>
 <p>A user asks:</p>
 <blockquote>
@@ -371,4 +375,4 @@
 <li>A safe failure message if any check fails</li>
 </ul>
 <p>Source: OWASP Top 10 for Large Language Model Applications: <a href="https://owasp.org/www-project-top-10-for-large-language-model-applications/">https://owasp.org/www-project-top-10-for-large-language-model-applications/</a></p>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0003-guardrails-for-ai-systems.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

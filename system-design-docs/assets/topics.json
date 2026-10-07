@@ -1,0 +1,143 @@
+[
+  {
+    "stem": "0001-cache-aside",
+    "title": "Cache-Aside",
+    "number": "0001",
+    "tags": [
+      "Caching",
+      "Data freshness"
+    ],
+    "diagram": "assets/diagrams/0001-cache-aside.svg"
+  },
+  {
+    "stem": "0002-horizontal-scaling",
+    "title": "Horizontal Scaling",
+    "number": "0002",
+    "tags": [
+      "Scaling",
+      "Availability"
+    ],
+    "diagram": "assets/diagrams/0002-horizontal-scaling.svg"
+  },
+  {
+    "stem": "0003-vertical-scaling",
+    "title": "Vertical Scaling",
+    "number": "0003",
+    "tags": [
+      "Scaling",
+      "Capacity"
+    ],
+    "diagram": "assets/diagrams/0003-vertical-scaling.svg"
+  },
+  {
+    "stem": "0004-load-balancing",
+    "title": "Load Balancing",
+    "number": "0004",
+    "tags": [
+      "Traffic routing",
+      "Availability"
+    ],
+    "diagram": "assets/diagrams/0004-load-balancing.svg"
+  },
+  {
+    "stem": "0005-message-queues",
+    "title": "Message Queues",
+    "number": "0005",
+    "tags": [
+      "Async work",
+      "Reliability"
+    ],
+    "diagram": "assets/diagrams/0005-message-queues.svg"
+  },
+  {
+    "stem": "0006-zero-downtime-database-migrations",
+    "title": "Zero-Downtime Database Migrations",
+    "number": "0006",
+    "tags": [
+      "Databases",
+      "Deployment"
+    ],
+    "diagram": "assets/diagrams/0006-zero-downtime-database-migrations.svg"
+  },
+  {
+    "stem": "0007-database-indexes",
+    "title": "Database Indexes",
+    "number": "0007",
+    "tags": [
+      "Databases",
+      "Query performance"
+    ],
+    "diagram": "assets/diagrams/0007-database-indexes.svg"
+  },
+  {
+    "stem": "0008-eventual-consistency",
+    "title": "Eventual Consistency",
+    "number": "0008",
+    "tags": [
+      "Databases",
+      "Data freshness"
+    ],
+    "diagram": "assets/diagrams/0008-eventual-consistency.svg"
+  },
+  {
+    "stem": "0009-containerization",
+    "title": "Containerization",
+    "number": "0009",
+    "tags": [
+      "Deployment",
+      "Isolation"
+    ],
+    "diagram": "assets/diagrams/0009-containerization.svg"
+  },
+  {
+    "stem": "0010-api-pagination",
+    "title": "API Pagination",
+    "number": "0010",
+    "tags": [
+      "APIs",
+      "Query performance"
+    ],
+    "diagram": "assets/diagrams/0010-api-pagination.svg"
+  },
+  {
+    "stem": "0011-observability",
+    "title": "Observability",
+    "number": "0011",
+    "tags": [
+      "Operations",
+      "Reliability"
+    ],
+    "diagram": "assets/diagrams/0011-observability.svg"
+  },
+  {
+    "stem": "0012-rate-limiting",
+    "title": "Rate Limiting",
+    "number": "0012",
+    "tags": [
+      "APIs",
+      "Security",
+      "Capacity"
+    ],
+    "diagram": "assets/diagrams/0012-rate-limiting.svg"
+  },
+  {
+    "stem": "0013-circuit-breakers",
+    "title": "Circuit Breakers",
+    "number": "0013",
+    "tags": [
+      "Reliability",
+      "State machines"
+    ],
+    "diagram": "assets/diagrams/0013-circuit-breakers.svg"
+  },
+  {
+    "stem": "0014-cost-aware-architecture",
+    "title": "Cost-Aware Architecture",
+    "number": "0014",
+    "tags": [
+      "Cost",
+      "Operations"
+    ],
+    "diagram": "assets/diagrams/0014-cost-aware-architecture.svg"
+  }
+]

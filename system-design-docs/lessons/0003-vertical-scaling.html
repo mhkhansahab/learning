@@ -1,166 +1,87 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Vertical Scaling: Make One Machine More Powerful</title>
-    <link rel="stylesheet" href="../assets/course.css">
-  </head>
-  <body>
-    <main>
-      <p class="eyebrow">Lesson 0003 · Scalability</p>
-      <h1>Vertical Scaling</h1>
-      <p class="muted">
-        Increase the CPU, memory, storage performance, or network capacity of one
-        machine instead of adding more machines.
-      </p>
-
-      <h2>The problem it solves</h2>
-      <p>
-        A service can become slow because its current machine has insufficient
-        resources. CPU may remain near 100%, memory pressure may cause swapping,
-        or storage may be unable to handle enough operations per second. Vertical
-        scaling, also called <strong>scaling up</strong>, moves the workload to a
-        larger machine.
-      </p>
-      <p class="flow">4 CPU / 16 GB RAM → 16 CPU / 64 GB RAM</p>
-
-      <h2>How it works</h2>
-      <ol>
-        <li>Measure which resource is limiting the workload.</li>
-        <li>Select a machine with more of that specific resource.</li>
-        <li>Back up data and prepare a rollback plan.</li>
-        <li>Stop, resize, and restart the machine when required.</li>
-        <li>Run health checks and compare performance with the baseline.</li>
-      </ol>
-      <p>
-        The application architecture usually stays unchanged. This makes vertical
-        scaling operationally simpler than distributing work across multiple nodes.
-        However, the larger machine remains one failure domain.
-      </p>
-
-      <h2>Main components</h2>
-      <ul>
-        <li><strong>Compute:</strong> more CPU cores or faster processors.</li>
-        <li><strong>Memory:</strong> more RAM for working data, connections, and caches.</li>
-        <li><strong>Storage:</strong> more capacity, IOPS, or throughput.</li>
-        <li><strong>Network:</strong> higher bandwidth and packet-processing limits.</li>
-        <li><strong>Monitoring:</strong> evidence that identifies the real bottleneck.</li>
-      </ul>
-
-      <h2>Example 1: growing database</h2>
-      <p>
-        A PostgreSQL database serves a business application. Its active dataset grows
-        from 10 GB to 80 GB, and frequently used indexes no longer fit in memory.
-        Disk reads increase and query latency rises from 30 ms to 300 ms.
-      </p>
-      <p>
-        Moving from 16 GB to 128 GB of RAM allows the database to retain more indexes
-        and frequently accessed pages in memory. This can be the simplest correct
-        solution while the workload still fits comfortably on one database server.
-      </p>
-
-      <h2>Example 2: production resize under load</h2>
-      <p>
-        A payment API runs on one 4-vCPU VM and receives 200 requests per second.
-        During payroll processing it reaches 95% CPU, p95 latency grows from 150 ms
-        to 2 seconds, and requests begin timing out.
-      </p>
-      <p>
-        The team temporarily moves it to a 16-vCPU VM. Before resizing, they drain
-        traffic, take a snapshot, confirm driver and storage compatibility, reserve
-        a maintenance window, and prepare the old machine type as rollback. The resize
-        restores capacity quickly, but the team then removes the single point of failure
-        by moving toward multiple stateless instances.
-      </p>
-
-      <h2>When to use it</h2>
-      <ul>
-        <li>You need a fast capacity increase with minimal architectural change.</li>
-        <li>The application cannot easily distribute work across multiple nodes.</li>
-        <li>A database requires strong coordination and still fits on one machine.</li>
-        <li>The larger machine is affordable and comfortably handles future growth.</li>
-      </ul>
-
-      <h2>When not to rely on it</h2>
-      <ul>
-        <li>The service requires high availability across failure domains.</li>
-        <li>Traffic changes rapidly and frequently.</li>
-        <li>The workload is approaching the provider's largest machine size.</li>
-        <li>The bottleneck is inefficient code, slow queries, locks, or an external API.</li>
-      </ul>
-
-      <h2>Implementation and reliability</h2>
-      <ul>
-        <li>Use CPU, memory, disk latency, IOPS, network, and application latency metrics.</li>
-        <li>Load test the new size; additional CPU does not fix every bottleneck.</li>
-        <li>Plan downtime because some platforms require stopping the machine.</li>
-        <li>Verify instance type, architecture, drivers, disks, and network compatibility.</li>
-        <li>Take tested backups and define exact rollback conditions.</li>
-        <li>Run post-change health checks before restoring full traffic.</li>
-      </ul>
-
-      <h2>Security considerations</h2>
-      <ul>
-        <li>Preserve encryption, firewall, identity, and audit settings during replacement.</li>
-        <li>Do not expose a temporary public address while testing the larger machine.</li>
-        <li>Protect snapshots because they may contain production data and credentials.</li>
-        <li>Use infrastructure as code to reduce configuration drift during resizing.</li>
-      </ul>
-
-      <h2>Performance and cost</h2>
-      <p>
-        Vertical scaling can improve performance immediately, but cost often increases
-        in large steps. A machine with four times the memory may cost roughly four times
-        as much even when memory was not the real bottleneck. Larger machines can also
-        increase the financial and operational impact of a single failure.
-      </p>
-
-      <h2>Key trade-offs</h2>
-      <ul>
-        <li><strong>Simplicity vs resilience:</strong> one larger node is simpler but less fault tolerant.</li>
-        <li><strong>Speed vs limits:</strong> resizing is fast, but every platform has a maximum size.</li>
-        <li><strong>Low engineering effort vs higher unit cost:</strong> architecture stays simple, but large machines can be expensive.</li>
-        <li><strong>Consistency vs availability:</strong> one database avoids distributed coordination, but maintenance can cause downtime.</li>
-      </ul>
-
-      <h2>Common mistakes and edge cases</h2>
-      <ul>
-        <li>Resizing before identifying whether CPU, memory, disk, or code is the constraint.</li>
-        <li>Assuming more CPU will fix lock contention or sequential processing.</li>
-        <li>Ignoring downtime, IP address changes, or machine compatibility.</li>
-        <li>Scaling up repeatedly without defining the point to redesign or scale out.</li>
-        <li>Increasing database connections with machine size until downstream systems fail.</li>
-        <li>Forgetting that a larger machine can take longer to restart, restore, or replace.</li>
-      </ul>
-
-      <h2>Connection to previous lessons</h2>
-      <p>
-        <a href="0002-horizontal-scaling.html">Horizontal scaling</a> adds machines and
-        improves fault tolerance, but requires stateless services and coordination.
-        Vertical scaling changes fewer things and is often the right first move.
-        <a href="0001-cache-aside.html">Cache-aside</a> may delay either type of scaling
-        by reducing repeated database work.
-      </p>
-
-      <h2>Design exercise</h2>
-      <p class="prompt">
-        A PostgreSQL server has 90% memory usage, 20% CPU usage, low disk latency, and
-        a 99.9% availability requirement. Queries slow down only after the active dataset
-        exceeds memory. Would you scale vertically, horizontally, add caching, or combine
-        approaches? Describe the metrics, migration steps, rollback trigger, and remaining
-        single-point-of-failure risk.
-      </p>
-
-      <h2>Primary source</h2>
-      <p>
-        Read:
-        <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/change-instance-type-of-ebs-backed-instance.html">
-          AWS: Change the instance type for an EC2 instance
-        </a>.
-      </p>
-
-      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
-    </main>
-  </body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Vertical Scaling</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><p>Lesson 0003 · Scalability</p>
+<h1 id="vertical-scaling">Vertical Scaling</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#the-problem-it-solves">The problem it solves</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#main-components">Main components</a></li><li><a href="#example-1-growing-database">Example 1: growing database</a></li><li><a href="#example-2-production-resize-under-load">Example 2: production resize under load</a></li><li><a href="#when-to-use-it">When to use it</a></li><li><a href="#when-not-to-rely-on-it">When not to rely on it</a></li><li><a href="#implementation-and-reliability">Implementation and reliability</a></li><li><a href="#security-considerations">Security considerations</a></li><li><a href="#performance-and-cost">Performance and cost</a></li><li><a href="#key-trade-offs">Key trade-offs</a></li><li><a href="#common-mistakes-and-edge-cases">Common mistakes and edge cases</a></li><li><a href="#connection-to-previous-lessons">Connection to previous lessons</a></li><li><a href="#design-exercise">Design exercise</a></li><li><a href="#primary-source">Primary source</a></li></ul></details>
+<p><img src="../assets/diagrams/0003-vertical-scaling.svg" alt="Before: One machine: 4 CPU / 16 GB RAM → Resize: Plan restart or failover → After: One machine: 16 CPU / 64 GB RAM"></p>
+<p>The same machine role gets more resources. This helps a measured CPU or memory limit, but a larger single machine still needs a separate availability plan.</p>
+<p>Increase the CPU, memory, storage performance, or network capacity of one machine instead of adding more machines.</p>
+<h2 id="the-problem-it-solves">The problem it solves</h2>
+<p>A service can become slow because its current machine has insufficient resources. CPU may remain near 100%, memory pressure may cause swapping, or storage may be unable to handle enough operations per second. Vertical scaling, also called <strong>scaling up</strong>, moves the workload to a larger machine.</p>
+<p>4 CPU / 16 GB RAM → 16 CPU / 64 GB RAM</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li>Measure which resource is limiting the workload.</li>
+<li>Select a machine with more of that specific resource.</li>
+<li>Back up data and prepare a rollback plan.</li>
+<li>Stop, resize, and restart the machine when required.</li>
+<li>Run health checks and compare performance with the baseline.</li>
+</ol>
+<p>The application architecture usually stays unchanged. This makes vertical scaling operationally simpler than distributing work across multiple nodes. However, the larger machine remains one failure domain.</p>
+<h2 id="main-components">Main components</h2>
+<ul>
+<li><strong>Compute:</strong> more CPU cores or faster processors.</li>
+<li><strong>Memory:</strong> more RAM for working data, connections, and caches.</li>
+<li><strong>Storage:</strong> more capacity, IOPS, or throughput.</li>
+<li><strong>Network:</strong> higher bandwidth and packet-processing limits.</li>
+<li><strong>Monitoring:</strong> evidence that identifies the real bottleneck.</li>
+</ul>
+<h2 id="example-1-growing-database">Example 1: growing database</h2>
+<p>A PostgreSQL database serves a business application. Its active dataset grows from 10 GB to 80 GB, and frequently used indexes no longer fit in memory. Disk reads increase and query latency rises from 30 ms to 300 ms.</p>
+<p>Moving from 16 GB to 128 GB of RAM allows the database to retain more indexes and frequently accessed pages in memory. This can be the simplest correct solution while the workload still fits comfortably on one database server.</p>
+<h2 id="example-2-production-resize-under-load">Example 2: production resize under load</h2>
+<p>A payment API runs on one 4-vCPU VM and receives 200 requests per second. During payroll processing it reaches 95% CPU, p95 latency grows from 150 ms to 2 seconds, and requests begin timing out.</p>
+<p>The team temporarily moves it to a 16-vCPU VM. Before resizing, they drain traffic, take a snapshot, confirm driver and storage compatibility, reserve a maintenance window, and prepare the old machine type as rollback. The resize restores capacity quickly, but the team then removes the single point of failure by moving toward multiple stateless instances.</p>
+<h2 id="when-to-use-it">When to use it</h2>
+<ul>
+<li>You need a fast capacity increase with minimal architectural change.</li>
+<li>The application cannot easily distribute work across multiple nodes.</li>
+<li>A database requires strong coordination and still fits on one machine.</li>
+<li>The larger machine is affordable and comfortably handles future growth.</li>
+</ul>
+<h2 id="when-not-to-rely-on-it">When not to rely on it</h2>
+<ul>
+<li>The service requires high availability across failure domains.</li>
+<li>Traffic changes rapidly and frequently.</li>
+<li>The workload is approaching the provider's largest machine size.</li>
+<li>The bottleneck is inefficient code, slow queries, locks, or an external API.</li>
+</ul>
+<h2 id="implementation-and-reliability">Implementation and reliability</h2>
+<ul>
+<li>Use CPU, memory, disk latency, IOPS, network, and application latency metrics.</li>
+<li>Load test the new size; additional CPU does not fix every bottleneck.</li>
+<li>Plan downtime because some platforms require stopping the machine.</li>
+<li>Verify instance type, architecture, drivers, disks, and network compatibility.</li>
+<li>Take tested backups and define exact rollback conditions.</li>
+<li>Run post-change health checks before restoring full traffic.</li>
+</ul>
+<h2 id="security-considerations">Security considerations</h2>
+<ul>
+<li>Preserve encryption, firewall, identity, and audit settings during replacement.</li>
+<li>Do not expose a temporary public address while testing the larger machine.</li>
+<li>Protect snapshots because they may contain production data and credentials.</li>
+<li>Use infrastructure as code to reduce configuration drift during resizing.</li>
+</ul>
+<h2 id="performance-and-cost">Performance and cost</h2>
+<p>Vertical scaling can improve performance immediately, but cost often increases in large steps. A machine with four times the memory may cost roughly four times as much even when memory was not the real bottleneck. Larger machines can also increase the financial and operational impact of a single failure.</p>
+<h2 id="key-trade-offs">Key trade-offs</h2>
+<ul>
+<li><strong>Simplicity vs resilience:</strong> one larger node is simpler but less fault tolerant.</li>
+<li><strong>Speed vs limits:</strong> resizing is fast, but every platform has a maximum size.</li>
+<li><strong>Low engineering effort vs higher unit cost:</strong> architecture stays simple, but large machines can be expensive.</li>
+<li><strong>Consistency vs availability:</strong> one database avoids distributed coordination, but maintenance can cause downtime.</li>
+</ul>
+<h2 id="common-mistakes-and-edge-cases">Common mistakes and edge cases</h2>
+<ul>
+<li>Resizing before identifying whether CPU, memory, disk, or code is the constraint.</li>
+<li>Assuming more CPU will fix lock contention or sequential processing.</li>
+<li>Ignoring downtime, IP address changes, or machine compatibility.</li>
+<li>Scaling up repeatedly without defining the point to redesign or scale out.</li>
+<li>Increasing database connections with machine size until downstream systems fail.</li>
+<li>Forgetting that a larger machine can take longer to restart, restore, or replace.</li>
+</ul>
+<h2 id="connection-to-previous-lessons">Connection to previous lessons</h2>
+<p><a href="0002-horizontal-scaling.html">Horizontal scaling</a> adds machines and improves fault tolerance, but requires stateless services and coordination. Vertical scaling changes fewer things and is often the right first move. <a href="0001-cache-aside.html">Cache-aside</a> may delay either type of scaling by reducing repeated database work.</p>
+<h2 id="design-exercise">Design exercise</h2>
+<p>A PostgreSQL server has 90% memory usage, 20% CPU usage, low disk latency, and a 99.9% availability requirement. Queries slow down only after the active dataset exceeds memory. Would you scale vertically, horizontally, add caching, or combine approaches? Describe the metrics, migration steps, rollback trigger, and remaining single-point-of-failure risk.</p>
+<h2 id="primary-source">Primary source</h2>
+<p>Read: <a href="https://docs.aws.amazon.com/AWSEC2/latest/UserGuide/change-instance-type-of-ebs-backed-instance.html">AWS: Change the instance type for an EC2 instance</a> .</p>
+<p>Ask a follow-up question if any part of the design is unclear.</p>
+<p><a href="0003-vertical-scaling.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

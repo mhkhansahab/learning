@@ -1,204 +1,105 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>API Pagination: Keep List Endpoints Bounded</title>
-    <link rel="stylesheet" href="../assets/course.css">
-  </head>
-  <body>
-    <main>
-      <p class="eyebrow">Lesson 0010 · API Optimization</p>
-      <h1>API Pagination</h1>
-      <p class="muted">
-        Pagination splits a large list response into smaller pages so APIs stay fast,
-        predictable, and safer under real production load.
-      </p>
-
-      <h2>The problem it solves</h2>
-      <p>
-        List endpoints are dangerous when they are unbounded. An endpoint like
-        <code>GET /orders</code> may be fine with 500 rows, but painful with 50 million
-        rows. A single request can consume too much database time, memory, network
-        bandwidth, and client processing.
-      </p>
-      <p>
-        Pagination forces the API to return a controlled number of items. The client
-        asks for the next page only when it needs more data.
-      </p>
-      <p class="flow">Client requests page → API validates page size → Database fetches bounded rows → API returns items + next page token</p>
-
-      <h2>How it works</h2>
-      <ol>
-        <li>The client calls a list endpoint with a requested page size.</li>
-        <li>The API applies a maximum page size to protect the system.</li>
-        <li>The database fetches one bounded slice of results.</li>
-        <li>The API returns the items and a cursor or page token for the next page.</li>
-        <li>The client sends that token to continue from the previous position.</li>
-        <li>The API stops returning a next token when there are no more results.</li>
-      </ol>
-      <p>
-        Good pagination is not only a UI feature. It is a system protection mechanism.
-        It keeps each request small enough to measure, retry, cache, rate limit, and
-        debug.
-      </p>
-
-      <h2>Main components</h2>
-      <ul>
-        <li><strong>Page size:</strong> the number of items requested, with a server-side maximum.</li>
-        <li><strong>Cursor or page token:</strong> an opaque value that tells the API where to continue.</li>
-        <li><strong>Stable ordering:</strong> a predictable sort order so items are not skipped or duplicated.</li>
-        <li><strong>Index:</strong> a database index that supports the filter and order used by the list endpoint.</li>
-        <li><strong>Response metadata:</strong> data such as <code>next_page_token</code>, count hints, or links.</li>
-        <li><strong>Rate limits:</strong> protection against clients crawling too aggressively.</li>
-      </ul>
-
-      <h2>Offset vs cursor pagination</h2>
-      <p>
-        Offset pagination uses <code>limit</code> and <code>offset</code>, such as
-        <code>?limit=50&amp;offset=1000</code>. It is simple, but it gets slower on
-        deep pages because the database may still need to walk past many skipped rows.
-        It can also duplicate or skip items when rows are inserted or deleted while
-        the user is paging.
-      </p>
-      <p>
-        Cursor pagination uses a stable position, such as the last seen
-        <code>created_at</code> and <code>id</code>, wrapped in an opaque token. It is
-        usually better for large, changing datasets because it continues from a known
-        item instead of counting skipped rows.
-      </p>
-
-      <h2>Example 1: order history API</h2>
-      <p>
-        A customer opens their order history. The app calls
-        <code>GET /orders?page_size=25</code>. The API returns the latest 25 orders
-        and a <code>next_page_token</code>. The mobile app only fetches more if the
-        customer scrolls.
-      </p>
-      <p>
-        The database uses an index like <code>(customer_id, created_at DESC, id DESC)</code>.
-        This matches the filter and ordering. The API avoids loading years of history
-        when the user only wants the first screen.
-      </p>
-
-      <h2>Example 2: production export incident</h2>
-      <p>
-        A reporting endpoint returns all events for an account. One enterprise account
-        has 90 million events. At 9:00 AM, three customers start exports at the same
-        time. Each request tries to return every matching row. Database CPU reaches
-        98%, memory pressure rises, API containers time out, and unrelated dashboards
-        become slow.
-      </p>
-      <p>
-        The fix is to make the endpoint paginated and move full exports to an async
-        job. Interactive APIs return small pages. Large exports create a background
-        task, stream data in chunks, store the file in object storage, and notify the
-        user when it is ready. Pagination protects the request path; queues handle
-        the long-running export.
-      </p>
-
-      <h2>When to use it</h2>
-      <ul>
-        <li>An endpoint returns a list that can grow over time.</li>
-        <li>Clients display scrollable or table-based data.</li>
-        <li>The query reads from a large table, search index, or external API.</li>
-        <li>You need predictable latency and memory usage per request.</li>
-        <li>You want APIs that remain safe as customers grow from small to large accounts.</li>
-      </ul>
-
-      <h2>When not to use it</h2>
-      <ul>
-        <li>The response is always tiny and bounded by business rules.</li>
-        <li>The client truly needs a complete export; use an async export flow instead.</li>
-        <li>The endpoint returns a single aggregate value, not a list of items.</li>
-        <li>The data is static and small enough to cache as one object safely.</li>
-      </ul>
-
-      <h2>Implementation considerations</h2>
-      <ul>
-        <li>Always enforce a server-side maximum page size.</li>
-        <li>Use cursor pagination for large or frequently changing datasets.</li>
-        <li>Use a stable sort, often by <code>created_at</code> plus a unique <code>id</code> tie-breaker.</li>
-        <li>Make page tokens opaque so clients do not depend on internal database details.</li>
-        <li>Validate filters and sort fields; unsupported combinations can create slow queries.</li>
-        <li>Avoid expensive total counts on large datasets unless the product truly needs them.</li>
-        <li>Align database indexes with the endpoint's filters and order.</li>
-      </ul>
-
-      <h2>Security considerations</h2>
-      <ul>
-        <li>Apply authorization before pagination so users cannot page through data they should not see.</li>
-        <li>Sign or encrypt page tokens if they include sensitive internal state.</li>
-        <li>Do not expose raw database IDs or query details inside readable tokens when avoidable.</li>
-        <li>Rate limit pagination to prevent scraping and expensive full-table crawling.</li>
-        <li>Keep filters tenant-scoped so one customer cannot infer another customer's data volume.</li>
-      </ul>
-
-      <h2>Reliability concerns</h2>
-      <ul>
-        <li>Offset pagination can skip or duplicate rows when data changes during traversal.</li>
-        <li>Cursor tokens can expire if the underlying sort key disappears or access changes.</li>
-        <li>Changing default sort order can break clients that store old tokens.</li>
-        <li>Deep pagination can still be expensive if the index does not match the query.</li>
-        <li>Clients may retry pages, so reads and billing side effects must be safe.</li>
-      </ul>
-
-      <h2>Performance and cost</h2>
-      <p>
-        Pagination reduces API latency, memory usage, database work, response size,
-        and bandwidth. It also lowers failure blast radius because one bad request
-        can only ask for a bounded amount of work. The cost is API complexity: clients
-        must handle tokens, empty pages, retries, ordering, and partial results.
-      </p>
-
-      <h2>Key trade-offs</h2>
-      <ul>
-        <li><strong>Simplicity vs scale:</strong> offset pagination is easy, but cursor pagination scales better on large changing lists.</li>
-        <li><strong>Freshness vs stable traversal:</strong> live data may change while the client pages through it.</li>
-        <li><strong>User convenience vs system safety:</strong> "show all" is convenient, but can overload production systems.</li>
-        <li><strong>Detailed totals vs fast responses:</strong> exact counts can be expensive on large filtered datasets.</li>
-      </ul>
-
-      <h2>Common mistakes and edge cases</h2>
-      <ul>
-        <li>Allowing clients to request unlimited or extremely large page sizes.</li>
-        <li>Using offset pagination for very deep pages on huge tables.</li>
-        <li>Sorting only by a non-unique field, causing unstable page boundaries.</li>
-        <li>Returning exact total counts that require expensive full scans.</li>
-        <li>Letting page tokens reveal tenant IDs, raw SQL, or internal schema details.</li>
-        <li>Forgetting that deleted or newly inserted rows can change what the next page contains.</li>
-        <li>Using pagination as the only solution for exports instead of background jobs.</li>
-      </ul>
-
-      <h2>Connection to previous lessons</h2>
-      <p>
-        <a href="0007-database-indexes.html">Database indexes</a> make paginated
-        queries fast only when the index matches the filter and sort. <a href="0005-message-queues.html">Message queues</a>
-        are better for full exports that should not block API requests.
-        <a href="0004-load-balancing.html">Load balancing</a> spreads API traffic,
-        but it cannot protect the database from one unbounded query. <a href="0009-containerization.html">Containerization</a>
-        makes APIs easier to scale, but pagination reduces the work each container
-        must perform. <a href="0008-eventual-consistency.html">Eventual consistency</a>
-        matters when paginated data changes while the client is traversing it.
-      </p>
-
-      <h2>Design exercise</h2>
-      <p class="prompt">
-        You own <code>GET /events</code> for an analytics product. Some accounts have
-        500 events; others have 500 million. Design the pagination contract: page
-        size limits, cursor fields, default sort, index shape, token security, and
-        what you would do when a customer asks for a full CSV export.
-      </p>
-
-      <h2>Primary source</h2>
-      <p>
-        Read:
-        <a href="https://google.aip.dev/158">
-          Google API Improvement Proposals: AIP-158 Pagination
-        </a>.
-      </p>
-
-      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
-    </main>
-  </body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>API Pagination</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><p>Lesson 0010 · API Optimization</p>
+<h1 id="api-pagination">API Pagination</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#the-problem-it-solves">The problem it solves</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#main-components">Main components</a></li><li><a href="#offset-vs-cursor-pagination">Offset vs cursor pagination</a></li><li><a href="#example-1-order-history-api">Example 1: order history API</a></li><li><a href="#example-2-production-export-incident">Example 2: production export incident</a></li><li><a href="#when-to-use-it">When to use it</a></li><li><a href="#when-not-to-use-it">When not to use it</a></li><li><a href="#implementation-considerations">Implementation considerations</a></li><li><a href="#security-considerations">Security considerations</a></li><li><a href="#reliability-concerns">Reliability concerns</a></li><li><a href="#performance-and-cost">Performance and cost</a></li><li><a href="#key-trade-offs">Key trade-offs</a></li><li><a href="#common-mistakes-and-edge-cases">Common mistakes and edge cases</a></li><li><a href="#connection-to-previous-lessons">Connection to previous lessons</a></li><li><a href="#design-exercise">Design exercise</a></li><li><a href="#primary-source">Primary source</a></li></ul></details>
+<p><img src="../assets/diagrams/0010-api-pagination.svg" alt="Client: page_size = 50 + optional cursor → API: Validate scope and cap size → Database: Stable order; bounded query; Response: Up to 50 items + next cursor → Next request: Continue after last sort key"></p>
+<p>Each request reads a bounded page. A stable sort key needs a tie-breaker, such as an ID. A cursor does not bypass authorization or automatically guarantee a snapshot across pages.</p>
+<p>Pagination splits a large list response into smaller pages so APIs stay fast, predictable, and safer under real production load.</p>
+<h2 id="the-problem-it-solves">The problem it solves</h2>
+<p>List endpoints are dangerous when they are unbounded. An endpoint like <code>GET /orders</code> may be fine with 500 rows, but painful with 50 million rows. A single request can consume too much database time, memory, network bandwidth, and client processing.</p>
+<p>Pagination forces the API to return a controlled number of items. The client asks for the next page only when it needs more data.</p>
+<p>Client requests page → API validates page size → Database fetches bounded rows → API returns items + next page token</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li>The client calls a list endpoint with a requested page size.</li>
+<li>The API applies a maximum page size to protect the system.</li>
+<li>The database fetches one bounded slice of results.</li>
+<li>The API returns the items and a cursor or page token for the next page.</li>
+<li>The client sends that token to continue from the previous position.</li>
+<li>The API stops returning a next token when there are no more results.</li>
+</ol>
+<p>Good pagination is not only a UI feature. It is a system protection mechanism. It keeps each request small enough to measure, retry, cache, rate limit, and debug.</p>
+<h2 id="main-components">Main components</h2>
+<ul>
+<li><strong>Page size:</strong> the number of items requested, with a server-side maximum.</li>
+<li><strong>Cursor or page token:</strong> an opaque value that tells the API where to continue.</li>
+<li><strong>Stable ordering:</strong> a predictable sort order so items are not skipped or duplicated.</li>
+<li><strong>Index:</strong> a database index that supports the filter and order used by the list endpoint.</li>
+<li><strong>Response metadata:</strong> data such as <code>next_page_token</code>, count hints, or links.</li>
+<li><strong>Rate limits:</strong> protection against clients crawling too aggressively.</li>
+</ul>
+<h2 id="offset-vs-cursor-pagination">Offset vs cursor pagination</h2>
+<p>Offset pagination uses <code>limit</code> and <code>offset</code>, such as <code>?limit=50&amp;offset=1000</code>. It is simple, but it gets slower on deep pages because the database may still need to walk past many skipped rows. It can also duplicate or skip items when rows are inserted or deleted while the user is paging.</p>
+<p>Cursor pagination uses a stable position, such as the last seen <code>created_at</code> and <code>id</code>, wrapped in an opaque token. It is usually better for large, changing datasets because it continues from a known item instead of counting skipped rows.</p>
+<h2 id="example-1-order-history-api">Example 1: order history API</h2>
+<p>A customer opens their order history. The app calls <code>GET /orders?page_size=25</code>. The API returns the latest 25 orders and a <code>next_page_token</code>. The mobile app only fetches more if the customer scrolls.</p>
+<p>The database uses an index like <code>(customer_id, created_at DESC, id DESC)</code>. This matches the filter and ordering. The API avoids loading years of history when the user only wants the first screen.</p>
+<h2 id="example-2-production-export-incident">Example 2: production export incident</h2>
+<p>A reporting endpoint returns all events for an account. One enterprise account has 90 million events. At 9:00 AM, three customers start exports at the same time. Each request tries to return every matching row. Database CPU reaches 98%, memory pressure rises, API containers time out, and unrelated dashboards become slow.</p>
+<p>The fix is to make the endpoint paginated and move full exports to an async job. Interactive APIs return small pages. Large exports create a background task, stream data in chunks, store the file in object storage, and notify the user when it is ready. Pagination protects the request path; queues handle the long-running export.</p>
+<h2 id="when-to-use-it">When to use it</h2>
+<ul>
+<li>An endpoint returns a list that can grow over time.</li>
+<li>Clients display scrollable or table-based data.</li>
+<li>The query reads from a large table, search index, or external API.</li>
+<li>You need predictable latency and memory usage per request.</li>
+<li>You want APIs that remain safe as customers grow from small to large accounts.</li>
+</ul>
+<h2 id="when-not-to-use-it">When not to use it</h2>
+<ul>
+<li>The response is always tiny and bounded by business rules.</li>
+<li>The client truly needs a complete export; use an async export flow instead.</li>
+<li>The endpoint returns a single aggregate value, not a list of items.</li>
+<li>The data is static and small enough to cache as one object safely.</li>
+</ul>
+<h2 id="implementation-considerations">Implementation considerations</h2>
+<ul>
+<li>Always enforce a server-side maximum page size.</li>
+<li>Use cursor pagination for large or frequently changing datasets.</li>
+<li>Use a stable sort, often by <code>created_at</code> plus a unique <code>id</code> tie-breaker.</li>
+<li>Make page tokens opaque so clients do not depend on internal database details.</li>
+<li>Validate filters and sort fields; unsupported combinations can create slow queries.</li>
+<li>Avoid expensive total counts on large datasets unless the product truly needs them.</li>
+<li>Align database indexes with the endpoint's filters and order.</li>
+</ul>
+<h2 id="security-considerations">Security considerations</h2>
+<ul>
+<li>Apply authorization before pagination so users cannot page through data they should not see.</li>
+<li>Sign or encrypt page tokens if they include sensitive internal state.</li>
+<li>Do not expose raw database IDs or query details inside readable tokens when avoidable.</li>
+<li>Rate limit pagination to prevent scraping and expensive full-table crawling.</li>
+<li>Keep filters tenant-scoped so one customer cannot infer another customer's data volume.</li>
+</ul>
+<h2 id="reliability-concerns">Reliability concerns</h2>
+<ul>
+<li>Offset pagination can skip or duplicate rows when data changes during traversal.</li>
+<li>Cursor tokens can expire if the underlying sort key disappears or access changes.</li>
+<li>Changing default sort order can break clients that store old tokens.</li>
+<li>Deep pagination can still be expensive if the index does not match the query.</li>
+<li>Clients may retry pages, so reads and billing side effects must be safe.</li>
+</ul>
+<h2 id="performance-and-cost">Performance and cost</h2>
+<p>Pagination reduces API latency, memory usage, database work, response size, and bandwidth. It also lowers failure blast radius because one bad request can only ask for a bounded amount of work. The cost is API complexity: clients must handle tokens, empty pages, retries, ordering, and partial results.</p>
+<h2 id="key-trade-offs">Key trade-offs</h2>
+<ul>
+<li><strong>Simplicity vs scale:</strong> offset pagination is easy, but cursor pagination scales better on large changing lists.</li>
+<li><strong>Freshness vs stable traversal:</strong> live data may change while the client pages through it.</li>
+<li><strong>User convenience vs system safety:</strong> "show all" is convenient, but can overload production systems.</li>
+<li><strong>Detailed totals vs fast responses:</strong> exact counts can be expensive on large filtered datasets.</li>
+</ul>
+<h2 id="common-mistakes-and-edge-cases">Common mistakes and edge cases</h2>
+<ul>
+<li>Allowing clients to request unlimited or extremely large page sizes.</li>
+<li>Using offset pagination for very deep pages on huge tables.</li>
+<li>Sorting only by a non-unique field, causing unstable page boundaries.</li>
+<li>Returning exact total counts that require expensive full scans.</li>
+<li>Letting page tokens reveal tenant IDs, raw SQL, or internal schema details.</li>
+<li>Forgetting that deleted or newly inserted rows can change what the next page contains.</li>
+<li>Using pagination as the only solution for exports instead of background jobs.</li>
+</ul>
+<h2 id="connection-to-previous-lessons">Connection to previous lessons</h2>
+<p><a href="0007-database-indexes.html">Database indexes</a> make paginated queries fast only when the index matches the filter and sort. <a href="0005-message-queues.html">Message queues</a> are better for full exports that should not block API requests. <a href="0004-load-balancing.html">Load balancing</a> spreads API traffic, but it cannot protect the database from one unbounded query. <a href="0009-containerization.html">Containerization</a> makes APIs easier to scale, but pagination reduces the work each container must perform. <a href="0008-eventual-consistency.html">Eventual consistency</a> matters when paginated data changes while the client is traversing it.</p>
+<h2 id="design-exercise">Design exercise</h2>
+<p>You own <code>GET /events</code> for an analytics product. Some accounts have 500 events; others have 500 million. Design the pagination contract: page size limits, cursor fields, default sort, index shape, token security, and what you would do when a customer asks for a full CSV export.</p>
+<h2 id="primary-source">Primary source</h2>
+<p>Read: <a href="https://google.aip.dev/158">Google API Improvement Proposals: AIP-158 Pagination</a> .</p>
+<p>Ask a follow-up question if any part of the design is unclear.</p>
+<p><a href="0010-api-pagination.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

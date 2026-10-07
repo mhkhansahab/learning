@@ -90,3 +90,5 @@ a {
     border: 0;
   }
 }
+.markdown-body { min-width: 0; }
+.markdown-body img { display: block; max-width: 100%; height: auto; margin: 24px 0 16px; }

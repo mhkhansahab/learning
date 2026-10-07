@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Production Agent Architecture</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-11"><h1><span class="chapter-number">Lesson 11</span> Production Agent Architecture</h1><div class="meta"><time datetime="2026-07-06">2026-07-06</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-11-section-1">1. What It Means</a></li><li><a href="#lesson-11-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-11-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-11-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-11-section-5">5. Real-World Example 1: Ecommerce Support Agent</a></li><li><a href="#lesson-11-section-6">6. Real-World Example 2: Internal Engineering Agent</a></li><li><a href="#lesson-11-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-11-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-11-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Production Agent Architecture workflow"><ol class="flow"><li><strong>Request</strong><span>Authenticate the user</span></li><li><strong>Orchestrate</strong><span>Manage model, context and tools</span></li><li><strong>Control</strong><span>Validate and limit actions</span></li><li><strong>Observe</strong><span>Evaluate and monitor outcomes</span></li></ol><figcaption>Figure 11. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-11-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Production Agent Architecture</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="production-agent-architecture">Production Agent Architecture</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-ecommerce-support-agent">5. Real-World Example 1: Ecommerce Support Agent</a></li><li><a href="#6-real-world-example-2-internal-engineering-agent">6. Real-World Example 2: Internal Engineering Agent</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-06 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0011-production-agent-architecture.svg" alt="Request: Authenticate the user → Orchestrate: Manage model, context and tools → Control: Validate and limit actions → Observe: Evaluate and monitor outcomes"></p>
+<p>Figure 11. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-11-section-1"></a>1. What It Means</h2>
 <p><strong>Production agent architecture</strong> means the full system design around an AI agent so it can run safely and reliably for real users.</p>
 <p>A production agent is not just:</p>
 <pre><code class="language-text">User -&gt; LLM -&gt; Answer
@@ -37,7 +41,7 @@
 </ul>
 <p>The model is only one component. The architecture around it decides whether the product is safe and useful.</p>
 <hr>
-<h2 id="lesson-11-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-11-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>A demo can work with one prompt and one model call.</p>
 <p>A production system needs more control.</p>
 <p>Without proper architecture, the agent may:</p>
@@ -66,7 +70,7 @@
 </ul>
 <p>Good architecture makes those answers clear.</p>
 <hr>
-<h2 id="lesson-11-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-11-section-3"></a>3. How It Works Step By Step</h2>
 <p>Imagine a user asks:</p>
 <blockquote>
 <p>“Cancel my subscription and refund my last payment.”</p>
@@ -86,8 +90,8 @@
 <li><p><strong>Classify the intent</strong></p>
 <p>The agent identifies the task:</p>
 <pre><code class="language-json">{
-  &quot;intent&quot;: &quot;subscription_cancellation_and_refund&quot;,
-  &quot;risk_level&quot;: &quot;high&quot;
+  "intent": "subscription_cancellation_and_refund",
+  "risk_level": "high"
 }
 </code></pre>
 </li>
@@ -102,9 +106,9 @@
 <li><p><strong>Call read-only tools first</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_subscription_status&quot;,
-  &quot;input&quot;: {
-    &quot;user_id&quot;: &quot;current_user&quot;
+  "tool": "get_subscription_status",
+  "input": {
+    "user_id": "current_user"
   }
 }
 </code></pre>
@@ -128,10 +132,10 @@
 <p>Write tools change data.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;create_refund_request&quot;,
-  &quot;input&quot;: {
-    &quot;subscription_id&quot;: &quot;sub_123&quot;,
-    &quot;reason&quot;: &quot;customer_request&quot;
+  "tool": "create_refund_request",
+  "input": {
+    "subscription_id": "sub_123",
+    "reason": "customer_request"
   }
 }
 </code></pre>
@@ -139,7 +143,7 @@
 <li><p><strong>Log everything</strong></p>
 </li>
 </ol>
-<p>   The system logs:</p>
+<p>The system logs:</p>
 <ul>
 <li>Request ID</li>
 <li>User ID</li>
@@ -152,9 +156,9 @@
 <ol start="11">
 <li><strong>Return final response</strong></li>
 </ol>
-<p>   The user gets a clear answer based on real system state.</p>
+<p>The user gets a clear answer based on real system state.</p>
 <hr>
-<h2 id="lesson-11-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-11-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start with a simple architecture. Add complexity only where needed.</p>
 <p>A practical first version:</p>
 <pre><code class="language-text">Frontend
@@ -220,11 +224,11 @@ Cannot:
 <p><strong>Step 5: Add evaluations</strong></p>
 <p>Create test cases for common and risky workflows.</p>
 <p>Example:</p>
-<pre><code class="language-text">User asks for another customer&#39;s invoice.
+<pre><code class="language-text">User asks for another customer's invoice.
 Expected: refuse or block access.
 </code></pre>
 <hr>
-<h2 id="lesson-11-section-5">5. Real-World Example 1: Ecommerce Support Agent</h2>
+<h2 id="5-real-world-example-1-ecommerce-support-agent"><a id="lesson-11-section-5"></a>5. Real-World Example 1: Ecommerce Support Agent</h2>
 <p><strong>Use case:</strong> An online store wants an AI support agent.</p>
 <p>The agent can:</p>
 <ul>
@@ -266,7 +270,7 @@ Expected: refuse or block access.
 <p><strong>Production fix:</strong></p>
 <p>The tool itself must check ownership before creating the return.</p>
 <hr>
-<h2 id="lesson-11-section-6">6. Real-World Example 2: Internal Engineering Agent</h2>
+<h2 id="6-real-world-example-2-internal-engineering-agent"><a id="lesson-11-section-6"></a>6. Real-World Example 2: Internal Engineering Agent</h2>
 <p><strong>Use case:</strong> A company wants an AI agent to help engineers debug deployment failures.</p>
 <p>The agent can:</p>
 <ul>
@@ -306,7 +310,7 @@ Expected: refuse or block access.
 <p><strong>Production fix:</strong></p>
 <p>Use sandboxing, allowlisted commands, approval gates, and read-only cloud access by default.</p>
 <hr>
-<h2 id="lesson-11-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-11-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Treating the model as the whole system</strong></p>
 <p>The model is not enough.</p>
 <p>You also need tools, permissions, retrieval, logging, and tests.</p>
@@ -343,7 +347,7 @@ Expected: refuse or block access.
 <p>But more autonomy increases risk.</p>
 <p>Production systems should give autonomy gradually, starting with low-risk tasks.</p>
 <hr>
-<h2 id="lesson-11-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-11-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Use a clear agent boundary</strong></p>
 <p>Define exactly what the agent can do.</p>
@@ -375,9 +379,9 @@ Expected: refuse or block access.
 <li><p><strong>Review production traces</strong></p>
 </li>
 </ol>
-<p>   Real user behavior will show failure cases your test set missed.</p>
+<p>Real user behavior will show failure cases your test set missed.</p>
 <hr>
-<h2 id="lesson-11-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-11-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI agent for a SaaS billing team.</p>
 <p>The agent should help users understand invoices and request refunds.</p>
 <p>Design the architecture.</p>
@@ -399,4 +403,4 @@ Expected: refuse or block access.
 <li>Logs for retrieved policy, tool calls, model output, cost, and latency</li>
 <li>Escalation to billing team if policy and invoice data conflict</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0011-production-agent-architecture.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

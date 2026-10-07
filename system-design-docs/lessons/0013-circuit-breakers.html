@@ -1,188 +1,102 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Circuit Breakers: Stop Cascading Failures</title>
-    <link rel="stylesheet" href="../assets/course.css">
-  </head>
-  <body>
-    <main>
-      <p class="eyebrow">Lesson 0013 · Reliability</p>
-      <h1>Circuit Breakers</h1>
-      <p class="muted">
-        A circuit breaker stops calling a dependency that is failing, waits for a
-        recovery period, then carefully tests whether the dependency is healthy again.
-      </p>
-
-      <h2>The problem it solves</h2>
-      <p>
-        Distributed systems depend on other services: databases, payment providers,
-        search APIs, queues, email providers, and internal microservices. When one
-        dependency becomes slow or fails, callers often retry. Those retries can make
-        the failing dependency even worse and consume all caller resources.
-      </p>
-      <p>
-        A circuit breaker prevents this cascading failure. After enough failures, it
-        temporarily fails fast instead of sending more traffic to a dependency that
-        probably cannot handle it.
-      </p>
-      <p class="flow">Request → Circuit breaker → Healthy dependency: call it · Failing dependency: fail fast / fallback</p>
-
-      <h2>How it works</h2>
-      <ol>
-        <li><strong>Closed:</strong> calls flow normally while the dependency is healthy.</li>
-        <li><strong>Failure tracking:</strong> the breaker counts errors, timeouts, or slow responses.</li>
-        <li><strong>Open:</strong> after a threshold is crossed, calls fail fast without hitting the dependency.</li>
-        <li><strong>Cooldown:</strong> the breaker waits for a configured recovery period.</li>
-        <li><strong>Half-open:</strong> a small number of test calls are allowed.</li>
-        <li><strong>Recover or reopen:</strong> if test calls succeed, the breaker closes; if they fail, it opens again.</li>
-      </ol>
-      <p>
-        The core idea is simple: when a dependency is clearly unhealthy, stop adding
-        pressure. Give it time to recover and protect the rest of your system.
-      </p>
-
-      <h2>Main components</h2>
-      <ul>
-        <li><strong>Failure threshold:</strong> how many failures or what error rate opens the breaker.</li>
-        <li><strong>Timeout:</strong> how long the caller waits before treating the call as failed.</li>
-        <li><strong>Open duration:</strong> how long the breaker fails fast before testing recovery.</li>
-        <li><strong>Half-open probes:</strong> limited test calls used to check if the dependency recovered.</li>
-        <li><strong>Fallback:</strong> a safe alternate response, cached result, queue, or graceful error.</li>
-        <li><strong>Metrics:</strong> breaker state, rejected calls, dependency latency, and failure rate.</li>
-      </ul>
-
-      <h2>Example 1: payment provider outage</h2>
-      <p>
-        A checkout service calls a payment provider. Normally the provider responds
-        in 300 ms. During an outage, calls hang for 10 seconds and then fail. Without
-        a circuit breaker, checkout containers fill with waiting requests, users retry,
-        and the whole checkout API becomes slow.
-      </p>
-      <p>
-        With a circuit breaker, the checkout service opens the breaker after repeated
-        failures. New payment attempts fail fast with a clear temporary error. The app
-        can offer "try again later" or save the order as pending payment. The payment
-        provider gets less traffic while it recovers.
-      </p>
-
-      <h2>Example 2: production cascading failure</h2>
-      <p>
-        A recommendation service depends on a profile service. At peak traffic, the
-        profile service starts timing out because a database read replica is overloaded.
-        The recommendation service receives 8,000 requests per second and retries each
-        profile call twice. That turns 8,000 failing calls into 24,000 calls per second.
-      </p>
-      <p>
-        The circuit breaker opens when the profile-service failure rate stays above
-        50% for one minute. Recommendation responses fall back to popular items instead
-        of personalized items. User experience is degraded, but the site stays up and
-        the profile service has room to recover.
-      </p>
-
-      <h2>When to use it</h2>
-      <ul>
-        <li>A service calls a remote dependency that can fail or become slow.</li>
-        <li>Retries could overload the dependency or caller.</li>
-        <li>A fallback response is safer than waiting for a doomed request.</li>
-        <li>The dependency is shared by many callers and needs protection.</li>
-        <li>You want failures to be contained instead of spreading across the system.</li>
-      </ul>
-
-      <h2>When not to use it</h2>
-      <ul>
-        <li>The operation is local, fast, and not likely to cause cascading failure.</li>
-        <li>Failing fast would be worse than waiting, such as a critical one-time admin action.</li>
-        <li>You have no safe fallback and the error would be confusing without product handling.</li>
-        <li>The real issue is missing timeouts; set timeouts before tuning circuit breakers.</li>
-      </ul>
-
-      <h2>Implementation considerations</h2>
-      <ul>
-        <li>Set short, explicit timeouts for every remote call before adding retries or breakers.</li>
-        <li>Track failures by dependency and operation, not only globally by service.</li>
-        <li>Use bounded retries with jitter so callers do not retry in synchronized waves.</li>
-        <li>Choose fallbacks carefully: cached data, default response, queued work, or clear failure.</li>
-        <li>Expose breaker state in metrics and dashboards.</li>
-        <li>Make half-open probes small so recovery checks do not create another traffic spike.</li>
-        <li>Test dependency failure in staging or controlled production experiments.</li>
-      </ul>
-
-      <h2>Security considerations</h2>
-      <ul>
-        <li>Do not bypass authorization or fraud checks as a fallback unless the business has approved that risk.</li>
-        <li>Do not expose internal dependency names, hostnames, or stack details in user-facing errors.</li>
-        <li>Be careful with cached fallback data; stale data can leak revoked permissions or old personal data.</li>
-        <li>Protect breaker controls because forcing breakers open or closed can affect availability.</li>
-        <li>Log enough to investigate incidents, but avoid logging secrets from failed dependency calls.</li>
-      </ul>
-
-      <h2>Reliability concerns</h2>
-      <ul>
-        <li>A breaker threshold that is too sensitive can block healthy traffic during brief blips.</li>
-        <li>A threshold that is too loose can allow cascading failure before opening.</li>
-        <li>Fallbacks can become overloaded if every request suddenly uses them.</li>
-        <li>Half-open recovery can cause traffic bursts if too many instances test at once.</li>
-        <li>Different app instances may disagree on breaker state unless you design for shared or local state intentionally.</li>
-      </ul>
-
-      <h2>Performance and cost</h2>
-      <p>
-        Circuit breakers reduce wasted work during failures. They save caller threads,
-        database connections, queue capacity, network calls, and third-party API
-        costs. The cost is added complexity: thresholds, fallback behavior, testing,
-        dashboards, and product decisions for degraded states.
-      </p>
-
-      <h2>Key trade-offs</h2>
-      <ul>
-        <li><strong>Availability vs completeness:</strong> fallback responses keep the app usable but may be less complete.</li>
-        <li><strong>Fast failure vs user success:</strong> failing fast protects systems but may reject requests that could have eventually succeeded.</li>
-        <li><strong>Local state vs shared state:</strong> local breakers are simple, but shared breakers coordinate better across many instances.</li>
-        <li><strong>Protection vs false positives:</strong> aggressive thresholds prevent overload but can open during short harmless spikes.</li>
-      </ul>
-
-      <h2>Common mistakes and edge cases</h2>
-      <ul>
-        <li>Adding retries without timeouts or circuit breakers.</li>
-        <li>Retrying non-idempotent operations, such as payments, without idempotency keys.</li>
-        <li>Using the same breaker for cheap and expensive operations.</li>
-        <li>Opening the breaker on all errors, including client errors like HTTP 400.</li>
-        <li>Creating a fallback that quietly returns wrong business data.</li>
-        <li>Not alerting when a breaker opens, so degraded mode becomes invisible.</li>
-        <li>Letting every instance half-open at the same time and flood the dependency.</li>
-      </ul>
-
-      <h2>Connection to previous lessons</h2>
-      <p>
-        <a href="0012-rate-limiting.html">Rate limiting</a> protects your system from
-        too much incoming traffic; circuit breakers protect it from failing outgoing
-        dependencies. <a href="0011-observability.html">Observability</a> is required
-        to tune breaker thresholds and know when fallback mode is active.
-        <a href="0005-message-queues.html">Message queues</a> can be a fallback for
-        work that can finish later. <a href="0001-cache-aside.html">Cache-aside</a>
-        can provide stale-but-safe fallback reads. <a href="0008-eventual-consistency.html">Eventual consistency</a>
-        helps explain why fallback data may be temporarily stale.
-      </p>
-
-      <h2>Design exercise</h2>
-      <p class="prompt">
-        Your checkout API calls payment, inventory, tax, and email services. Payment
-        must be correct, inventory should be current, tax can retry briefly, and email
-        can happen later. Design circuit breaker rules: timeout, failure threshold,
-        fallback behavior, retry policy, and the alerts you would create for each dependency.
-      </p>
-
-      <h2>Primary source</h2>
-      <p>
-        Read:
-        <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker">
-          Microsoft Azure Architecture Center: Circuit Breaker Pattern
-        </a>.
-      </p>
-
-      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
-    </main>
-  </body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Circuit Breakers</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><p>Lesson 0013 · Reliability</p>
+<h1 id="circuit-breakers">Circuit Breakers</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#the-problem-it-solves">The problem it solves</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#main-components">Main components</a></li><li><a href="#example-1-payment-provider-outage">Example 1: payment provider outage</a></li><li><a href="#example-2-production-cascading-failure">Example 2: production cascading failure</a></li><li><a href="#when-to-use-it">When to use it</a></li><li><a href="#when-not-to-use-it">When not to use it</a></li><li><a href="#implementation-considerations">Implementation considerations</a></li><li><a href="#security-considerations">Security considerations</a></li><li><a href="#reliability-concerns">Reliability concerns</a></li><li><a href="#performance-and-cost">Performance and cost</a></li><li><a href="#key-trade-offs">Key trade-offs</a></li><li><a href="#common-mistakes-and-edge-cases">Common mistakes and edge cases</a></li><li><a href="#connection-to-previous-lessons">Connection to previous lessons</a></li><li><a href="#design-exercise">Design exercise</a></li><li><a href="#primary-source">Primary source</a></li></ul></details>
+<p><img src="../assets/diagrams/0013-circuit-breakers.svg" alt="Closed: Call dependency normally → Failure threshold reached: Open the circuit → Open: Reject calls quickly / safe fallback; After cooldown: Permit limited trial calls → Half-open: Success: close; failure: reopen"></p>
+<p>The breaker uses recent failures to change state. Half-open probes test recovery; a fallback must preserve business correctness, especially for payment operations.</p>
+<p>A circuit breaker stops calling a dependency that is failing, waits for a recovery period, then carefully tests whether the dependency is healthy again.</p>
+<h2 id="the-problem-it-solves">The problem it solves</h2>
+<p>Distributed systems depend on other services: databases, payment providers, search APIs, queues, email providers, and internal microservices. When one dependency becomes slow or fails, callers often retry. Those retries can make the failing dependency even worse and consume all caller resources.</p>
+<p>A circuit breaker prevents this cascading failure. After enough failures, it temporarily fails fast instead of sending more traffic to a dependency that probably cannot handle it.</p>
+<p>Request → Circuit breaker → Healthy dependency: call it · Failing dependency: fail fast / fallback</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li><strong>Closed:</strong> calls flow normally while the dependency is healthy.</li>
+<li><strong>Failure tracking:</strong> the breaker counts errors, timeouts, or slow responses.</li>
+<li><strong>Open:</strong> after a threshold is crossed, calls fail fast without hitting the dependency.</li>
+<li><strong>Cooldown:</strong> the breaker waits for a configured recovery period.</li>
+<li><strong>Half-open:</strong> a small number of test calls are allowed.</li>
+<li><strong>Recover or reopen:</strong> if test calls succeed, the breaker closes; if they fail, it opens again.</li>
+</ol>
+<p>The core idea is simple: when a dependency is clearly unhealthy, stop adding pressure. Give it time to recover and protect the rest of your system.</p>
+<h2 id="main-components">Main components</h2>
+<ul>
+<li><strong>Failure threshold:</strong> how many failures or what error rate opens the breaker.</li>
+<li><strong>Timeout:</strong> how long the caller waits before treating the call as failed.</li>
+<li><strong>Open duration:</strong> how long the breaker fails fast before testing recovery.</li>
+<li><strong>Half-open probes:</strong> limited test calls used to check if the dependency recovered.</li>
+<li><strong>Fallback:</strong> a safe alternate response, cached result, queue, or graceful error.</li>
+<li><strong>Metrics:</strong> breaker state, rejected calls, dependency latency, and failure rate.</li>
+</ul>
+<h2 id="example-1-payment-provider-outage">Example 1: payment provider outage</h2>
+<p>A checkout service calls a payment provider. Normally the provider responds in 300 ms. During an outage, calls hang for 10 seconds and then fail. Without a circuit breaker, checkout containers fill with waiting requests, users retry, and the whole checkout API becomes slow.</p>
+<p>With a circuit breaker, the checkout service opens the breaker after repeated failures. New payment attempts fail fast with a clear temporary error. The app can offer "try again later" or save the order as pending payment. The payment provider gets less traffic while it recovers.</p>
+<h2 id="example-2-production-cascading-failure">Example 2: production cascading failure</h2>
+<p>A recommendation service depends on a profile service. At peak traffic, the profile service starts timing out because a database read replica is overloaded. The recommendation service receives 8,000 requests per second and retries each profile call twice. That turns 8,000 failing calls into 24,000 calls per second.</p>
+<p>The circuit breaker opens when the profile-service failure rate stays above 50% for one minute. Recommendation responses fall back to popular items instead of personalized items. User experience is degraded, but the site stays up and the profile service has room to recover.</p>
+<h2 id="when-to-use-it">When to use it</h2>
+<ul>
+<li>A service calls a remote dependency that can fail or become slow.</li>
+<li>Retries could overload the dependency or caller.</li>
+<li>A fallback response is safer than waiting for a doomed request.</li>
+<li>The dependency is shared by many callers and needs protection.</li>
+<li>You want failures to be contained instead of spreading across the system.</li>
+</ul>
+<h2 id="when-not-to-use-it">When not to use it</h2>
+<ul>
+<li>The operation is local, fast, and not likely to cause cascading failure.</li>
+<li>Failing fast would be worse than waiting, such as a critical one-time admin action.</li>
+<li>You have no safe fallback and the error would be confusing without product handling.</li>
+<li>The real issue is missing timeouts; set timeouts before tuning circuit breakers.</li>
+</ul>
+<h2 id="implementation-considerations">Implementation considerations</h2>
+<ul>
+<li>Set short, explicit timeouts for every remote call before adding retries or breakers.</li>
+<li>Track failures by dependency and operation, not only globally by service.</li>
+<li>Use bounded retries with jitter so callers do not retry in synchronized waves.</li>
+<li>Choose fallbacks carefully: cached data, default response, queued work, or clear failure.</li>
+<li>Expose breaker state in metrics and dashboards.</li>
+<li>Make half-open probes small so recovery checks do not create another traffic spike.</li>
+<li>Test dependency failure in staging or controlled production experiments.</li>
+</ul>
+<h2 id="security-considerations">Security considerations</h2>
+<ul>
+<li>Do not bypass authorization or fraud checks as a fallback unless the business has approved that risk.</li>
+<li>Do not expose internal dependency names, hostnames, or stack details in user-facing errors.</li>
+<li>Be careful with cached fallback data; stale data can leak revoked permissions or old personal data.</li>
+<li>Protect breaker controls because forcing breakers open or closed can affect availability.</li>
+<li>Log enough to investigate incidents, but avoid logging secrets from failed dependency calls.</li>
+</ul>
+<h2 id="reliability-concerns">Reliability concerns</h2>
+<ul>
+<li>A breaker threshold that is too sensitive can block healthy traffic during brief blips.</li>
+<li>A threshold that is too loose can allow cascading failure before opening.</li>
+<li>Fallbacks can become overloaded if every request suddenly uses them.</li>
+<li>Half-open recovery can cause traffic bursts if too many instances test at once.</li>
+<li>Different app instances may disagree on breaker state unless you design for shared or local state intentionally.</li>
+</ul>
+<h2 id="performance-and-cost">Performance and cost</h2>
+<p>Circuit breakers reduce wasted work during failures. They save caller threads, database connections, queue capacity, network calls, and third-party API costs. The cost is added complexity: thresholds, fallback behavior, testing, dashboards, and product decisions for degraded states.</p>
+<h2 id="key-trade-offs">Key trade-offs</h2>
+<ul>
+<li><strong>Availability vs completeness:</strong> fallback responses keep the app usable but may be less complete.</li>
+<li><strong>Fast failure vs user success:</strong> failing fast protects systems but may reject requests that could have eventually succeeded.</li>
+<li><strong>Local state vs shared state:</strong> local breakers are simple, but shared breakers coordinate better across many instances.</li>
+<li><strong>Protection vs false positives:</strong> aggressive thresholds prevent overload but can open during short harmless spikes.</li>
+</ul>
+<h2 id="common-mistakes-and-edge-cases">Common mistakes and edge cases</h2>
+<ul>
+<li>Adding retries without timeouts or circuit breakers.</li>
+<li>Retrying non-idempotent operations, such as payments, without idempotency keys.</li>
+<li>Using the same breaker for cheap and expensive operations.</li>
+<li>Opening the breaker on all errors, including client errors like HTTP 400.</li>
+<li>Creating a fallback that quietly returns wrong business data.</li>
+<li>Not alerting when a breaker opens, so degraded mode becomes invisible.</li>
+<li>Letting every instance half-open at the same time and flood the dependency.</li>
+</ul>
+<h2 id="connection-to-previous-lessons">Connection to previous lessons</h2>
+<p><a href="0012-rate-limiting.html">Rate limiting</a> protects your system from too much incoming traffic; circuit breakers protect it from failing outgoing dependencies. <a href="0011-observability.html">Observability</a> is required to tune breaker thresholds and know when fallback mode is active. <a href="0005-message-queues.html">Message queues</a> can be a fallback for work that can finish later. <a href="0001-cache-aside.html">Cache-aside</a> can provide stale-but-safe fallback reads. <a href="0008-eventual-consistency.html">Eventual consistency</a> helps explain why fallback data may be temporarily stale.</p>
+<h2 id="design-exercise">Design exercise</h2>
+<p>Your checkout API calls payment, inventory, tax, and email services. Payment must be correct, inventory should be current, tax can retry briefly, and email can happen later. Design circuit breaker rules: timeout, failure threshold, fallback behavior, retry policy, and the alerts you would create for each dependency.</p>
+<h2 id="primary-source">Primary source</h2>
+<p>Read: <a href="https://learn.microsoft.com/en-us/azure/architecture/patterns/circuit-breaker">Microsoft Azure Architecture Center: Circuit Breaker Pattern</a> .</p>
+<p>Ask a follow-up question if any part of the design is unclear.</p>
+<p><a href="0013-circuit-breakers.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

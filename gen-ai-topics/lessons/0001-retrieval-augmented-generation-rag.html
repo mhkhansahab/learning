@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Retrieval-Augmented Generation (RAG)</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-1"><h1><span class="chapter-number">Lesson 01</span> Retrieval-Augmented Generation (RAG)</h1><div class="meta"><time datetime="2026-06-25">2026-06-25</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-1-section-1">1. What RAG Means</a></li><li><a href="#lesson-1-section-2">2. Why RAG Matters</a></li><li><a href="#lesson-1-section-3">3. How RAG Works</a></li><li><a href="#lesson-1-section-4">Step 1: Prepare documents</a></li><li><a href="#lesson-1-section-5">Step 2: Create embeddings</a></li><li><a href="#lesson-1-section-6">Step 3: Search</a></li><li><a href="#lesson-1-section-7">Step 4: Rerank results</a></li><li><a href="#lesson-1-section-8">Step 5: Build the prompt</a></li><li><a href="#lesson-1-section-9">Step 6: Generate the answer</a></li><li><a href="#lesson-1-section-10">4. Applying RAG in a Project</a></li><li><a href="#lesson-1-section-11">5. Real-World Example: Customer Support</a></li><li><a href="#lesson-1-section-12">6. Real-World Example: Internal Engineering Assistant</a></li><li><a href="#lesson-1-section-13">7. Common Mistakes and Trade-offs</a></li><li><a href="#lesson-1-section-14">8. Practical Best Practices</a></li><li><a href="#lesson-1-section-15">Practice</a></li></ul></details><figure class="diagram" role="group" aria-label="Retrieval-Augmented Generation (RAG) workflow"><ol class="flow"><li><strong>Question</strong><span>What does the user need?</span></li><li><strong>Retrieve</strong><span>Find relevant evidence</span></li><li><strong>Generate</strong><span>Answer using evidence</span></li><li><strong>Check</strong><span>Verify claims and citations</span></li></ol><figcaption>Figure 1. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-1-section-1">1. What RAG Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Retrieval-Augmented Generation (RAG)</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="retrieval-augmented-generation-rag">Retrieval-Augmented Generation (RAG)</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-rag-means">1. What RAG Means</a></li><li><a href="#2-why-rag-matters">2. Why RAG Matters</a></li><li><a href="#3-how-rag-works">3. How RAG Works</a></li><li><a href="#step-1-prepare-documents">Step 1: Prepare documents</a></li><li><a href="#step-2-create-embeddings">Step 2: Create embeddings</a></li><li><a href="#step-3-search">Step 3: Search</a></li><li><a href="#step-4-rerank-results">Step 4: Rerank results</a></li><li><a href="#step-5-build-the-prompt">Step 5: Build the prompt</a></li><li><a href="#step-6-generate-the-answer">Step 6: Generate the answer</a></li><li><a href="#4-applying-rag-in-a-project">4. Applying RAG in a Project</a></li><li><a href="#5-real-world-example-customer-support">5. Real-World Example: Customer Support</a></li><li><a href="#6-real-world-example-internal-engineering-assistant">6. Real-World Example: Internal Engineering Assistant</a></li><li><a href="#7-common-mistakes-and-trade-offs">7. Common Mistakes and Trade-offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#practice">Practice</a></li></ul></details>
+<p>2026-06-25 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0001-retrieval-augmented-generation-rag.svg" alt="Question: What does the user need? → Retrieve: Find relevant evidence → Generate: Answer using evidence → Check: Verify claims and citations"></p>
+<p>Figure 1. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-rag-means"><a id="lesson-1-section-1"></a>1. What RAG Means</h2>
 <p><strong>Retrieval-Augmented Generation</strong>, usually called <strong>RAG</strong>, is a method where an AI searches your data before answering a question.</p>
 <p>A normal language model answers mainly from knowledge learned during training. A RAG system adds an external knowledge source, such as:</p>
 <ul>
@@ -18,7 +22,7 @@
 </ol>
 <p>RAG does not permanently teach the model new facts. It gives the model useful information for the current request.</p>
 <hr>
-<h2 id="lesson-1-section-2">2. Why RAG Matters</h2>
+<h2 id="2-why-rag-matters"><a id="lesson-1-section-2"></a>2. Why RAG Matters</h2>
 <p>Language models have several limitations:</p>
 <ul>
 <li>Their training knowledge may be outdated.</li>
@@ -30,11 +34,11 @@
 <p>For example, when a refund policy changes, you update the policy document. Future answers can immediately use the new policy.</p>
 <p>However, RAG does not automatically guarantee correct answers. If retrieval returns the wrong document, the model may still produce a wrong answer.</p>
 <hr>
-<h2 id="lesson-1-section-3">3. How RAG Works</h2>
-<h3 id="lesson-1-section-4">Step 1: Prepare documents</h3>
+<h2 id="3-how-rag-works"><a id="lesson-1-section-3"></a>3. How RAG Works</h2>
+<h3 id="step-1-prepare-documents"><a id="lesson-1-section-4"></a>Step 1: Prepare documents</h3>
 <p>Collect trusted information and remove outdated or duplicate content.</p>
 <p>Large documents are divided into smaller sections called <strong>chunks</strong>. A chunk might contain two or three paragraphs about one topic.</p>
-<h3 id="lesson-1-section-5">Step 2: Create embeddings</h3>
+<h3 id="step-2-create-embeddings"><a id="lesson-1-section-5"></a>Step 2: Create embeddings</h3>
 <p>An <strong>embedding</strong> is a numerical representation of meaning.</p>
 <p>For example, these sentences have different words but similar meanings:</p>
 <ul>
@@ -43,14 +47,14 @@
 </ul>
 <p>Their embeddings should be close together.</p>
 <p>The system stores document chunks and their embeddings in a searchable index, often called a <strong>vector database</strong>.</p>
-<h3 id="lesson-1-section-6">Step 3: Search</h3>
+<h3 id="step-3-search"><a id="lesson-1-section-6"></a>Step 3: Search</h3>
 <p>When a user asks a question, the system creates an embedding for that question.</p>
 <p>It searches for document chunks with similar meanings.</p>
 <p>The system may retrieve five chunks, for example.</p>
-<h3 id="lesson-1-section-7">Step 4: Rerank results</h3>
+<h3 id="step-4-rerank-results"><a id="lesson-1-section-7"></a>Step 4: Rerank results</h3>
 <p>Initial search results are not always ordered correctly.</p>
 <p>A <strong>reranker</strong> examines the question and retrieved chunks more carefully, then moves the most useful chunks to the top.</p>
-<h3 id="lesson-1-section-8">Step 5: Build the prompt</h3>
+<h3 id="step-5-build-the-prompt"><a id="lesson-1-section-8"></a>Step 5: Build the prompt</h3>
 <p>The application sends the model:</p>
 <ul>
 <li>System instructions</li>
@@ -62,11 +66,11 @@
 <blockquote>
 <p>Answer only from the supplied sources. If the sources do not contain the answer, say that you cannot find it.</p>
 </blockquote>
-<h3 id="lesson-1-section-9">Step 6: Generate the answer</h3>
+<h3 id="step-6-generate-the-answer"><a id="lesson-1-section-9"></a>Step 6: Generate the answer</h3>
 <p>The model reads the retrieved information and creates an answer.</p>
 <p>A production system should usually include citations so the user can inspect the source.</p>
 <hr>
-<h2 id="lesson-1-section-10">4. Applying RAG in a Project</h2>
+<h2 id="4-applying-rag-in-a-project"><a id="lesson-1-section-10"></a>4. Applying RAG in a Project</h2>
 <p>Start with a narrow use case. Do not index every company document immediately.</p>
 <p>A practical implementation process is:</p>
 <ol>
@@ -83,7 +87,7 @@
 </ol>
 <p>Security must be applied during retrieval. A user should never retrieve documents they are not allowed to access.</p>
 <hr>
-<h2 id="lesson-1-section-11">5. Real-World Example: Customer Support</h2>
+<h2 id="5-real-world-example-customer-support"><a id="lesson-1-section-11"></a>5. Real-World Example: Customer Support</h2>
 <p>Imagine a software company with these documents:</p>
 <ul>
 <li>Pricing guide</li>
@@ -107,7 +111,7 @@
 <p>Without RAG, the model might invent a 14-day limit or use an old policy.</p>
 <p>The outcome is a more reliable answer that support staff and customers can verify.</p>
 <hr>
-<h2 id="lesson-1-section-12">6. Real-World Example: Internal Engineering Assistant</h2>
+<h2 id="6-real-world-example-internal-engineering-assistant"><a id="lesson-1-section-12"></a>6. Real-World Example: Internal Engineering Assistant</h2>
 <p>An engineering company has:</p>
 <ul>
 <li>Architecture documents</li>
@@ -135,7 +139,7 @@
 </ul>
 <p>Without these filters, it might retrieve an old staging deployment guide and provide dangerous instructions.</p>
 <hr>
-<h2 id="lesson-1-section-13">7. Common Mistakes and Trade-offs</h2>
+<h2 id="7-common-mistakes-and-trade-offs"><a id="lesson-1-section-13"></a>7. Common Mistakes and Trade-offs</h2>
 <p><strong>Poor document quality:</strong> RAG cannot fix incorrect source documents.</p>
 <p><strong>Bad chunking:</strong> Very small chunks lose context. Very large chunks add irrelevant information and increase cost.</p>
 <p><strong>Retrieving by similarity only:</strong> A semantically similar document may still be outdated or unauthorized.</p>
@@ -145,7 +149,7 @@
 <p><strong>Higher latency:</strong> Retrieval and reranking add extra processing time.</p>
 <p><strong>Higher complexity:</strong> You must maintain document ingestion, indexes, permissions, retrieval, evaluation, and monitoring.</p>
 <hr>
-<h2 id="lesson-1-section-14">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-1-section-14"></a>8. Practical Best Practices</h2>
 <ul>
 <li>Index only trusted and approved sources.</li>
 <li>Store document dates, versions, owners, and permissions as metadata.</li>
@@ -160,7 +164,7 @@
 </ul>
 <p>The key production lesson is:</p>
 <p><strong>RAG quality depends more on retrieving the right evidence than on writing a clever prompt.</strong></p>
-<h2 id="lesson-1-section-15">Practice</h2>
+<h2 id="practice"><a id="lesson-1-section-15"></a>Practice</h2>
 <p>Your company has 10,000 documents, including old policies, drafts, and confidential files.</p>
 <p>Before building a RAG assistant, what rules would you create to decide:</p>
 <ol>
@@ -169,4 +173,4 @@
 <li>How should the system handle conflicting document versions?</li>
 </ol>
 <p>Primary source: <a href="https://arxiv.org/abs/2005.11401">Retrieval-Augmented Generation for Knowledge-Intensive NLP Tasks</a> (<a href="https://arxiv.org/abs/2005.11401?utm_source=openai">arxiv.org</a>)</p>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0001-retrieval-augmented-generation-rag.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

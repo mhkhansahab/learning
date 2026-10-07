@@ -1,183 +1,100 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Load Balancing: Route Traffic to Healthy Servers</title>
-    <link rel="stylesheet" href="../assets/course.css">
-  </head>
-  <body>
-    <main>
-      <p class="eyebrow">Lesson 0004 · Reliability</p>
-      <h1>Load Balancing</h1>
-      <p class="muted">
-        A load balancer receives client requests and sends each request to one of
-        several healthy backend servers.
-      </p>
-
-      <h2>The problem it solves</h2>
-      <p>
-        When an application runs on one server, that server can become overloaded
-        or fail completely. After you add more servers with
-        <a href="0002-horizontal-scaling.html">horizontal scaling</a>, clients need
-        one stable place to send traffic. A load balancer gives clients one endpoint
-        while spreading work across many servers.
-      </p>
-      <p class="flow">Clients → DNS → Load balancer → Healthy app servers → Database / cache</p>
-
-      <h2>How it works</h2>
-      <ol>
-        <li>A client calls one public hostname, such as api.example.com.</li>
-        <li>DNS points that hostname to the load balancer.</li>
-        <li>The load balancer accepts the connection or HTTP request.</li>
-        <li>It checks its list of healthy backend servers.</li>
-        <li>It chooses a backend using a routing rule or balancing algorithm.</li>
-        <li>The backend handles the request and returns the response.</li>
-      </ol>
-      <p>
-        The client usually does not know which server handled the request. This is
-        useful because servers can be added, removed, deployed, or replaced without
-        changing the client.
-      </p>
-
-      <h2>Main components</h2>
-      <ul>
-        <li><strong>Listener:</strong> the port and protocol the load balancer accepts, such as HTTPS on port 443.</li>
-        <li><strong>Backend pool:</strong> the servers, containers, or IP targets that can receive traffic.</li>
-        <li><strong>Health check:</strong> a repeated test that decides whether a backend should receive traffic.</li>
-        <li><strong>Routing rule:</strong> logic that sends traffic by host, path, header, port, or service.</li>
-        <li><strong>Algorithm:</strong> the method used to choose a backend, such as round robin or least connections.</li>
-        <li><strong>TLS termination:</strong> the load balancer decrypts HTTPS before sending traffic to backends.</li>
-      </ul>
-
-      <h2>Example 1: web API with four servers</h2>
-      <p>
-        A simple order API runs on four identical app servers. The load balancer
-        receives 800 requests per second and sends roughly 200 requests per second
-        to each server. If the team deploys a new version, it can remove one server
-        from rotation, update it, run health checks, and then put it back.
-      </p>
-      <p>
-        This only works cleanly if the app servers are mostly stateless. User sessions,
-        carts, and temporary data should live in a shared store such as Redis or a
-        database, not only in one server's memory.
-      </p>
-
-      <h2>Example 2: production failure during peak traffic</h2>
-      <p>
-        An e-commerce checkout service runs across six containers in three availability
-        zones. During a sale, traffic reaches 3,000 requests per second. One container
-        starts returning HTTP 500 errors because it lost its database connection.
-      </p>
-      <p>
-        The load balancer health check calls <code>/health</code> every 10 seconds.
-        After two failed checks, the bad container is marked unhealthy and receives
-        no new requests. Existing requests may still fail, but the blast radius is
-        limited. The remaining five containers continue serving traffic while the
-        orchestrator replaces the broken container.
-      </p>
-
-      <h2>When to use it</h2>
-      <ul>
-        <li>You have multiple app servers, containers, or service instances.</li>
-        <li>You need one stable public endpoint for a service.</li>
-        <li>You want to remove unhealthy instances automatically.</li>
-        <li>You want rolling deployments without sending users to broken versions.</li>
-        <li>You need traffic routing by path, hostname, region, or service.</li>
-      </ul>
-
-      <h2>When not to use it</h2>
-      <ul>
-        <li>A small internal tool runs fine on one machine and downtime is acceptable.</li>
-        <li>The backend is not safe to run on multiple instances.</li>
-        <li>The real bottleneck is the database, a lock, or a slow third-party API.</li>
-        <li>You need global disaster recovery; one regional load balancer is not enough.</li>
-      </ul>
-
-      <h2>Implementation considerations</h2>
-      <ul>
-        <li>Make app servers stateless or move session state to a shared store.</li>
-        <li>Use health checks that prove real readiness, not only process existence.</li>
-        <li>Set timeouts lower than client timeouts so failures return quickly.</li>
-        <li>Enable connection draining before removing a backend during deploys.</li>
-        <li>Pass request IDs and original client IP headers to preserve observability.</li>
-        <li>Test behavior when one backend, one zone, or one dependency fails.</li>
-      </ul>
-
-      <h2>Security considerations</h2>
-      <ul>
-        <li>Terminate TLS at the load balancer or re-encrypt traffic to private backends.</li>
-        <li>Keep backend servers private; only the load balancer should reach them directly.</li>
-        <li>Attach WAF, rate limiting, and DDoS protection at the public edge when needed.</li>
-        <li>Restrict admin and health-check endpoints so they do not expose sensitive data.</li>
-        <li>Validate forwarded headers; do not blindly trust client-supplied IP headers.</li>
-      </ul>
-
-      <h2>Reliability concerns</h2>
-      <ul>
-        <li>Run the load balancer across multiple availability zones when possible.</li>
-        <li>Keep enough spare backend capacity to survive one instance or zone failure.</li>
-        <li>Use slow-start or warm-up so new instances do not receive full load immediately.</li>
-        <li>Monitor unhealthy target count, target latency, 4xx/5xx rates, and rejected connections.</li>
-        <li>Decide what happens if all backends are unhealthy: fail closed, serve maintenance, or route to fallback.</li>
-      </ul>
-
-      <h2>Performance and cost</h2>
-      <p>
-        Load balancing improves throughput by using many servers, but it adds one
-        network hop. Usually that cost is small compared with the reliability gain.
-        Managed load balancers also add direct cost based on time, traffic, rules,
-        or capacity units. The bigger cost risk is over-scaling backends because
-        health checks or routing rules hide an inefficient application.
-      </p>
-
-      <h2>Key trade-offs</h2>
-      <ul>
-        <li><strong>Simplicity vs resilience:</strong> one server is simpler, but multiple servers behind a load balancer survive failures better.</li>
-        <li><strong>Stateless design vs convenience:</strong> shared session storage is more work, but it avoids users being tied to one server.</li>
-        <li><strong>Strict health checks vs false failures:</strong> deep checks catch real issues, but can remove healthy servers if dependencies briefly fail.</li>
-        <li><strong>TLS termination vs end-to-end encryption:</strong> terminating TLS simplifies certificates and inspection, but backends may still need encryption.</li>
-      </ul>
-
-      <h2>Common mistakes and edge cases</h2>
-      <ul>
-        <li>Using a health check that returns OK even when the app cannot reach the database.</li>
-        <li>Using sticky sessions to hide unsafe stateful server design.</li>
-        <li>Forgetting connection draining, causing user requests to fail during deploys.</li>
-        <li>Setting timeouts too high, which keeps broken requests open and wastes capacity.</li>
-        <li>Ignoring uneven traffic when some requests are much slower than others.</li>
-        <li>Allowing direct public access to backend servers, bypassing the load balancer.</li>
-        <li>Not planning for all targets becoming unhealthy at the same time.</li>
-      </ul>
-
-      <h2>Connection to previous lessons</h2>
-      <p>
-        <a href="0002-horizontal-scaling.html">Horizontal scaling</a> creates the
-        need for load balancing. <a href="0003-vertical-scaling.html">Vertical scaling</a>
-        can buy time before adding more servers, but it does not remove the single
-        server failure risk. <a href="0001-cache-aside.html">Cache-aside</a> can
-        reduce backend pressure so the load balancer and app servers handle fewer
-        expensive database reads.
-      </p>
-
-      <h2>Design exercise</h2>
-      <p class="prompt">
-        You run an API on three servers behind a load balancer. One server becomes
-        slow but still returns HTTP 200 from <code>/health</code>. p95 latency doubles
-        during peak traffic. What should your health check measure, what timeout
-        values would you review, and how would you deploy a fix without dropping
-        active user requests?
-      </p>
-
-      <h2>Primary source</h2>
-      <p>
-        Read:
-        <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html">
-          AWS: What is Elastic Load Balancing?
-        </a>.
-      </p>
-
-      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
-    </main>
-  </body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Load Balancing</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><p>Lesson 0004 · Reliability</p>
+<h1 id="load-balancing">Load Balancing</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#the-problem-it-solves">The problem it solves</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#main-components">Main components</a></li><li><a href="#example-1-web-api-with-four-servers">Example 1: web API with four servers</a></li><li><a href="#example-2-production-failure-during-peak-traffic">Example 2: production failure during peak traffic</a></li><li><a href="#when-to-use-it">When to use it</a></li><li><a href="#when-not-to-use-it">When not to use it</a></li><li><a href="#implementation-considerations">Implementation considerations</a></li><li><a href="#security-considerations">Security considerations</a></li><li><a href="#reliability-concerns">Reliability concerns</a></li><li><a href="#performance-and-cost">Performance and cost</a></li><li><a href="#key-trade-offs">Key trade-offs</a></li><li><a href="#common-mistakes-and-edge-cases">Common mistakes and edge cases</a></li><li><a href="#connection-to-previous-lessons">Connection to previous lessons</a></li><li><a href="#design-exercise">Design exercise</a></li><li><a href="#primary-source">Primary source</a></li></ul></details>
+<p><img src="../assets/diagrams/0004-load-balancing.svg" alt="Client: Send request → Load balancer: Route using health checks → Healthy pool: App A and App B receive traffic; App C fails health check: Remove from routing → Remaining capacity: A and B carry extra traffic"></p>
+<p>Health checks change which servers are eligible for traffic. Removing a failed server protects requests only if the remaining servers have enough capacity.</p>
+<p>A load balancer receives client requests and sends each request to one of several healthy backend servers.</p>
+<h2 id="the-problem-it-solves">The problem it solves</h2>
+<p>When an application runs on one server, that server can become overloaded or fail completely. After you add more servers with <a href="0002-horizontal-scaling.html">horizontal scaling</a>, clients need one stable place to send traffic. A load balancer gives clients one endpoint while spreading work across many servers.</p>
+<p>Clients → DNS → Load balancer → Healthy app servers → Database / cache</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li>A client calls one public hostname, such as api.example.com.</li>
+<li>DNS points that hostname to the load balancer.</li>
+<li>The load balancer accepts the connection or HTTP request.</li>
+<li>It checks its list of healthy backend servers.</li>
+<li>It chooses a backend using a routing rule or balancing algorithm.</li>
+<li>The backend handles the request and returns the response.</li>
+</ol>
+<p>The client usually does not know which server handled the request. This is useful because servers can be added, removed, deployed, or replaced without changing the client.</p>
+<h2 id="main-components">Main components</h2>
+<ul>
+<li><strong>Listener:</strong> the port and protocol the load balancer accepts, such as HTTPS on port 443.</li>
+<li><strong>Backend pool:</strong> the servers, containers, or IP targets that can receive traffic.</li>
+<li><strong>Health check:</strong> a repeated test that decides whether a backend should receive traffic.</li>
+<li><strong>Routing rule:</strong> logic that sends traffic by host, path, header, port, or service.</li>
+<li><strong>Algorithm:</strong> the method used to choose a backend, such as round robin or least connections.</li>
+<li><strong>TLS termination:</strong> the load balancer decrypts HTTPS before sending traffic to backends.</li>
+</ul>
+<h2 id="example-1-web-api-with-four-servers">Example 1: web API with four servers</h2>
+<p>A simple order API runs on four identical app servers. The load balancer receives 800 requests per second and sends roughly 200 requests per second to each server. If the team deploys a new version, it can remove one server from rotation, update it, run health checks, and then put it back.</p>
+<p>This only works cleanly if the app servers are mostly stateless. User sessions, carts, and temporary data should live in a shared store such as Redis or a database, not only in one server's memory.</p>
+<h2 id="example-2-production-failure-during-peak-traffic">Example 2: production failure during peak traffic</h2>
+<p>An e-commerce checkout service runs across six containers in three availability zones. During a sale, traffic reaches 3,000 requests per second. One container starts returning HTTP 500 errors because it lost its database connection.</p>
+<p>The load balancer health check calls <code>/health</code> every 10 seconds. After two failed checks, the bad container is marked unhealthy and receives no new requests. Existing requests may still fail, but the blast radius is limited. The remaining five containers continue serving traffic while the orchestrator replaces the broken container.</p>
+<h2 id="when-to-use-it">When to use it</h2>
+<ul>
+<li>You have multiple app servers, containers, or service instances.</li>
+<li>You need one stable public endpoint for a service.</li>
+<li>You want to remove unhealthy instances automatically.</li>
+<li>You want rolling deployments without sending users to broken versions.</li>
+<li>You need traffic routing by path, hostname, region, or service.</li>
+</ul>
+<h2 id="when-not-to-use-it">When not to use it</h2>
+<ul>
+<li>A small internal tool runs fine on one machine and downtime is acceptable.</li>
+<li>The backend is not safe to run on multiple instances.</li>
+<li>The real bottleneck is the database, a lock, or a slow third-party API.</li>
+<li>You need global disaster recovery; one regional load balancer is not enough.</li>
+</ul>
+<h2 id="implementation-considerations">Implementation considerations</h2>
+<ul>
+<li>Make app servers stateless or move session state to a shared store.</li>
+<li>Use health checks that prove real readiness, not only process existence.</li>
+<li>Set timeouts lower than client timeouts so failures return quickly.</li>
+<li>Enable connection draining before removing a backend during deploys.</li>
+<li>Pass request IDs and original client IP headers to preserve observability.</li>
+<li>Test behavior when one backend, one zone, or one dependency fails.</li>
+</ul>
+<h2 id="security-considerations">Security considerations</h2>
+<ul>
+<li>Terminate TLS at the load balancer or re-encrypt traffic to private backends.</li>
+<li>Keep backend servers private; only the load balancer should reach them directly.</li>
+<li>Attach WAF, rate limiting, and DDoS protection at the public edge when needed.</li>
+<li>Restrict admin and health-check endpoints so they do not expose sensitive data.</li>
+<li>Validate forwarded headers; do not blindly trust client-supplied IP headers.</li>
+</ul>
+<h2 id="reliability-concerns">Reliability concerns</h2>
+<ul>
+<li>Run the load balancer across multiple availability zones when possible.</li>
+<li>Keep enough spare backend capacity to survive one instance or zone failure.</li>
+<li>Use slow-start or warm-up so new instances do not receive full load immediately.</li>
+<li>Monitor unhealthy target count, target latency, 4xx/5xx rates, and rejected connections.</li>
+<li>Decide what happens if all backends are unhealthy: fail closed, serve maintenance, or route to fallback.</li>
+</ul>
+<h2 id="performance-and-cost">Performance and cost</h2>
+<p>Load balancing improves throughput by using many servers, but it adds one network hop. Usually that cost is small compared with the reliability gain. Managed load balancers also add direct cost based on time, traffic, rules, or capacity units. The bigger cost risk is over-scaling backends because health checks or routing rules hide an inefficient application.</p>
+<h2 id="key-trade-offs">Key trade-offs</h2>
+<ul>
+<li><strong>Simplicity vs resilience:</strong> one server is simpler, but multiple servers behind a load balancer survive failures better.</li>
+<li><strong>Stateless design vs convenience:</strong> shared session storage is more work, but it avoids users being tied to one server.</li>
+<li><strong>Strict health checks vs false failures:</strong> deep checks catch real issues, but can remove healthy servers if dependencies briefly fail.</li>
+<li><strong>TLS termination vs end-to-end encryption:</strong> terminating TLS simplifies certificates and inspection, but backends may still need encryption.</li>
+</ul>
+<h2 id="common-mistakes-and-edge-cases">Common mistakes and edge cases</h2>
+<ul>
+<li>Using a health check that returns OK even when the app cannot reach the database.</li>
+<li>Using sticky sessions to hide unsafe stateful server design.</li>
+<li>Forgetting connection draining, causing user requests to fail during deploys.</li>
+<li>Setting timeouts too high, which keeps broken requests open and wastes capacity.</li>
+<li>Ignoring uneven traffic when some requests are much slower than others.</li>
+<li>Allowing direct public access to backend servers, bypassing the load balancer.</li>
+<li>Not planning for all targets becoming unhealthy at the same time.</li>
+</ul>
+<h2 id="connection-to-previous-lessons">Connection to previous lessons</h2>
+<p><a href="0002-horizontal-scaling.html">Horizontal scaling</a> creates the need for load balancing. <a href="0003-vertical-scaling.html">Vertical scaling</a> can buy time before adding more servers, but it does not remove the single server failure risk. <a href="0001-cache-aside.html">Cache-aside</a> can reduce backend pressure so the load balancer and app servers handle fewer expensive database reads.</p>
+<h2 id="design-exercise">Design exercise</h2>
+<p>You run an API on three servers behind a load balancer. One server becomes slow but still returns HTTP 200 from <code>/health</code>. p95 latency doubles during peak traffic. What should your health check measure, what timeout values would you review, and how would you deploy a fix without dropping active user requests?</p>
+<h2 id="primary-source">Primary source</h2>
+<p>Read: <a href="https://docs.aws.amazon.com/elasticloadbalancing/latest/userguide/what-is-load-balancing.html">AWS: What is Elastic Load Balancing?</a> .</p>
+<p>Ask a follow-up question if any part of the design is unclear.</p>
+<p><a href="0004-load-balancing.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

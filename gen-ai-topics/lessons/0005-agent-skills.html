@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Skills</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-5"><h1><span class="chapter-number">Lesson 05</span> Agent Skills</h1><div class="meta"><time datetime="2026-06-29">2026-06-29</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-5-section-1">1. What It Means</a></li><li><a href="#lesson-5-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-5-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-5-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-5-section-5">5. Real-World Example 1: Engineering Bug Diagnosis Skill</a></li><li><a href="#lesson-5-section-6">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#lesson-5-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-5-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-5-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Agent Skills workflow"><ol class="flow"><li><strong>Trigger</strong><span>Match a specific task</span></li><li><strong>Workflow</strong><span>Follow reusable steps</span></li><li><strong>Tools</strong><span>Use approved operations</span></li><li><strong>Verify</strong><span>Check the task outcome</span></li></ol><figcaption>Figure 5. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-5-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Agent Skills</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="agent-skills">Agent Skills</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-engineering-bug-diagnosis-skill">5. Real-World Example 1: Engineering Bug Diagnosis Skill</a></li><li><a href="#6-real-world-example-2-sales-call-summary-skill">6. Real-World Example 2: Sales Call Summary Skill</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-29 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0005-agent-skills.svg" alt="Trigger: Match a specific task → Workflow: Follow reusable steps → Tools: Use approved operations → Verify: Check the task outcome"></p>
+<p>Figure 5. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-5-section-1"></a>1. What It Means</h2>
 <p>An <strong>agent skill</strong> is a reusable capability that tells an AI agent how to do a specific kind of task.</p>
 <p>A skill is more than a prompt. It usually includes:</p>
 <ul>
@@ -25,7 +29,7 @@
 </ul>
 <p>Agent skills are related to the general agent idea of <strong>reasoning and acting</strong>: the model decides what to do, uses tools or external systems, observes results, and continues. A useful source on this pattern is the ReAct paper: <a href="https://arxiv.org/abs/2210.03629">https://arxiv.org/abs/2210.03629</a></p>
 <hr>
-<h2 id="lesson-5-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-5-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>Without skills, agents often behave inconsistently.</p>
 <p>One day the agent handles a task well. Another day it forgets an important step.</p>
 <p>In production, this is a problem because teams need:</p>
@@ -50,7 +54,7 @@
 </ul>
 <p>That is much closer to production behavior.</p>
 <hr>
-<h2 id="lesson-5-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-5-section-3"></a>3. How It Works Step By Step</h2>
 <p>A skill usually works like this:</p>
 <ol>
 <li><p><strong>User asks for a task</strong></p>
@@ -98,7 +102,7 @@
 </ol>
 <p>The skill gives structure. The model still reasons, but inside a clearer process.</p>
 <hr>
-<h2 id="lesson-5-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-5-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start with tasks that repeat often.</p>
 <p>Good first skill candidates:</p>
 <ul>
@@ -151,7 +155,7 @@ Classify tickets by urgency, topic, owner, and next action.
 <p>“Prepare a weekly sales pipeline summary from CRM data.”</p>
 </blockquote>
 <hr>
-<h2 id="lesson-5-section-5">5. Real-World Example 1: Engineering Bug Diagnosis Skill</h2>
+<h2 id="5-real-world-example-1-engineering-bug-diagnosis-skill"><a id="lesson-5-section-5"></a>5. Real-World Example 1: Engineering Bug Diagnosis Skill</h2>
 <p><strong>Use case:</strong> A software team wants an AI agent to debug production bugs.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -187,7 +191,7 @@ Classify tickets by urgency, topic, owner, and next action.
 </blockquote>
 <p>This is useful because the skill forced the agent to inspect evidence instead of guessing.</p>
 <hr>
-<h2 id="lesson-5-section-6">6. Real-World Example 2: Sales Call Summary Skill</h2>
+<h2 id="6-real-world-example-2-sales-call-summary-skill"><a id="lesson-5-section-6"></a>6. Real-World Example 2: Sales Call Summary Skill</h2>
 <p><strong>Use case:</strong> A sales team wants consistent summaries after customer calls.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -225,7 +229,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <p>The CRM data becomes structured and consistent across reps.</p>
 <p>This helps managers search, report, and forecast better.</p>
 <hr>
-<h2 id="lesson-5-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-5-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Making skills too broad</strong></p>
 <p>A broad skill becomes vague.</p>
 <p>Bad:</p>
@@ -270,7 +274,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <p>But if a skill is too rigid, the agent may handle unusual cases poorly.</p>
 <p>Good skills define the important process but still allow judgment.</p>
 <hr>
-<h2 id="lesson-5-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-5-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Name skills by job, not by technology</strong></p>
 <p>Good:</p>
@@ -319,7 +323,7 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 </li>
 </ol>
 <hr>
-<h2 id="lesson-5-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-5-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you want an AI agent to help with customer refund requests.</p>
 <p>Design a skill called:</p>
 <pre><code class="language-text">refund-request-review
@@ -342,4 +346,4 @@ CRM risk: Medium renewal risk if onboarding timeline slips
 <li>Create a refund request if approval is needed</li>
 <li>Explain the decision in customer-safe language</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0005-agent-skills.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

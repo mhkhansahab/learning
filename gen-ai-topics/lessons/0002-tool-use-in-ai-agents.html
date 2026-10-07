@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tool Use in AI Agents</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-2"><h1><span class="chapter-number">Lesson 02</span> Tool Use in AI Agents</h1><div class="meta"><time datetime="2026-06-26">2026-06-26</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-2-section-1">1. What It Means</a></li><li><a href="#lesson-2-section-2">2. Why It Matters in Production Systems</a></li><li><a href="#lesson-2-section-3">3. How It Works Step by Step</a></li><li><a href="#lesson-2-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-2-section-5">5. Real-World Example 1: Customer Support Agent</a></li><li><a href="#lesson-2-section-6">6. Real-World Example 2: Internal Sales Assistant</a></li><li><a href="#lesson-2-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-2-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-2-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Tool Use in AI Agents workflow"><ol class="flow"><li><strong>Request</strong><span>Identify the task</span></li><li><strong>Tool call</strong><span>Choose a permitted function</span></li><li><strong>Execute</strong><span>Backend validates arguments</span></li><li><strong>Observe</strong><span>Use the real result</span></li></ol><figcaption>Figure 2. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-2-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tool Use in AI Agents</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="tool-use-in-ai-agents">Tool Use in AI Agents</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters in Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step by Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-customer-support-agent">5. Real-World Example 1: Customer Support Agent</a></li><li><a href="#6-real-world-example-2-internal-sales-assistant">6. Real-World Example 2: Internal Sales Assistant</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-06-26 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0002-tool-use-in-ai-agents.svg" alt="Request: Identify the task → Tool call: Choose a permitted function → Execute: Backend validates arguments → Observe: Use the real result"></p>
+<p>Figure 2. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-2-section-1"></a>1. What It Means</h2>
 <p><strong>Tool use</strong> means an AI model can call an external function, API, database, search system, calculator, file reader, or business system instead of only answering from its own text knowledge.</p>
 <p>A normal chatbot only produces text.</p>
 <p>A tool-using agent can do things like:</p>
@@ -19,12 +23,12 @@
 <p>A tool usually has three parts:</p>
 <ul>
 <li><strong>Name:</strong> what the tool is called, for example <code>get_order_status</code></li>
-<li><strong>Input schema:</strong> what information the tool needs, for example <code>{ &quot;order_id&quot;: &quot;12345&quot; }</code></li>
-<li><strong>Output:</strong> what the tool returns, for example <code>{ &quot;status&quot;: &quot;shipped&quot;, &quot;delivery_date&quot;: &quot;2026-06-28&quot; }</code></li>
+<li><strong>Input schema:</strong> what information the tool needs, for example <code>{ "order_id": "12345" }</code></li>
+<li><strong>Output:</strong> what the tool returns, for example <code>{ "status": "shipped", "delivery_date": "2026-06-28" }</code></li>
 </ul>
 <p>The model should not guess when a tool can provide the real answer.</p>
 <hr>
-<h2 id="lesson-2-section-2">2. Why It Matters in Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-2-section-2"></a>2. Why It Matters in Production Systems</h2>
 <p>Tool use is one of the main differences between a demo chatbot and a useful production agent.</p>
 <p>Without tools, the AI can only generate possible answers. That is risky for real systems.</p>
 <p>For example:</p>
@@ -46,7 +50,7 @@
 </ul>
 <p>Tool use makes AI more useful, but also more dangerous if designed badly. A tool-using agent can affect real users, real money, and real data.</p>
 <hr>
-<h2 id="lesson-2-section-3">3. How It Works Step by Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-2-section-3"></a>3. How It Works Step by Step</h2>
 <p>A typical tool-use flow looks like this:</p>
 <ol>
 <li><p><strong>User asks for something</strong></p>
@@ -61,9 +65,9 @@
 <li><p><strong>Model selects a tool</strong></p>
 <p>It chooses something like:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_order_status&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;A1928&quot;
+  "tool": "get_order_status",
+  "input": {
+    "order_id": "A1928"
   }
 }
 </code></pre>
@@ -74,10 +78,10 @@
 <li><p><strong>Tool returns data</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;order_id&quot;: &quot;A1928&quot;,
-  &quot;status&quot;: &quot;in_transit&quot;,
-  &quot;carrier&quot;: &quot;DHL&quot;,
-  &quot;estimated_delivery&quot;: &quot;2026-06-29&quot;
+  "order_id": "A1928",
+  "status": "in_transit",
+  "carrier": "DHL",
+  "estimated_delivery": "2026-06-29"
 }
 </code></pre>
 </li>
@@ -101,7 +105,7 @@
 </ol>
 <p>This log helps with debugging, security reviews, and quality improvement.</p>
 <hr>
-<h2 id="lesson-2-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-2-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start small. Do not give the agent too many tools at once.</p>
 <p>A practical implementation plan:</p>
 <ol>
@@ -117,10 +121,10 @@
 <li><p><strong>Design one tool with a strict schema</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;name&quot;: &quot;get_order_status&quot;,
-  &quot;description&quot;: &quot;Fetch the current shipping status for one customer order.&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;string&quot;
+  "name": "get_order_status",
+  "description": "Fetch the current shipping status for one customer order.",
+  "input": {
+    "order_id": "string"
   }
 }
 </code></pre>
@@ -165,7 +169,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-2-section-5">5. Real-World Example 1: Customer Support Agent</h2>
+<h2 id="5-real-world-example-1-customer-support-agent"><a id="lesson-2-section-5"></a>5. Real-World Example 1: Customer Support Agent</h2>
 <p><strong>Use case:</strong> An ecommerce company wants an AI assistant to answer order questions.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -174,18 +178,18 @@
 <p><strong>Agent behavior:</strong></p>
 <p>The agent should call:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_order_status&quot;,
-  &quot;input&quot;: {
-    &quot;order_id&quot;: &quot;88421&quot;
+  "tool": "get_order_status",
+  "input": {
+    "order_id": "88421"
   }
 }
 </code></pre>
 <p><strong>Tool result:</strong></p>
 <pre><code class="language-json">{
-  &quot;status&quot;: &quot;shipped&quot;,
-  &quot;carrier&quot;: &quot;FedEx&quot;,
-  &quot;tracking_number&quot;: &quot;FX29301&quot;,
-  &quot;estimated_delivery&quot;: &quot;2026-06-27&quot;
+  "status": "shipped",
+  "carrier": "FedEx",
+  "tracking_number": "FX29301",
+  "estimated_delivery": "2026-06-27"
 }
 </code></pre>
 <p><strong>Final answer:</strong></p>
@@ -199,7 +203,7 @@
 <p><strong>Production detail:</strong></p>
 <p>The backend must verify that the logged-in customer owns order <code>88421</code>. The model should not decide that by itself.</p>
 <hr>
-<h2 id="lesson-2-section-6">6. Real-World Example 2: Internal Sales Assistant</h2>
+<h2 id="6-real-world-example-2-internal-sales-assistant"><a id="lesson-2-section-6"></a>6. Real-World Example 2: Internal Sales Assistant</h2>
 <p><strong>Use case:</strong> A sales team wants an AI assistant that prepares account summaries before calls.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -207,25 +211,25 @@
 </blockquote>
 <p>The agent may need multiple tools:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_crm_account&quot;,
-  &quot;input&quot;: {
-    &quot;company_name&quot;: &quot;Acme Corp&quot;
+  "tool": "get_crm_account",
+  "input": {
+    "company_name": "Acme Corp"
   }
 }
 </code></pre>
 <p>Then:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_recent_support_tickets&quot;,
-  &quot;input&quot;: {
-    &quot;account_id&quot;: &quot;acct_781&quot;
+  "tool": "get_recent_support_tickets",
+  "input": {
+    "account_id": "acct_781"
   }
 }
 </code></pre>
 <p>Then:</p>
 <pre><code class="language-json">{
-  &quot;tool&quot;: &quot;get_open_opportunities&quot;,
-  &quot;input&quot;: {
-    &quot;account_id&quot;: &quot;acct_781&quot;
+  "tool": "get_open_opportunities",
+  "input": {
+    "account_id": "acct_781"
   }
 }
 </code></pre>
@@ -247,7 +251,7 @@
 <p><strong>Production detail:</strong></p>
 <p>Each tool should respect the user’s role. A junior salesperson may not be allowed to see enterprise pricing or legal notes.</p>
 <hr>
-<h2 id="lesson-2-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-2-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Too many tools</strong></p>
 <p>If the agent has 40 tools, it may choose the wrong one.</p>
 <p>Better: start with a small set of high-value tools.</p>
@@ -285,7 +289,7 @@
 <p>An <strong>attack surface</strong> means the number of ways something can be misused or attacked.</p>
 <p>For example, if an agent can send emails, a malicious user may try to trick it into sending private information.</p>
 <hr>
-<h2 id="lesson-2-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-2-section-8"></a>8. Practical Best Practices</h2>
 <p>Use these rules when building tool-using agents:</p>
 <ol>
 <li><p><strong>Make tools narrow</strong></p>
@@ -332,7 +336,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-2-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-2-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI assistant for a clinic.</p>
 <p>A patient asks:</p>
 <blockquote>
@@ -354,4 +358,4 @@
 <li><code>reschedule_appointment</code></li>
 </ul>
 <p>And it should require confirmation before the final change.</p>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0002-tool-use-in-ai-agents.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

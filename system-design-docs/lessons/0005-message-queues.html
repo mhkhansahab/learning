@@ -1,190 +1,101 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Message Queues: Process Work Asynchronously</title>
-    <link rel="stylesheet" href="../assets/course.css">
-  </head>
-  <body>
-    <main>
-      <p class="eyebrow">Lesson 0005 · Asynchronous Systems</p>
-      <h1>Message Queues</h1>
-      <p class="muted">
-        A message queue stores work temporarily so producers and workers do not need
-        to be online, fast, or scaled at exactly the same time.
-      </p>
-
-      <h2>The problem it solves</h2>
-      <p>
-        Some work should not happen inside the user's request. Sending emails,
-        resizing images, charging retries, report generation, fraud checks, and
-        webhooks can be slow or unreliable. If the API waits for all of that work,
-        users see slow responses and failures spread across the system.
-      </p>
-      <p>
-        A queue creates a buffer. The API records the work as a message, returns
-        quickly, and background workers process the message later.
-      </p>
-      <p class="flow">API / producer → Queue → Worker pool → Database / external service</p>
-
-      <h2>How it works</h2>
-      <ol>
-        <li>A producer creates a message that describes work to do.</li>
-        <li>The queue stores the message durably.</li>
-        <li>A worker receives the message when it has capacity.</li>
-        <li>The worker processes the job.</li>
-        <li>If processing succeeds, the worker acknowledges or deletes the message.</li>
-        <li>If processing fails, the message becomes available again or moves to a dead-letter queue.</li>
-      </ol>
-      <p>
-        The key idea is decoupling. Producers care about submitting work. Workers
-        care about completing work. The queue sits between them and absorbs spikes,
-        retries, and temporary failures.
-      </p>
-
-      <h2>Main components</h2>
-      <ul>
-        <li><strong>Producer:</strong> the service that sends work to the queue.</li>
-        <li><strong>Message:</strong> a small payload with the task type, IDs, metadata, and retry context.</li>
-        <li><strong>Queue:</strong> the durable buffer that stores messages until workers are ready.</li>
-        <li><strong>Consumer / worker:</strong> the process that receives and handles messages.</li>
-        <li><strong>Visibility timeout:</strong> the time a message is hidden while one worker processes it.</li>
-        <li><strong>Dead-letter queue:</strong> a separate queue for messages that fail too many times.</li>
-      </ul>
-
-      <h2>Example 1: image processing</h2>
-      <p>
-        A marketplace lets sellers upload product images. The upload API stores the
-        original file, sends an <code>ImageUploaded</code> message, and returns success
-        to the seller. Workers later create thumbnails, compress the image, scan it,
-        and update the product record.
-      </p>
-      <p>
-        Without a queue, upload requests would wait for CPU-heavy image processing.
-        With a queue, sellers get a fast response and workers can scale separately
-        when many sellers upload at the same time.
-      </p>
-
-      <h2>Example 2: production spike and external failure</h2>
-      <p>
-        A SaaS billing system receives 50,000 invoice events in 10 minutes at the end
-        of the month. Each invoice must call a payment provider and send an email.
-        The payment provider starts timing out for 20% of requests.
-      </p>
-      <p>
-        The API writes invoice messages to a queue and returns quickly. Workers process
-        300 messages per second under normal conditions. When the provider is slow, the
-        queue depth grows, but the API stays healthy. Failed messages retry with delay.
-        After five failures, a message moves to a dead-letter queue so engineers can
-        inspect it without blocking all other invoices.
-      </p>
-
-      <h2>When to use it</h2>
-      <ul>
-        <li>Work can happen after the user gets a response.</li>
-        <li>Traffic arrives in bursts but processing capacity is limited.</li>
-        <li>An external dependency is slow, rate-limited, or temporarily unreliable.</li>
-        <li>You need retries without making the original request wait.</li>
-        <li>Different services need a stable handoff point.</li>
-      </ul>
-
-      <h2>When not to use it</h2>
-      <ul>
-        <li>The user needs the final result immediately before continuing.</li>
-        <li>The task must be strongly consistent with the request transaction.</li>
-        <li>The team has no monitoring or ownership for failed background jobs.</li>
-        <li>Ordering is strict and the queue design does not guarantee the order you need.</li>
-        <li>The work is tiny and synchronous processing is simpler and reliable enough.</li>
-      </ul>
-
-      <h2>Implementation considerations</h2>
-      <ul>
-        <li>Keep messages small; store large files in object storage and send a pointer.</li>
-        <li>Make workers idempotent because a message may be delivered more than once.</li>
-        <li>Choose retry limits, backoff, and dead-letter queue behavior deliberately.</li>
-        <li>Set visibility timeout longer than normal processing time, but not extremely long.</li>
-        <li>Track queue depth, oldest message age, processing rate, failure rate, and DLQ count.</li>
-        <li>Use a stable message schema and version it when producers and consumers change.</li>
-      </ul>
-
-      <h2>Security considerations</h2>
-      <ul>
-        <li>Encrypt queue data at rest and in transit.</li>
-        <li>Give producers only permission to send messages and workers only permission to consume.</li>
-        <li>Do not put passwords, API keys, or raw sensitive data in message bodies.</li>
-        <li>Validate message payloads; never trust queue input just because it is internal.</li>
-        <li>Protect dead-letter queues because failed messages may contain production context.</li>
-      </ul>
-
-      <h2>Reliability concerns</h2>
-      <ul>
-        <li>Plan for duplicate messages with idempotency keys or processed-event records.</li>
-        <li>Plan for poison messages that fail every retry and fill the queue.</li>
-        <li>Use alarms on oldest message age, not only queue size.</li>
-        <li>Apply backpressure when producers create work faster than workers can finish it.</li>
-        <li>Have a safe replay process for messages in the dead-letter queue.</li>
-      </ul>
-
-      <h2>Performance and cost</h2>
-      <p>
-        Queues improve user-facing latency because the API stops waiting for slow
-        work. They also smooth traffic spikes, so worker capacity can be sized for
-        sustained throughput instead of the highest instant spike. The cost is extra
-        infrastructure, more monitoring, and possible delayed completion. If workers
-        fall behind for too long, the system is not failing loudly, but users may
-        still experience stale data or missing side effects.
-      </p>
-
-      <h2>Key trade-offs</h2>
-      <ul>
-        <li><strong>Fast response vs delayed result:</strong> the request returns quickly, but the work finishes later.</li>
-        <li><strong>Loose coupling vs debugging complexity:</strong> services fail less together, but traces cross async boundaries.</li>
-        <li><strong>Retries vs duplicates:</strong> retrying improves reliability, but workers must handle repeated messages safely.</li>
-        <li><strong>Buffering vs hidden backlog:</strong> queues absorb spikes, but a growing queue can hide a capacity problem.</li>
-      </ul>
-
-      <h2>Common mistakes and edge cases</h2>
-      <ul>
-        <li>Putting business-critical work in a queue without alerts for failed jobs.</li>
-        <li>Assuming queues guarantee exactly-once processing in all conditions.</li>
-        <li>Using message order as a hidden dependency when multiple workers run in parallel.</li>
-        <li>Retrying immediately and overwhelming an already failing dependency.</li>
-        <li>Making messages too large or tightly coupled to one database schema.</li>
-        <li>Forgetting that background work still needs authorization and audit logs.</li>
-      </ul>
-
-      <h2>Connection to previous lessons</h2>
-      <p>
-        <a href="0004-load-balancing.html">Load balancing</a> spreads live request
-        traffic across healthy servers. Queues spread background work across workers
-        and protect the request path from slow tasks. <a href="0002-horizontal-scaling.html">Horizontal scaling</a>
-        also applies to workers: add more consumers when the queue is growing.
-        <a href="0001-cache-aside.html">Cache-aside</a> reduces repeated reads, while
-        queues reduce synchronous work.
-      </p>
-
-      <h2>Design exercise</h2>
-      <p class="prompt">
-        A signup API sends welcome emails, creates a CRM record, and calls a fraud
-        service. Today the API takes 4 seconds and fails whenever the CRM is down.
-        Which parts would you move to a queue, what would the message contain, how
-        would you make retries safe, and what alerts would prove the queue is healthy?
-      </p>
-
-      <h2>Primary source</h2>
-      <p>
-        Read:
-        <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html">
-          AWS: What is Amazon Simple Queue Service?
-        </a>.
-        For failed-message handling, also review
-        <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html">
-          AWS: Using dead-letter queues in Amazon SQS
-        </a>.
-      </p>
-
-      <p class="muted">Ask a follow-up question if any part of the design is unclear.</p>
-    </main>
-  </body>
-</html>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Message Queues</title><link rel="stylesheet" href="../assets/course.css"><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><p>Lesson 0005 · Asynchronous Systems</p>
+<h1 id="message-queues">Message Queues</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#the-problem-it-solves">The problem it solves</a></li><li><a href="#how-it-works">How it works</a></li><li><a href="#main-components">Main components</a></li><li><a href="#example-1-image-processing">Example 1: image processing</a></li><li><a href="#example-2-production-spike-and-external-failure">Example 2: production spike and external failure</a></li><li><a href="#when-to-use-it">When to use it</a></li><li><a href="#when-not-to-use-it">When not to use it</a></li><li><a href="#implementation-considerations">Implementation considerations</a></li><li><a href="#security-considerations">Security considerations</a></li><li><a href="#reliability-concerns">Reliability concerns</a></li><li><a href="#performance-and-cost">Performance and cost</a></li><li><a href="#key-trade-offs">Key trade-offs</a></li><li><a href="#common-mistakes-and-edge-cases">Common mistakes and edge cases</a></li><li><a href="#connection-to-previous-lessons">Connection to previous lessons</a></li><li><a href="#design-exercise">Design exercise</a></li><li><a href="#primary-source">Primary source</a></li></ul></details>
+<p><img src="../assets/diagrams/0005-message-queues.svg" alt="Producer: Submit job → Durable queue: Buffer pending work → Worker: Process, then acknowledge; Worker fails: No success acknowledgment → Retry: Redeliver after timeout / delay → Dead-letter queue: After configured failure limit"></p>
+<p>Success removes work from the queue. A failure can lead to redelivery, so processing must tolerate duplicates. The retry path needs limits and an owner for dead-letter messages.</p>
+<p>A message queue stores work temporarily so producers and workers do not need to be online, fast, or scaled at exactly the same time.</p>
+<h2 id="the-problem-it-solves">The problem it solves</h2>
+<p>Some work should not happen inside the user's request. Sending emails, resizing images, charging retries, report generation, fraud checks, and webhooks can be slow or unreliable. If the API waits for all of that work, users see slow responses and failures spread across the system.</p>
+<p>A queue creates a buffer. The API records the work as a message, returns quickly, and background workers process the message later.</p>
+<p>API / producer → Queue → Worker pool → Database / external service</p>
+<h2 id="how-it-works">How it works</h2>
+<ol>
+<li>A producer creates a message that describes work to do.</li>
+<li>The queue stores the message durably.</li>
+<li>A worker receives the message when it has capacity.</li>
+<li>The worker processes the job.</li>
+<li>If processing succeeds, the worker acknowledges or deletes the message.</li>
+<li>If processing fails, the message becomes available again or moves to a dead-letter queue.</li>
+</ol>
+<p>The key idea is decoupling. Producers care about submitting work. Workers care about completing work. The queue sits between them and absorbs spikes, retries, and temporary failures.</p>
+<h2 id="main-components">Main components</h2>
+<ul>
+<li><strong>Producer:</strong> the service that sends work to the queue.</li>
+<li><strong>Message:</strong> a small payload with the task type, IDs, metadata, and retry context.</li>
+<li><strong>Queue:</strong> the durable buffer that stores messages until workers are ready.</li>
+<li><strong>Consumer / worker:</strong> the process that receives and handles messages.</li>
+<li><strong>Visibility timeout:</strong> the time a message is hidden while one worker processes it.</li>
+<li><strong>Dead-letter queue:</strong> a separate queue for messages that fail too many times.</li>
+</ul>
+<h2 id="example-1-image-processing">Example 1: image processing</h2>
+<p>A marketplace lets sellers upload product images. The upload API stores the original file, sends an <code>ImageUploaded</code> message, and returns success to the seller. Workers later create thumbnails, compress the image, scan it, and update the product record.</p>
+<p>Without a queue, upload requests would wait for CPU-heavy image processing. With a queue, sellers get a fast response and workers can scale separately when many sellers upload at the same time.</p>
+<h2 id="example-2-production-spike-and-external-failure">Example 2: production spike and external failure</h2>
+<p>A SaaS billing system receives 50,000 invoice events in 10 minutes at the end of the month. Each invoice must call a payment provider and send an email. The payment provider starts timing out for 20% of requests.</p>
+<p>The API writes invoice messages to a queue and returns quickly. Workers process 300 messages per second under normal conditions. When the provider is slow, the queue depth grows, but the API stays healthy. Failed messages retry with delay. After five failures, a message moves to a dead-letter queue so engineers can inspect it without blocking all other invoices.</p>
+<h2 id="when-to-use-it">When to use it</h2>
+<ul>
+<li>Work can happen after the user gets a response.</li>
+<li>Traffic arrives in bursts but processing capacity is limited.</li>
+<li>An external dependency is slow, rate-limited, or temporarily unreliable.</li>
+<li>You need retries without making the original request wait.</li>
+<li>Different services need a stable handoff point.</li>
+</ul>
+<h2 id="when-not-to-use-it">When not to use it</h2>
+<ul>
+<li>The user needs the final result immediately before continuing.</li>
+<li>The task must be strongly consistent with the request transaction.</li>
+<li>The team has no monitoring or ownership for failed background jobs.</li>
+<li>Ordering is strict and the queue design does not guarantee the order you need.</li>
+<li>The work is tiny and synchronous processing is simpler and reliable enough.</li>
+</ul>
+<h2 id="implementation-considerations">Implementation considerations</h2>
+<ul>
+<li>Keep messages small; store large files in object storage and send a pointer.</li>
+<li>Make workers idempotent because a message may be delivered more than once.</li>
+<li>Choose retry limits, backoff, and dead-letter queue behavior deliberately.</li>
+<li>Set visibility timeout longer than normal processing time, but not extremely long.</li>
+<li>Track queue depth, oldest message age, processing rate, failure rate, and DLQ count.</li>
+<li>Use a stable message schema and version it when producers and consumers change.</li>
+</ul>
+<h2 id="security-considerations">Security considerations</h2>
+<ul>
+<li>Encrypt queue data at rest and in transit.</li>
+<li>Give producers only permission to send messages and workers only permission to consume.</li>
+<li>Do not put passwords, API keys, or raw sensitive data in message bodies.</li>
+<li>Validate message payloads; never trust queue input just because it is internal.</li>
+<li>Protect dead-letter queues because failed messages may contain production context.</li>
+</ul>
+<h2 id="reliability-concerns">Reliability concerns</h2>
+<ul>
+<li>Plan for duplicate messages with idempotency keys or processed-event records.</li>
+<li>Plan for poison messages that fail every retry and fill the queue.</li>
+<li>Use alarms on oldest message age, not only queue size.</li>
+<li>Apply backpressure when producers create work faster than workers can finish it.</li>
+<li>Have a safe replay process for messages in the dead-letter queue.</li>
+</ul>
+<h2 id="performance-and-cost">Performance and cost</h2>
+<p>Queues improve user-facing latency because the API stops waiting for slow work. They also smooth traffic spikes, so worker capacity can be sized for sustained throughput instead of the highest instant spike. The cost is extra infrastructure, more monitoring, and possible delayed completion. If workers fall behind for too long, the system is not failing loudly, but users may still experience stale data or missing side effects.</p>
+<h2 id="key-trade-offs">Key trade-offs</h2>
+<ul>
+<li><strong>Fast response vs delayed result:</strong> the request returns quickly, but the work finishes later.</li>
+<li><strong>Loose coupling vs debugging complexity:</strong> services fail less together, but traces cross async boundaries.</li>
+<li><strong>Retries vs duplicates:</strong> retrying improves reliability, but workers must handle repeated messages safely.</li>
+<li><strong>Buffering vs hidden backlog:</strong> queues absorb spikes, but a growing queue can hide a capacity problem.</li>
+</ul>
+<h2 id="common-mistakes-and-edge-cases">Common mistakes and edge cases</h2>
+<ul>
+<li>Putting business-critical work in a queue without alerts for failed jobs.</li>
+<li>Assuming queues guarantee exactly-once processing in all conditions.</li>
+<li>Using message order as a hidden dependency when multiple workers run in parallel.</li>
+<li>Retrying immediately and overwhelming an already failing dependency.</li>
+<li>Making messages too large or tightly coupled to one database schema.</li>
+<li>Forgetting that background work still needs authorization and audit logs.</li>
+</ul>
+<h2 id="connection-to-previous-lessons">Connection to previous lessons</h2>
+<p><a href="0004-load-balancing.html">Load balancing</a> spreads live request traffic across healthy servers. Queues spread background work across workers and protect the request path from slow tasks. <a href="0002-horizontal-scaling.html">Horizontal scaling</a> also applies to workers: add more consumers when the queue is growing. <a href="0001-cache-aside.html">Cache-aside</a> reduces repeated reads, while queues reduce synchronous work.</p>
+<h2 id="design-exercise">Design exercise</h2>
+<p>A signup API sends welcome emails, creates a CRM record, and calls a fraud service. Today the API takes 4 seconds and fails whenever the CRM is down. Which parts would you move to a queue, what would the message contain, how would you make retries safe, and what alerts would prove the queue is healthy?</p>
+<h2 id="primary-source">Primary source</h2>
+<p>Read: <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/welcome.html">AWS: What is Amazon Simple Queue Service?</a> . For failed-message handling, also review <a href="https://docs.aws.amazon.com/AWSSimpleQueueService/latest/SQSDeveloperGuide/sqs-dead-letter-queues.html">AWS: Using dead-letter queues in Amazon SQS</a> .</p>
+<p>Ask a follow-up question if any part of the design is unclear.</p>
+<p><a href="0005-message-queues.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

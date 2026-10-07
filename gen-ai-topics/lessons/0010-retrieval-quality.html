@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Retrieval Quality</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-10"><h1><span class="chapter-number">Lesson 10</span> Retrieval Quality</h1><div class="meta"><time datetime="2026-07-05">2026-07-05</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-10-section-1">1. What It Means</a></li><li><a href="#lesson-10-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-10-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-10-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-10-section-5">5. Real-World Example 1: Customer Support Policy Assistant</a></li><li><a href="#lesson-10-section-6">6. Real-World Example 2: Developer Documentation Assistant</a></li><li><a href="#lesson-10-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-10-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-10-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Retrieval Quality workflow"><ol class="flow"><li><strong>Query</strong><span>Understand the information need</span></li><li><strong>Search</strong><span>Find candidate passages</span></li><li><strong>Rank</strong><span>Prioritize useful evidence</span></li><li><strong>Measure</strong><span>Check relevant coverage</span></li></ol><figcaption>Figure 10. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-10-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Retrieval Quality</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="retrieval-quality">Retrieval Quality</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-customer-support-policy-assistant">5. Real-World Example 1: Customer Support Policy Assistant</a></li><li><a href="#6-real-world-example-2-developer-documentation-assistant">6. Real-World Example 2: Developer Documentation Assistant</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-05 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0010-retrieval-quality.svg" alt="Query: Understand the information need → Search: Find candidate passages → Rank: Prioritize useful evidence → Measure: Check relevant coverage"></p>
+<p>Figure 10. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-10-section-1"></a>1. What It Means</h2>
 <p><strong>Retrieval quality</strong> means how well your AI system finds the right information before generating an answer.</p>
 <p>This matters most in RAG systems.</p>
 <p>RAG means <strong>Retrieval-Augmented Generation</strong>. The AI first retrieves documents, then uses them to answer.</p>
@@ -24,7 +28,7 @@
 <p>Did we find the most useful, correct, current, and allowed information?</p>
 </blockquote>
 <hr>
-<h2 id="lesson-10-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-10-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>Many teams blame the model when the real problem is retrieval.</p>
 <p>Example:</p>
 <p>User asks:</p>
@@ -59,7 +63,7 @@
 </ul>
 <p>RAG evaluation frameworks like RAGAS discuss retrieval-focused checks such as context relevance and answer grounding. Source: <a href="https://arxiv.org/abs/2309.15217">https://arxiv.org/abs/2309.15217</a></p>
 <hr>
-<h2 id="lesson-10-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-10-section-3"></a>3. How It Works Step By Step</h2>
 <p>Imagine a user asks:</p>
 <blockquote>
 <p>“What is the refund policy for damaged electronics?”</p>
@@ -87,16 +91,16 @@
 <p>Example:</p>
 <pre><code class="language-json">[
   {
-    &quot;doc&quot;: &quot;damaged_items_policy&quot;,
-    &quot;score&quot;: 0.91
+    "doc": "damaged_items_policy",
+    "score": 0.91
   },
   {
-    &quot;doc&quot;: &quot;electronics_warranty_policy&quot;,
-    &quot;score&quot;: 0.86
+    "doc": "electronics_warranty_policy",
+    "score": 0.86
   },
   {
-    &quot;doc&quot;: &quot;general_refund_policy&quot;,
-    &quot;score&quot;: 0.79
+    "doc": "general_refund_policy",
+    "score": 0.79
   }
 ]
 </code></pre>
@@ -131,7 +135,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-10-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-10-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start by treating retrieval as its own product feature.</p>
 <p>Do not only test the final answer.</p>
 <p>Test whether the system found the right evidence.</p>
@@ -140,8 +144,8 @@
 <li><p><strong>Create a small test set</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;question&quot;: &quot;Can customers return damaged electronics?&quot;,
-  &quot;must_retrieve&quot;: [&quot;damaged_items_policy&quot;, &quot;electronics_return_policy&quot;]
+  "question": "Can customers return damaged electronics?",
+  "must_retrieve": ["damaged_items_policy", "electronics_return_policy"]
 }
 </code></pre>
 </li>
@@ -204,7 +208,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-10-section-5">5. Real-World Example 1: Customer Support Policy Assistant</h2>
+<h2 id="5-real-world-example-1-customer-support-policy-assistant"><a id="lesson-10-section-5"></a>5. Real-World Example 1: Customer Support Policy Assistant</h2>
 <p><strong>Use case:</strong> An ecommerce support chatbot answers refund questions.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -212,9 +216,9 @@
 </blockquote>
 <p><strong>Bad retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;general_return_policy&quot;,
-  &quot;opened_items_policy&quot;,
-  &quot;refund_processing_time&quot;
+  "general_return_policy",
+  "opened_items_policy",
+  "refund_processing_time"
 ]
 </code></pre>
 <p><strong>Bad answer:</strong></p>
@@ -224,9 +228,9 @@
 <p>This answer ignores damage.</p>
 <p><strong>Good retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;damaged_item_return_policy&quot;,
-  &quot;electronics_damage_exception&quot;,
-  &quot;refund_evidence_requirements&quot;
+  "damaged_item_return_policy",
+  "electronics_damage_exception",
+  "refund_evidence_requirements"
 ]
 </code></pre>
 <p><strong>Good answer:</strong></p>
@@ -239,7 +243,7 @@
 <p>Policy exceptions are often more important than general rules.</p>
 <p>Your retrieval system must find them.</p>
 <hr>
-<h2 id="lesson-10-section-6">6. Real-World Example 2: Developer Documentation Assistant</h2>
+<h2 id="6-real-world-example-2-developer-documentation-assistant"><a id="lesson-10-section-6"></a>6. Real-World Example 2: Developer Documentation Assistant</h2>
 <p><strong>Use case:</strong> A developer asks an internal AI assistant about deployment.</p>
 <p><strong>User input:</strong></p>
 <blockquote>
@@ -247,9 +251,9 @@
 </blockquote>
 <p><strong>Bad retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;old_deployment_notes_2023&quot;,
-  &quot;backend_deploy_script&quot;,
-  &quot;local_setup_readme&quot;
+  "old_deployment_notes_2023",
+  "backend_deploy_script",
+  "local_setup_readme"
 ]
 </code></pre>
 <p><strong>Bad answer:</strong></p>
@@ -259,9 +263,9 @@
 <p>This may break production.</p>
 <p><strong>Good retrieval result:</strong></p>
 <pre><code class="language-json">[
-  &quot;frontend_deployment_runbook_current&quot;,
-  &quot;ci_cd_pipeline_docs&quot;,
-  &quot;rollback_instructions&quot;
+  "frontend_deployment_runbook_current",
+  "ci_cd_pipeline_docs",
+  "rollback_instructions"
 ]
 </code></pre>
 <p><strong>Good answer:</strong></p>
@@ -274,7 +278,7 @@
 <p>For engineering docs, retrieval must prefer current docs over stale notes.</p>
 <p>Metadata like <code>current: true</code>, <code>last_updated</code>, and <code>service: frontend</code> matters.</p>
 <hr>
-<h2 id="lesson-10-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-10-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Bad chunking</strong></p>
 <p>If chunks are too large, the model gets noise.</p>
 <p>If chunks are too small, key context is missing.</p>
@@ -320,7 +324,7 @@
 <p>High precision can miss important exceptions.</p>
 <p>Good production systems balance both.</p>
 <hr>
-<h2 id="lesson-10-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-10-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Build a retrieval test set</strong></p>
 <p>For each question, define which documents should be retrieved.</p>
@@ -366,7 +370,7 @@
 </li>
 </ol>
 <hr>
-<h2 id="lesson-10-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-10-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI assistant for company HR policies.</p>
 <p>User asks:</p>
 <blockquote>
@@ -391,4 +395,4 @@
 <li>Hybrid search because exact terms like country, visa, tax, and remote work matter</li>
 <li>If policies conflict, do not guess; say the policies conflict and escalate to HR</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0010-retrieval-quality.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>

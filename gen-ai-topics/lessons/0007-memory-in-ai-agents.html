@@ -1,4 +1,8 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory In AI Agents</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone"><article class="chapter" id="lesson-7"><h1><span class="chapter-number">Lesson 07</span> Memory In AI Agents</h1><div class="meta"><time datetime="2026-07-01">2026-07-01</time><span class="badge">Archived lesson</span><span>Original lesson text; technical claims not rechecked</span></div><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#lesson-7-section-1">1. What It Means</a></li><li><a href="#lesson-7-section-2">2. Why It Matters In Production Systems</a></li><li><a href="#lesson-7-section-3">3. How It Works Step By Step</a></li><li><a href="#lesson-7-section-4">4. How To Apply It In A Project</a></li><li><a href="#lesson-7-section-5">5. Real-World Example 1: Coding Agent Memory</a></li><li><a href="#lesson-7-section-6">6. Real-World Example 2: Customer Support Agent Memory</a></li><li><a href="#lesson-7-section-7">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#lesson-7-section-8">8. Practical Best Practices</a></li><li><a href="#lesson-7-section-9">9. Small Practice Exercise</a></li></ul></details><figure class="diagram" role="group" aria-label="Memory In AI Agents workflow"><ol class="flow"><li><strong>Select</strong><span>Choose what to retain</span></li><li><strong>Store</strong><span>Record scope and provenance</span></li><li><strong>Retrieve</strong><span>Find relevant memories</span></li><li><strong>Refresh</strong><span>Correct or expire old facts</span></li></ol><figcaption>Figure 7. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</figcaption></figure><div class="body"><h2 id="lesson-7-section-1">1. What It Means</h2>
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Memory In AI Agents</title><link rel="stylesheet" href="../assets/handbook.css"></head><body><main class="standalone markdown-body"><h1 id="memory-in-ai-agents">Memory In AI Agents</h1><details class="section-nav"><summary>In this lesson</summary><ul><li><a href="#1-what-it-means">1. What It Means</a></li><li><a href="#2-why-it-matters-in-production-systems">2. Why It Matters In Production Systems</a></li><li><a href="#3-how-it-works-step-by-step">3. How It Works Step By Step</a></li><li><a href="#4-how-to-apply-it-in-a-project">4. How To Apply It In A Project</a></li><li><a href="#5-real-world-example-1-coding-agent-memory">5. Real-World Example 1: Coding Agent Memory</a></li><li><a href="#6-real-world-example-2-customer-support-agent-memory">6. Real-World Example 2: Customer Support Agent Memory</a></li><li><a href="#7-common-mistakes-risks-and-trade-offs">7. Common Mistakes, Risks, And Trade-Offs</a></li><li><a href="#8-practical-best-practices">8. Practical Best Practices</a></li><li><a href="#9-small-practice-exercise">9. Small Practice Exercise</a></li></ul></details>
+<p>2026-07-01 · Archived lesson · Original lesson text; technical claims not rechecked</p>
+<p><img src="../assets/diagrams/0007-memory-in-ai-agents.svg" alt="Select: Choose what to retain → Store: Record scope and provenance → Retrieve: Find relevant memories → Refresh: Correct or expire old facts"></p>
+<p>Figure 7. Original study diagram added on 7 October 2026 to summarize this archived lesson. Each stage follows the previous stage; review may send the task back for correction.</p>
+<h2 id="1-what-it-means"><a id="lesson-7-section-1"></a>1. What It Means</h2>
 <p><strong>Memory</strong> in an AI agent means the system can keep useful information beyond one single message.</p>
 <p>A normal chat model only sees what is inside its current context window.</p>
 <p>A <strong>context window</strong> is the amount of text the model can read at one time.</p>
@@ -48,7 +52,7 @@ The frontend service runs on port 3002.
 </code></pre>
 <p>Memory is an active research area. A useful primary source is the MemGPT paper, which discusses managing memory beyond a model’s limited context window: <a href="https://arxiv.org/abs/2310.08560">https://arxiv.org/abs/2310.08560</a></p>
 <hr>
-<h2 id="lesson-7-section-2">2. Why It Matters In Production Systems</h2>
+<h2 id="2-why-it-matters-in-production-systems"><a id="lesson-7-section-2"></a>2. Why It Matters In Production Systems</h2>
 <p>Without memory, an AI agent can feel forgetful.</p>
 <p>The user must repeat the same information again and again.</p>
 <p>That creates problems:</p>
@@ -77,7 +81,7 @@ The frontend service runs on port 3002.
 </blockquote>
 <p>Do not treat memory as magic. Treat it like a database that needs rules.</p>
 <hr>
-<h2 id="lesson-7-section-3">3. How It Works Step By Step</h2>
+<h2 id="3-how-it-works-step-by-step"><a id="lesson-7-section-3"></a>3. How It Works Step By Step</h2>
 <p>A typical memory system works like this:</p>
 <ol>
 <li><p><strong>User interacts with the agent</strong></p>
@@ -98,10 +102,10 @@ The frontend service runs on port 3002.
 <li><p><strong>Memory is written</strong></p>
 <p>Example memory:</p>
 <pre><code class="language-json">{
-  &quot;type&quot;: &quot;user_preference&quot;,
-  &quot;content&quot;: &quot;User prefers detailed lessons with real-world examples.&quot;,
-  &quot;created_at&quot;: &quot;2026-07-01&quot;,
-  &quot;source&quot;: &quot;user_instruction&quot;
+  "type": "user_preference",
+  "content": "User prefers detailed lessons with real-world examples.",
+  "created_at": "2026-07-01",
+  "source": "user_instruction"
 }
 </code></pre>
 </li>
@@ -129,7 +133,7 @@ Use simple English.
 </li>
 </ol>
 <hr>
-<h2 id="lesson-7-section-4">4. How To Apply It In A Project</h2>
+<h2 id="4-how-to-apply-it-in-a-project"><a id="lesson-7-section-4"></a>4. How To Apply It In A Project</h2>
 <p>Start small. Do not store everything.</p>
 <p>A practical memory design:</p>
 <p><strong>Step 1: Decide what memory is allowed</strong></p>
@@ -153,12 +157,12 @@ Use simple English.
 <p><strong>Step 2: Define memory types</strong></p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;types&quot;: [
-    &quot;user_preference&quot;,
-    &quot;project_fact&quot;,
-    &quot;workflow_rule&quot;,
-    &quot;decision&quot;,
-    &quot;task_state&quot;
+  "types": [
+    "user_preference",
+    "project_fact",
+    "workflow_rule",
+    "decision",
+    "task_state"
   ]
 }
 </code></pre>
@@ -166,9 +170,9 @@ Use simple English.
 <p>Every memory should say where it came from.</p>
 <p>Example:</p>
 <pre><code class="language-json">{
-  &quot;content&quot;: &quot;Use npm run test:authorization for auth verification.&quot;,
-  &quot;source&quot;: &quot;deployment-debug-session&quot;,
-  &quot;created_at&quot;: &quot;2026-06-20&quot;
+  "content": "Use npm run test:authorization for auth verification.",
+  "source": "deployment-debug-session",
+  "created_at": "2026-06-20"
 }
 </code></pre>
 <p><strong>Step 4: Retrieve only relevant memory</strong></p>
@@ -185,29 +189,24 @@ User writing preference can remain until changed.
 <p><strong>Step 6: Let users correct memory</strong></p>
 <p>Users should be able to say:</p>
 <blockquote>
-<p>“Forget that.”
-“Update this preference.”
-“That is no longer true.”</p>
+<p>“Forget that.” “Update this preference.” “That is no longer true.”</p>
 </blockquote>
 <hr>
-<h2 id="lesson-7-section-5">5. Real-World Example 1: Coding Agent Memory</h2>
+<h2 id="5-real-world-example-1-coding-agent-memory"><a id="lesson-7-section-5"></a>5. Real-World Example 1: Coding Agent Memory</h2>
 <p><strong>Use case:</strong> A developer uses an AI coding agent across many sessions.</p>
 <p><strong>Without memory:</strong></p>
 <p>The user repeatedly says:</p>
 <blockquote>
-<p>“Use the existing test command.”
-“Do not change unrelated files.”
-“The frontend API routes are in this folder.”
-“The deploy script is the source of truth.”</p>
+<p>“Use the existing test command.” “Do not change unrelated files.” “The frontend API routes are in this folder.” “The deploy script is the source of truth.”</p>
 </blockquote>
 <p>The agent wastes time rediscovering the same facts.</p>
 <p><strong>With memory:</strong></p>
 <p>The system stores:</p>
 <pre><code class="language-json">{
-  &quot;type&quot;: &quot;project_fact&quot;,
-  &quot;content&quot;: &quot;For this repo, deployment logic is controlled by scripts/deploy-main.sh.&quot;,
-  &quot;source&quot;: &quot;previous deployment debugging session&quot;,
-  &quot;created_at&quot;: &quot;2026-06-18&quot;
+  "type": "project_fact",
+  "content": "For this repo, deployment logic is controlled by scripts/deploy-main.sh.",
+  "source": "previous deployment debugging session",
+  "created_at": "2026-06-18"
 }
 </code></pre>
 <p>Later, the user asks:</p>
@@ -232,7 +231,7 @@ User writing preference can remain until changed.
 <p><strong>Production fix:</strong></p>
 <p>Mark memory as “possibly stale” and verify important facts before acting.</p>
 <hr>
-<h2 id="lesson-7-section-6">6. Real-World Example 2: Customer Support Agent Memory</h2>
+<h2 id="6-real-world-example-2-customer-support-agent-memory"><a id="lesson-7-section-6"></a>6. Real-World Example 2: Customer Support Agent Memory</h2>
 <p><strong>Use case:</strong> A SaaS company has an AI assistant for customer success.</p>
 <p><strong>Customer history:</strong></p>
 <ul>
@@ -253,11 +252,11 @@ User writing preference can remain until changed.
 <p><strong>With memory:</strong></p>
 <p>The agent retrieves:</p>
 <pre><code class="language-json">{
-  &quot;customer&quot;: &quot;Acme&quot;,
-  &quot;plan&quot;: &quot;enterprise&quot;,
-  &quot;preferred_contact&quot;: &quot;email&quot;,
-  &quot;recent_issue&quot;: &quot;onboarding delay&quot;,
-  &quot;renewal_month&quot;: &quot;August&quot;
+  "customer": "Acme",
+  "plan": "enterprise",
+  "preferred_contact": "email",
+  "recent_issue": "onboarding delay",
+  "renewal_month": "August"
 }
 </code></pre>
 <p><strong>Better output:</strong></p>
@@ -271,7 +270,7 @@ User writing preference can remain until changed.
 <p><strong>Production fix:</strong></p>
 <p>Use access control. Only authorized employees should access account memory.</p>
 <hr>
-<h2 id="lesson-7-section-7">7. Common Mistakes, Risks, And Trade-Offs</h2>
+<h2 id="7-common-mistakes-risks-and-trade-offs"><a id="lesson-7-section-7"></a>7. Common Mistakes, Risks, And Trade-Offs</h2>
 <p><strong>Mistake 1: Saving everything</strong></p>
 <p>More memory is not always better.</p>
 <p>Too much memory creates noise.</p>
@@ -307,7 +306,7 @@ User writing preference can remain until changed.
 <p>But it also increases privacy and security risk.</p>
 <p>Production systems must choose carefully what to store.</p>
 <hr>
-<h2 id="lesson-7-section-8">8. Practical Best Practices</h2>
+<h2 id="8-practical-best-practices"><a id="lesson-7-section-8"></a>8. Practical Best Practices</h2>
 <ol>
 <li><p><strong>Store only useful, stable information</strong></p>
 <p>Ask:</p>
@@ -355,7 +354,7 @@ User writing preference can remain until changed.
 </li>
 </ol>
 <hr>
-<h2 id="lesson-7-section-9">9. Small Practice Exercise</h2>
+<h2 id="9-small-practice-exercise"><a id="lesson-7-section-9"></a>9. Small Practice Exercise</h2>
 <p>Imagine you are building an AI project assistant for a software team.</p>
 <p>The user says:</p>
 <blockquote>
@@ -378,4 +377,4 @@ User writing preference can remain until changed.
 <li>Verify if package scripts changed or the memory is old</li>
 <li>Do not apply it to unrelated repos</li>
 </ul>
-</div><p class="back"><a href="../genai-handbook.html#contents">Back to contents</a><a href="../genai-handbook.html#glossary">Glossary</a></p></article></main></body></html>
+<p><a href="0007-memory-in-ai-agents.md">Markdown edition</a> · <a href="../README.md">Topic index</a></p></main></body></html>
