@@ -1,4 +1,4 @@
-# System design docs
+# System design topics
 
 Read each topic directly on GitHub using its Markdown link. HTML editions share the same content and diagram assets.
 

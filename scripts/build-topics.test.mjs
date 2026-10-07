@@ -32,7 +32,7 @@ test('renders GitHub tables and escapes diagram labels', () => {
 });
 
 test('category indexes link to Markdown and HTML without retired output links', () => {
-  for (const category of ['gen-ai-topics', 'system-design-docs']) {
+  for (const category of ['gen-ai-topics', 'system-design-topics']) {
     const markdown = topicIndex(category, [{number:'0001', stem:'0001-example', title:'Example'}]);
     assert.ok(markdown.includes('lessons/0001-example.md'));
     assert.ok(markdown.includes('lessons/0001-example.html'));

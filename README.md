@@ -5,7 +5,7 @@ Practical engineering lessons organized by category. Each category has its own i
 | Category | Collection |
 | --- | --- |
 | [Generative AI](gen-ai-topics/README.md) | Agents, retrieval, prompts, evaluation, and production AI systems |
-| [System design](system-design-docs/README.md) | Scaling, databases, reliability, performance, and architecture |
+| [System design](system-design-topics/README.md) | Scaling, databases, reliability, performance, and architecture |
 
 ## Organization
 
@@ -14,7 +14,7 @@ gen-ai-topics/
   README.md
   lessons/
   assets/
-system-design-docs/
+system-design-topics/
   README.md
   lessons/
   assets/

@@ -1,7 +1,7 @@
 import domino from '@mixmark-io/domino';
 import { marked } from 'marked';
 
-export const categories = ['gen-ai-topics', 'system-design-docs'];
+export const categories = ['gen-ai-topics', 'system-design-topics'];
 export const parseHtml = html => domino.createDocument(html);
 export const escapeHtml = value => String(value).replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;');
 
@@ -21,7 +21,7 @@ export function renderTopic(markdown, prefix = '') {
 }
 
 export function topicIndex(category, topics) {
-  const title = category === 'gen-ai-topics' ? 'Generative AI topics' : 'System design docs';
+  const title = category === 'gen-ai-topics' ? 'Generative AI topics' : 'System design topics';
   const handbook = category === 'gen-ai-topics' ? 'genai-handbook.html' : 'system-design-handbook.html';
   const table = topics.map(topic => `| ${topic.number} | [${topic.title.replaceAll('|', '\\|')}](lessons/${topic.stem}.md) | [HTML](lessons/${topic.stem}.html) |`).join('\n');
   const archive = category === 'gen-ai-topics' ? '\nLessons 0001-0012 contain archived material. See the handbook for coverage gaps and review status.\n' : '';
